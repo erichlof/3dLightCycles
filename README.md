@@ -1,5 +1,6 @@
-# 3dLightCycles
-================
+3dLightCycles
+==============
+
 A 3D Arcade game based on the LightCycle sequence in the movie TRON. <br>
 
 [play 3dLightCycles](http://erichlof.github.io/3dLightCycles/3dLightCycles.html)
@@ -17,6 +18,7 @@ Mouse controls camera rotation <br>
 
 <h6>Mobile:</h6> 
 slow Swipe to control camera rotation <br>
+
 
 
 February 7, 2015 Progress Note
