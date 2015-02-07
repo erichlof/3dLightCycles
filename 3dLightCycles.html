@@ -81,6 +81,21 @@
 			//store how much time has passed since the last animation frame
 			frameTime = clock.getDelta();
 			
+			//check if joystick Stick is being moved
+			if (playerAlive) {
+				//if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
+				if (!mouseControl) {
+					
+					cameraControlsYawObject.rotation.y = joystick.previousRotationY - joystick.deltaX() * 0.005;
+					cameraControlsPitchObject.rotation.x = joystick.previousRotationX - joystick.deltaY() * 0.005;
+					//clamp the camera's vertical movement (around the x-axis) to the 'ceiling' and 'floor',
+					// so you can't accidentally flip the camera upside down
+					cameraControlsPitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, cameraControlsPitchObject.rotation.x ) );
+				
+				}
+
+			}
+			
 			//this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
 			controls.getDirection(cameraRotationVector);
