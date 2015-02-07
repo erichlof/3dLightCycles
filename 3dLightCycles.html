@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>3dLightCycles</title>
+	<style>
+
+		body {
+			background-color: rgb(0, 0, 0);
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+		
+	</style>
+</head>
+
+<body>
+	
+	<div id="banner" style="position:fixed; left:0; right:0; top:20%; text-align:center; z-index: 10;
+                               font-size:40px; font-family:arial; font-type:bold; color:rgb(255,255,255);">
+		<!-- Loading... -->
+	</div>
+	
+	<div id="gameover" style="position:fixed; left:0; right:0; top:25%; text-align:center; z-index: 10;
+                               font-family:arial; font-type:bold; color:rgb(255,255,255);">
+	</div>
+	
+	<div id="container"></div>
+
+	<div id="help" style="position:fixed; left:2%; bottom:7%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
+		3dLightCycles
+	</div>
+	
+	<div id="help1" style="position:fixed; left:2%; bottom:4%; font-family:arial; font-size:10px; color:grey;">
+		Desktop: Mouse to rotate | Esc: exit
+	</div>
+
+	<div id="help2" style="position:fixed; left:2%; bottom:1%; font-family:arial; font-size:10px; color:grey;">
+		Mobile: Swipe to rotate | 
+	</div>
+	
+	<div id="score" style="position:fixed; right:3%; top:1%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
+		0
+	</div>
+	
+	<div id="sound" style="position:fixed; right:3%; top:14%; font-family:arial; font-type:bold; color:rgb(70,70,70); border:thin solid;">
+		Sound: Off
+	</div>	
+
+	 <script src="js/three.min.js"></script> 
+	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script> -->
+	<script src="js/threex.keyboardstate.js"></script>
+	<script src="js/threex.FirstPersonControls.js"></script>
+	<script src="js/virtualButtonJoystick.js"></script>
+	<script src="js/threex.GameTimer.js"></script>
+	<script src="js/howler.js"></script>
+	<script src="js/3dLightCyclesVariables.js"></script>
+	
+	<script>
+		
+		initLevel();
+		
+		//TODO move this animate() call to the 'all sounds loaded' callback inside 3dLightCyclesVariables.js
+		animate();
+		
+
+		function initLevel() {
+			
+			playerAlive = true;
+			cameraControlsObject.position.set(0,0,5);
+			
+		} //end function initLevel()
+		
+
+		function animate() {
+			
+			//keep looping through animate()
+			requestAnimationFrame(animate);
+			//store how much time has passed since the last animation frame
+			frameTime = clock.getDelta();
+			
+			//this gives us a vector in the direction that the camera is pointing,
+			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
+			controls.getDirection(cameraRotationVector);
+			//this following gives us a rotation quaternion (4D vector), which will be useful for 
+			// rotating scene objects to match the camera's rotation
+			camera.getWorldQuaternion(cameraWorldQuaternion);
+			
+			// update Game variables
+			cycle.rotateOnAxis(upVector, cycleRotationAmount * frameTime);
+			
+			
+			
+			//render the scene with our camera
+			renderer.render(scene, camera);
+			
+
+		} //end function animate()
+		
+		
+	</script>
+</body>
+
+</html>
