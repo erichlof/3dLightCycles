@@ -14,11 +14,12 @@ A 3D Arcade game based on the LightCycle sequence in the movie TRON. <br>
 <h4>Quick instructions for 3dLightCycles:</h4>
 <h6>Desktop:</h6> 
 Mouse controls camera rotation <br>
+SPACE: Move Camera Forward <br>
 
 
 <h6>Mobile:</h6> 
 slow Swipe to control camera rotation <br>
-
+PurpleButton: Move Camera Forward <br>
 
 
 February 7, 2015 Progress Note
