@@ -57,7 +57,7 @@ var cameraControlsPitchObject = controls.getPitchObject();//allows access to con
 ///cameraControlsPitchObject.remove(camera);
 
 var renderer = new THREE.WebGLRenderer({
-	antialias: true
+	//antialias: true
 });
 //pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
 //renderer.setPixelRatio(0.5);
@@ -120,20 +120,34 @@ function onWindowResize() {
 
 // LIGHTS
 var sunLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
-sunLight.position.set(-1000, 1000, 1000);
+sunLight.position.set(1, 5, 1);
 sunLight.lookAt(scene.position);
 scene.add(sunLight);
 
 // MODELS
 var cycle = new THREE.Mesh();
 var loader = new THREE.ObjectLoader();
+//the following load function gives us a mesh object which is in this function's local scope.  
+// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
+// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
 loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
-	//the above load function gives us a mesh object which is in this function's local scope.  
-	// We call its clone function to copy it (and its properties) and place the end result in 'cycle', 
-	// which is a THREE.Mesh declared (above) globally, giving us access to its position/rotation/etc..
-	mesh.clone(cycle);//copy mesh's contents into global 'cycle' mesh
-	scene.add(cycle);//add cycle mesh to the scene, so it becomes a game object
+	mesh.clone(cycle);//copy mesh's contents into the global 'cycle' mesh
+	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
 } );
+
+// FLOOR
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
+floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+floorTexture.repeat.set( 30, 30 );
+//floorTexture.minFilter = THREE.LinearMipMapNearestFilter; 
+var floorMaterial = new THREE.MeshPhongMaterial({
+	shininess: 2,
+	map: floorTexture
+});
+var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 1, 1);
+var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotation.x = Math.PI / -2;
+scene.add(floor);
 
 
 // GAMEPLAY VARIABLES /////////////////////////////////////////////////////////////////////////////////////////////////////////////
