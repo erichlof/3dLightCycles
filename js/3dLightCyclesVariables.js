@@ -119,10 +119,12 @@ function onWindowResize() {
 // GAME OBJECTS and MATERIALS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // LIGHTS
-var sunLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
-sunLight.position.set(1, 5, 1);
-sunLight.lookAt(scene.position);
-scene.add(sunLight);
+//var ambientLight = new THREE.AmbientLight('rgb(80,80,80)', 1);
+//scene.add(ambientLight);
+var directionalLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
+directionalLight.position.set(0, 1000, 300);
+directionalLight.lookAt(scene.position);
+scene.add(directionalLight);
 
 // MODELS
 var cycle = new THREE.Mesh();
@@ -136,12 +138,12 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 } );
 
 // FLOOR
-var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor01.png' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 floorTexture.repeat.set( 30, 30 );
 //floorTexture.minFilter = THREE.LinearMipMapNearestFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
-	shininess: 2,
+	shininess: 10,
 	map: floorTexture
 });
 var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 1, 1);
