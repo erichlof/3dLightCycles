@@ -34,11 +34,11 @@
 	</div>
 	
 	<div id="help1" style="position:fixed; left:2%; bottom:4%; font-family:arial; font-size:10px; color:grey;">
-		Desktop: Mouse to rotate | Esc: exit
+		Desktop: Mouse to rotate | SPACE: MoveCameraForward | Esc: exit
 	</div>
 
 	<div id="help2" style="position:fixed; left:2%; bottom:1%; font-family:arial; font-size:10px; color:grey;">
-		Mobile: Swipe to rotate | 
+		Mobile: Swipe to rotate | PurpleButton: MoveCameraForward
 	</div>
 	
 	<div id="score" style="position:fixed; right:3%; top:1%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
@@ -69,7 +69,8 @@
 		function initLevel() {
 			
 			playerAlive = true;
-			cameraControlsObject.position.set(0,0,5);
+			cameraControlsObject.position.set(0,3,8);
+			cameraControlsPitchObject.rotation.x = -0.3;
 			
 		} //end function initLevel()
 		
@@ -99,10 +100,18 @@
 			//this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
 			controls.getDirection(cameraRotationVector);
+			//cameraRotationVector.normalize();
+			
 			//this following gives us a rotation quaternion (4D vector), which will be useful for 
 			// rotating scene objects to match the camera's rotation
 			camera.getWorldQuaternion(cameraWorldQuaternion);
 			
+			// get player Input
+			if ( playerAlive && (joystick.button2Pressed || keyboard.pressed('space')) ) {
+				cameraControlsObject.localToWorld(cameraControlsObject.position);
+				cameraControlsObject.translateOnAxis(cameraRotationVector, 20 * frameTime);
+				cameraControlsObject.worldToLocal(cameraControlsObject.position);
+			}
 			// update Game variables
 			cycle.rotateOnAxis(upVector, cycleRotationAmount * frameTime);
 			
