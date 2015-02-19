@@ -56,9 +56,8 @@ var cameraControlsPitchObject = controls.getPitchObject();//allows access to con
 
 ///cameraControlsPitchObject.remove(camera);
 
-var renderer = new THREE.WebGLRenderer({
-	//antialias: true
-});
+var renderer = new THREE.WebGLRenderer();
+
 //pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
 //renderer.setPixelRatio(0.5);
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -116,33 +115,111 @@ function onWindowResize() {
 }
 
 
+// GAMEPLAY VARIABLES /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var playerAlive = false;
+var frameTime = 0;
+var TWO_PI = Math.PI * 2;
+var PI_4 = Math.PI / 4;
+var north_Y_Rotation = 0;
+var west_Y_Rotation = PI_2;
+var south_Y_Rotation = Math.PI;
+var east_Y_Rotation = Math.PI + PI_2;
+
+var northVector = new THREE.Vector3(0, 0, -1);
+var southVector = new THREE.Vector3(0, 0, 1);
+var eastVector = new THREE.Vector3(1, 0, 0);
+var westVector = new THREE.Vector3(-1, 0, 0);
+var cycleHeadingVector = new THREE.Vector3();
+var cycleSpeed = 10;
+var upVector = new THREE.Vector3(0, 1, 0);
+var rightVector = new THREE.Vector3(1, 0, 0);
+var forwardVector = new THREE.Vector3(0, 0, -1);
+var cycleRotationAmount = 2;
+var cameraDistance = 8;
+//Shadows
+var testMesh;
+var cycleShadow = [];
+var normalVector = new THREE.Vector3( 0, 1, 0 );
+var planeConstant = 0.01;
+var groundPlane = new THREE.Plane( normalVector, planeConstant );
+var verticalAngle = 0;
+var horizontalAngle = 0;
+
+
+
 // GAME OBJECTS and MATERIALS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // LIGHTS
 //var ambientLight = new THREE.AmbientLight('rgb(80,80,80)', 1);
 //scene.add(ambientLight);
 var directionalLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
-directionalLight.position.set(0, 1000, 300);
+directionalLight.position.set(5, 20, 1);
 directionalLight.lookAt(scene.position);
 scene.add(directionalLight);
 
+var lightPosition4D = new THREE.Vector4();
+lightPosition4D.x = directionalLight.position.x;
+lightPosition4D.y = directionalLight.position.y;
+lightPosition4D.z = directionalLight.position.z;
+lightPosition4D.w = 0.5;
+
 // MODELS
-var cycle = new THREE.Mesh();
+var cycle;
 var loader = new THREE.ObjectLoader();
+
 //the following load function gives us a mesh object which is in this function's local scope.  
 // We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
 // which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
 loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
-	mesh.clone(cycle);//copy mesh's contents into the global 'cycle' mesh
+	
+	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
+	cycle.position.set(0, 0, 50);
 	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
+	
+	cycle.children[1].material.emissive.set('rgb(30,20,10)');//main hull
+	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
+	
+	//shadow for black windows
+	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
+	cycleShadow[0].material.side = THREE.DoubleSide;
+	cycleShadow[0].material.opacity = 0.8;
+	//cycleShadow[0].material.color.set(0xffffff);
+	scene.add( cycleShadow[0] );
+	
+	//shadow for main colored hull
+	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
+	cycleShadow[1].material.side = THREE.DoubleSide;
+	cycleShadow[1].material.opacity = 0.8;
+	//cycleShadow[1].material.color.set(0xffffff);
+	scene.add( cycleShadow[1] );
+	
+	//shadow for wheel rims/hubcaps
+	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
+	cycleShadow[2].material.side = THREE.DoubleSide;
+	cycleShadow[2].material.opacity = 0.8;
+	//cycleShadow[2].material.color.set(0xffffff);
+	scene.add( cycleShadow[2] );
+	
+	//shadow for grey underbody chassis
+	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
+	cycleShadow[3].material.side = THREE.DoubleSide;
+	cycleShadow[3].material.opacity = 0.8;
+	//cycleShadow[3].material.color.set(0xffffff);
+	scene.add( cycleShadow[3] );
+	
+	initLevel();
+	
 } );
 
+
 // FLOOR
-var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor01.png' );
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-floorTexture.repeat.set( 30, 30 );
+floorTexture.repeat.set(30, 30);
 //floorTexture.minFilter = THREE.LinearMipMapNearestFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
+	//emissive: 'rgb(5,5,5)',
 	shininess: 10,
 	map: floorTexture
 });
@@ -150,18 +227,6 @@ var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 1, 1);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
-
-
-// GAMEPLAY VARIABLES /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var playerAlive = false;
-var frameTime = 0;
-var TWO_PI = Math.PI * 2;
-var PI_4 = Math.PI / 4;
-var upVector = new THREE.Vector3(0, 1, 0);
-var rightVector = new THREE.Vector3(1, 0, 0);
-var forwardVector = new THREE.Vector3(0, 0, -1);
-var cycleRotationAmount = 2;
 
 
 
@@ -212,11 +277,13 @@ function startGame () {
 
 */
 
-// HUD html text elements
+// HUD html text elements /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var bannerText = document.getElementById("banner");
 var scoreText = document.getElementById("score");
 var gameOverText = document.getElementById("gameover");
-
+// debug elements
+var debug1Text = document.getElementById("debug1");
 
 // Misc. Elements
 
