@@ -29,16 +29,20 @@
 	
 	<div id="container"></div>
 
+	<div id="debug1" style="position:fixed; left:2%; top:2%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
+		
+	</div>
+	
 	<div id="help" style="position:fixed; left:2%; bottom:7%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
 		3dLightCycles
 	</div>
 	
 	<div id="help1" style="position:fixed; left:2%; bottom:4%; font-family:arial; font-size:10px; color:grey;">
-		Desktop: Mouse to rotate | SPACE: MoveCameraForward | Esc: exit
+		Desktop: Mouse to rotate | Esc: exit
 	</div>
 
 	<div id="help2" style="position:fixed; left:2%; bottom:1%; font-family:arial; font-size:10px; color:grey;">
-		Mobile: Swipe to rotate | PurpleButton: MoveCameraForward
+		Mobile: Swipe to rotate
 	</div>
 	
 	<div id="score" style="position:fixed; right:3%; top:1%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
@@ -51,6 +55,7 @@
 
 	 <script src="js/three.min.js"></script> 
 	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script> -->
+	<script src="js/ShadowMesh.js"></script>
 	<script src="js/threex.keyboardstate.js"></script>
 	<script src="js/threex.FirstPersonControls.js"></script>
 	<script src="js/virtualButtonJoystick.js"></script>
@@ -60,36 +65,46 @@
 	
 	<script>
 		
-		initLevel();
 		
-		//TODO move this animate() call to the 'all sounds loaded' callback inside 3dLightCyclesVariables.js
-		animate();
-		
-
 		function initLevel() {
 			
 			playerAlive = true;
-			cameraControlsObject.position.set(0,3,8);
+			
+			// initial starting position
+			cycle.position.set(0, 0, 25);
+			
+			// initial heading and rotation
+			cycleHeadingVector.copy(northVector);
+			cycle.rotation.set( 0, north_Y_Rotation, 0);
+			
+			// look slightly downward
 			cameraControlsPitchObject.rotation.x = -0.3;
 			
-		} //end function initLevel()
+			// Initial 3rd person view
+			camera.translateZ(cameraDistance);
+			
+			animate();
+			
+		} // end function initLevel()
 		
 
 		function animate() {
 			
-			//keep looping through animate()
+			// keep looping through animate()
 			requestAnimationFrame(animate);
-			//store how much time has passed since the last animation frame
+			// store how much time has passed since the last animation frame
 			frameTime = clock.getDelta();
 			
-			//check if joystick Stick is being moved
+			// RESPOND TO PLAYER INPUT ///////////////////////////////////////////////////////////////////////////////////////////
+			
+			// check if joystick Stick is being moved
 			if (playerAlive) {
-				//if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
+				// if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
 				if (!mouseControl) {
 					
 					cameraControlsYawObject.rotation.y = joystick.previousRotationY - joystick.deltaX() * 0.005;
 					cameraControlsPitchObject.rotation.x = joystick.previousRotationX - joystick.deltaY() * 0.005;
-					//clamp the camera's vertical movement (around the x-axis) to the 'ceiling' and 'floor',
+					// clamp the camera's vertical movement (around the x-axis) to the 'ceiling' and 'floor',
 					// so you can't accidentally flip the camera upside down
 					cameraControlsPitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, cameraControlsPitchObject.rotation.x ) );
 				
@@ -97,31 +112,104 @@
 
 			}
 			
-			//this gives us a vector in the direction that the camera is pointing,
+			// this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
 			controls.getDirection(cameraRotationVector);
 			//cameraRotationVector.normalize();
 			
-			//this following gives us a rotation quaternion (4D vector), which will be useful for 
+			// this following gives us a rotation quaternion (4D vector), which will be useful for 
 			// rotating scene objects to match the camera's rotation
 			camera.getWorldQuaternion(cameraWorldQuaternion);
 			
-			// get player Input
+			/*
 			if ( playerAlive && (joystick.button2Pressed || keyboard.pressed('space')) ) {
+				
 				cameraControlsObject.localToWorld(cameraControlsObject.position);
 				cameraControlsObject.translateOnAxis(cameraRotationVector, 20 * frameTime);
 				cameraControlsObject.worldToLocal(cameraControlsObject.position);
+				
 			}
-			// update Game variables
-			cycle.rotateOnAxis(upVector, cycleRotationAmount * frameTime);
+			*/
 			
 			
 			
-			//render the scene with our camera
+			// GAME LOGIC ////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			if (cycle.position.z < -25) {
+				
+				cycle.position.z = -25;
+				cycleHeadingVector.copy(eastVector);
+				cycle.rotation.set( 0, east_Y_Rotation, 0);
+				
+			}
+			if (cycle.position.x > 25) {
+				
+				cycle.position.x = 25;
+				cycleHeadingVector.copy(southVector);
+				cycle.rotation.set( 0, south_Y_Rotation, 0);
+				
+			}
+			if (cycle.position.z > 25) {
+				
+				cycle.position.z = 25;
+				cycleHeadingVector.copy(westVector);
+				cycle.rotation.set( 0, west_Y_Rotation, 0);
+				
+			}
+			if (cycle.position.x < -25) {
+				
+				cycle.position.x = -25;
+				cycleHeadingVector.copy(northVector);
+				cycle.rotation.set( 0, north_Y_Rotation, 0);
+				
+			}
+			
+			
+			// UPDATE GAME OBJECTS ///////////////////////////////////////////////////////////////////////////////////////////////
+			
+			// update Cycles and player camera
+			if (cycle) {
+				
+				// update cycle position
+				cycle.localToWorld(cycle.position);
+				cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+				cycle.worldToLocal(cycle.position);
+				
+				
+				// update Camera Object
+				// clamp vertical camera rotation so the camera doesn't go through the floor
+				if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.1 || 
+				     cameraControlsPitchObject.rotation.x > 0.0 ) {
+					cameraControlsPitchObject.rotation.x = -0.1;
+				}
+				
+				
+				// camera.translateZ(cameraDistance) must be called when switching cameras
+				
+				cameraControlsObject.position.copy(cycle.position);
+				// for cockpit view only
+				//cameraControlsObject.translateY(2.5);
+				//cameraControlsObject.translateZ(-1);
+				
+				
+				// update the ShadowMeshes to follow their parent objects
+				cycleShadow[0].update( groundPlane, lightPosition4D );
+				cycleShadow[1].update( groundPlane, lightPosition4D );
+				cycleShadow[2].update( groundPlane, lightPosition4D );
+				cycleShadow[3].update( groundPlane, lightPosition4D );
+				
+			}
+			
+			
+			
+			// render the scene with our camera
 			renderer.render(scene, camera);
 			
+			// real-time debug text output
+			//debug1Text.innerHTML = "pitchRotation: " + cameraControlsPitchObject.rotation.x.toFixed(1);
+			
 
-		} //end function animate()
+		} // end function animate()
 		
 		
 	</script>
