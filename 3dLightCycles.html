@@ -140,6 +140,7 @@
 				cycle.position.z = -25;
 				cycleHeadingVector.copy(eastVector);
 				cycle.rotation.set( 0, east_Y_Rotation, 0);
+				cameraControlsYawObject.rotation.copy(cycle.rotation);
 				
 			}
 			if (cycle.position.x > 25) {
@@ -147,6 +148,7 @@
 				cycle.position.x = 25;
 				cycleHeadingVector.copy(southVector);
 				cycle.rotation.set( 0, south_Y_Rotation, 0);
+				cameraControlsYawObject.rotation.copy(cycle.rotation);
 				
 			}
 			if (cycle.position.z > 25) {
@@ -154,6 +156,7 @@
 				cycle.position.z = 25;
 				cycleHeadingVector.copy(westVector);
 				cycle.rotation.set( 0, west_Y_Rotation, 0);
+				cameraControlsYawObject.rotation.copy(cycle.rotation);
 				
 			}
 			if (cycle.position.x < -25) {
@@ -161,6 +164,7 @@
 				cycle.position.x = -25;
 				cycleHeadingVector.copy(northVector);
 				cycle.rotation.set( 0, north_Y_Rotation, 0);
+				cameraControlsYawObject.rotation.copy(cycle.rotation);
 				
 			}
 			
@@ -168,42 +172,50 @@
 			// UPDATE GAME OBJECTS ///////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// update Cycles and player camera
-			if (cycle) {
-				
-				// update cycle position
-				cycle.localToWorld(cycle.position);
-				cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
-				cycle.worldToLocal(cycle.position);
-				
-				
-				// update Camera Object
-				// clamp vertical camera rotation so the camera doesn't go through the floor
-				if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.1 || 
-				     cameraControlsPitchObject.rotation.x > 0.0 ) {
-					cameraControlsPitchObject.rotation.x = -0.1;
-				}
-				
-				
-				// camera.translateZ(cameraDistance) must be called when switching cameras
-				
-				cameraControlsObject.position.copy(cycle.position);
-				// for cockpit view only
-				//cameraControlsObject.translateY(2.5);
-				//cameraControlsObject.translateZ(-1);
-				
-				
-				// update the ShadowMeshes to follow their parent objects
-				cycleShadow[0].update( groundPlane, lightPosition4D );
-				cycleShadow[1].update( groundPlane, lightPosition4D );
-				cycleShadow[2].update( groundPlane, lightPosition4D );
-				cycleShadow[3].update( groundPlane, lightPosition4D );
-				
+			
+			// update cycle position
+			cycle.localToWorld(cycle.position);
+			cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+			cycle.worldToLocal(cycle.position);
+			
+			// spin wheels
+			verticalAngle += cycleSpeed * 12 * frameTime;
+			if ( verticalAngle > TWO_PI ) {
+				verticalAngle -= TWO_PI;
+				flipper = !flipper;
 			}
 			
+			cycle.children[2].material.shininess = 100 * flipper;
+			cycle.children[2].rotation.z = 0.01 * flipper;
 			
+			// update Camera Object
+			// clamp vertical camera rotation so the camera doesn't go through the floor
+			if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.1 || 
+			     cameraControlsPitchObject.rotation.x > 0.0 ) {
+				cameraControlsPitchObject.rotation.x = -0.1;
+			}
+					
+			// camera.translateZ(cameraDistance) must be called when switching cameras
+				
+			cameraControlsObject.position.copy(cycle.position);
+			// for cockpit view only
+			//cameraControlsObject.translateY(2.5);
+			//cameraControlsObject.translateZ(-1);
+			
+			// update the cycle's matrix now before shadows are set (instead of at render time), 
+			// so that the shadows line up exactly with the cycle
+			cycle.updateMatrixWorld(true);
+				
+			// update the ShadowMeshes to follow their shadow-casting objects
+			cycleShadow[0].update( groundPlane, lightPosition4D );
+			cycleShadow[1].update( groundPlane, lightPosition4D );
+			cycleShadow[2].update( groundPlane, lightPosition4D );
+			cycleShadow[3].update( groundPlane, lightPosition4D );
 			
 			// render the scene with our camera
 			renderer.render(scene, camera);
+			
+			
 			
 			// real-time debug text output
 			//debug1Text.innerHTML = "pitchRotation: " + cameraControlsPitchObject.rotation.x.toFixed(1);
