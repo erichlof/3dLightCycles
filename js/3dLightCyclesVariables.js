@@ -145,7 +145,7 @@ var planeConstant = 0.01;
 var groundPlane = new THREE.Plane( normalVector, planeConstant );
 var verticalAngle = 0;
 var horizontalAngle = 0;
-
+var flipper = 0;
 
 
 // GAME OBJECTS and MATERIALS /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 	cycle.position.set(0, 0, 50);
 	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
 	
-	cycle.children[1].material.emissive.set('rgb(30,20,10)');//main hull
+	cycle.children[1].material.emissive.set('rgb(30,10,10)');//main hull
 	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
 	
 	//shadow for black windows
@@ -216,8 +216,8 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 // FLOOR
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-floorTexture.repeat.set(30, 30);
-//floorTexture.minFilter = THREE.LinearMipMapNearestFilter; 
+floorTexture.repeat.set(36, 36);//30
+//floorTexture.minFilter = THREE.LinearMipMapLinearFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
 	//emissive: 'rgb(5,5,5)',
 	shininess: 10,
