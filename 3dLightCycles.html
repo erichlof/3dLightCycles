@@ -71,17 +71,20 @@
 			playerAlive = true;
 			
 			// initial starting position
-			cycle.position.set(0, 0, 25);
+			cycle.position.set(0, 0, 20);
 			
 			// initial heading and rotation
 			cycleHeadingVector.copy(northVector);
-			cycle.rotation.set( 0, north_Y_Rotation, 0);
+			cycle.rotation.y = north_Y_Rotation;
+			
+			// for debug flyCam
+			cameraControlsObject.position.set(5,10,50);
 			
 			// look slightly downward
 			cameraControlsPitchObject.rotation.x = -0.3;
 			
-			// Initial 3rd person view
-			camera.translateZ(cameraDistance);
+			// for initial 3rd person view, pull the camera back a little
+			//camera.translateZ(cameraDistance);
 			
 			animate();
 			
@@ -115,13 +118,13 @@
 			// this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
 			controls.getDirection(cameraRotationVector);
-			//cameraRotationVector.normalize();
+			cameraRotationVector.normalize();
 			
 			// this following gives us a rotation quaternion (4D vector), which will be useful for 
 			// rotating scene objects to match the camera's rotation
 			camera.getWorldQuaternion(cameraWorldQuaternion);
 			
-			/*
+			// allow flying camera forward
 			if ( playerAlive && (joystick.button2Pressed || keyboard.pressed('space')) ) {
 				
 				cameraControlsObject.localToWorld(cameraControlsObject.position);
@@ -129,7 +132,7 @@
 				cameraControlsObject.worldToLocal(cameraControlsObject.position);
 				
 			}
-			*/
+			
 			
 			
 			
@@ -139,32 +142,40 @@
 				
 				cycle.position.z = -25;
 				cycleHeadingVector.copy(eastVector);
-				cycle.rotation.set( 0, east_Y_Rotation, 0);
-				cameraControlsYawObject.rotation.copy(cycle.rotation);
+				cycle.rotation.y = east_Y_Rotation;
+				//snap camera to cycle's new heading
+				//cameraControlsYawObject.rotation.y = east_Y_Rotation;
+				//joystick.previousRotationY = east_Y_Rotation;
 				
 			}
 			if (cycle.position.x > 25) {
 				
 				cycle.position.x = 25;
 				cycleHeadingVector.copy(southVector);
-				cycle.rotation.set( 0, south_Y_Rotation, 0);
-				cameraControlsYawObject.rotation.copy(cycle.rotation);
+				cycle.rotation.y = south_Y_Rotation;
+				//snap camera to cycle's new heading
+				//cameraControlsYawObject.rotation.y = south_Y_Rotation;
+				//joystick.previousRotationY = south_Y_Rotation;
 				
 			}
 			if (cycle.position.z > 25) {
 				
 				cycle.position.z = 25;
 				cycleHeadingVector.copy(westVector);
-				cycle.rotation.set( 0, west_Y_Rotation, 0);
-				cameraControlsYawObject.rotation.copy(cycle.rotation);
+				cycle.rotation.y = west_Y_Rotation;
+				//snap camera to cycle's new heading
+				//cameraControlsYawObject.rotation.y = west_Y_Rotation;
+				//joystick.previousRotationY = west_Y_Rotation;
 				
 			}
 			if (cycle.position.x < -25) {
 				
 				cycle.position.x = -25;
 				cycleHeadingVector.copy(northVector);
-				cycle.rotation.set( 0, north_Y_Rotation, 0);
-				cameraControlsYawObject.rotation.copy(cycle.rotation);
+				cycle.rotation.y = north_Y_Rotation;
+				//snap camera to cycle's new heading
+				//cameraControlsYawObject.rotation.y = north_Y_Rotation;
+				//joystick.previousRotationY = north_Y_Rotation;
 				
 			}
 			
@@ -175,7 +186,7 @@
 			
 			// update cycle position
 			cycle.localToWorld(cycle.position);
-			cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+			//cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
 			cycle.worldToLocal(cycle.position);
 			
 			// spin wheels
@@ -186,18 +197,20 @@
 			}
 			
 			cycle.children[2].material.shininess = 100 * flipper;
-			cycle.children[2].rotation.z = 0.01 * flipper;
+			cycle.children[2].rotation.z = 0.004 * flipper;
 			
 			// update Camera Object
 			// clamp vertical camera rotation so the camera doesn't go through the floor
 			if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.1 || 
 			     cameraControlsPitchObject.rotation.x > 0.0 ) {
-				cameraControlsPitchObject.rotation.x = -0.1;
+				//cameraControlsPitchObject.rotation.x = -0.1;
 			}
 					
-			// camera.translateZ(cameraDistance) must be called when switching cameras
-				
-			cameraControlsObject.position.copy(cycle.position);
+			// NOTE: camera.translateZ(cameraDistance) must be called when switching cameras
+			
+			// follow the player's cycle
+			//cameraControlsObject.position.copy(cycle.position);
+			
 			// for cockpit view only
 			//cameraControlsObject.translateY(2.5);
 			//cameraControlsObject.translateZ(-1);
@@ -211,6 +224,9 @@
 			cycleShadow[1].update( groundPlane, lightPosition4D );
 			cycleShadow[2].update( groundPlane, lightPosition4D );
 			cycleShadow[3].update( groundPlane, lightPosition4D );
+			
+			trailShadow[0].update( groundPlane, lightPosition4D );
+			trailShadow[1].update( groundPlane, lightPosition4D );
 			
 			// render the scene with our camera
 			renderer.render(scene, camera);
