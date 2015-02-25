@@ -22,6 +22,12 @@ slow Swipe to control camera rotation <br>
 PurpleButton: Move Camera Forward <br>
 
 
+February 24, 2015 Progress Note
+--------------------------------
+
+Added cycle's jet wall.  The geometry's vertex colors smoothly interpolate between White (which will spawn from the back wheel of the cycle) to the desired cycle's wall color.  The jet trail walls also have vertical line segments every 10 units.  Next up is to change the white part's geometry so that it bends down towards the cycle's back wheel (like in the 1982 Tron movie).  Things are starting to take shape!
+
+
 February 7, 2015 Progress Note
 --------------------------------
 
