@@ -126,6 +126,11 @@ var west_Y_Rotation = PI_2;
 var south_Y_Rotation = Math.PI;
 var east_Y_Rotation = Math.PI + PI_2;
 
+var NORTH = 0;
+var EAST = 1;
+var SOUTH = 2;
+var WEST = 3;
+var cycleDirection = NORTH;
 var northVector = new THREE.Vector3(0, 0, -1);
 var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
@@ -138,7 +143,6 @@ var forwardVector = new THREE.Vector3(0, 0, -1);
 var cycleRotationAmount = 2;
 var cameraDistance = 8;
 //Shadows
-var testMesh;
 var cycleShadow = [];
 var trailShadow = [];
 var normalVector = new THREE.Vector3( 0, 1, 0 );
@@ -146,6 +150,7 @@ var planeConstant = 0.01;
 var groundPlane = new THREE.Plane( normalVector, planeConstant );
 var verticalAngle = 0;
 var horizontalAngle = 0;
+var testAngle = 0;
 var flipper = 0;
 
 
@@ -182,58 +187,12 @@ floor.rotation.x = Math.PI / -2;
 scene.add(floor);
 
 
-
-// MODELS
-var cycle;
-var loader = new THREE.ObjectLoader();
-
-//the following load function gives us a mesh object which is in this function's local scope.  
-// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
-// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
-loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
-	
-	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
-	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
-	
-	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
-	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
-	
-	//shadow for black windows
-	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
-	cycleShadow[0].material.side = THREE.DoubleSide;
-	cycleShadow[0].material.opacity = 0.8;
-	//cycleShadow[0].material.color.set(0xffffff);
-	scene.add( cycleShadow[0] );
-	
-	//shadow for main colored hull
-	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
-	cycleShadow[1].material.side = THREE.DoubleSide;
-	cycleShadow[1].material.opacity = 0.8;
-	//cycleShadow[1].material.color.set(0xffffff);
-	scene.add( cycleShadow[1] );
-	
-	//shadow for wheel rims/hubcaps
-	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
-	cycleShadow[2].material.side = THREE.DoubleSide;
-	cycleShadow[2].material.opacity = 0.8;
-	//cycleShadow[2].material.color.set(0xffffff);
-	scene.add( cycleShadow[2] );
-	
-	//shadow for grey underbody chassis
-	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
-	cycleShadow[3].material.side = THREE.DoubleSide;
-	cycleShadow[3].material.opacity = 0.8;
-	//cycleShadow[3].material.color.set(0xffffff);
-	scene.add( cycleShadow[3] );
-	
-	initLevel();
-	
-} );
-
 // JET TRAILS
+var trailHeight = 1.4;
+var halfTrailHeight = trailHeight * 0.5;
 var northSouthTrail = [];
 
-var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, 1.4, 10);
+var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, 10);
 
 for ( var i = 0; i < northSouthTrailGeometry.faces.length; i++ ) {			
 	northSouthTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
@@ -255,7 +214,7 @@ var trailMaterial = new THREE.MeshBasicMaterial({
 });
 
 northSouthTrail[0] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[0].position.set(0, 0.7, 34);
+northSouthTrail[0].position.set(0, halfTrailHeight, 34);
 scene.add(northSouthTrail[0]);
 
 trailShadow[0] = new THREE.ShadowMesh(northSouthTrail[0]);
@@ -263,7 +222,7 @@ trailShadow[0].material.opacity = 0.9;
 scene.add(trailShadow[0]);
 
 northSouthTrail[1] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[1].position.set(0, 0.7, 44);
+northSouthTrail[1].position.set(0, halfTrailHeight, 44);
 scene.add(northSouthTrail[1]);
 
 trailShadow[1] = new THREE.ShadowMesh(northSouthTrail[1]);
@@ -273,7 +232,6 @@ scene.add(trailShadow[1]);
 
 
 // Jet trail beginning (White blended to cycle's color)
-
 var currentColorText = "";
 var currentColorR1 = 0;
 var currentColorG1 = 0;
@@ -289,21 +247,21 @@ var colorDeltaR = 255 - trailColorR;
 var colorDeltaG = 255 - trailColorG;
 var colorDeltaB = 255 - trailColorB;
 var currentColorValue = new THREE.Color();
-var curveSegments = 10;
+var curveSegments = 8;
 var curveSegmentsX2 = curveSegments * 2;
-var trailBeginningGeometry = new THREE.BoxGeometry(0.05, 1.4, 2, 1, 1, curveSegments);
+var trailBeginningGeometry = new THREE.BoxGeometry(0.05, trailHeight, 1, 1, 1, curveSegments);
 var v2 = 0;
 var deformVec = new THREE.Vector3();
 //when changing the top of the trailBeginning to gently curve downward towards cycle's rear wheel,
 //vertices[0]is southeast corner, [1] is east right above (north of) 0, [2] is north of that, etc.. till [curveSegments]
 // then going back south along the west side, starting at (curveSegmentsX2 + 2), continue till (curveSegmentsX2 + 2) + curveSegments
 for (var v = 0; v <= curveSegments; v++) {
-	deformVec.set(-v * 0.003, (-v * v * v) * 0.0004, 0);
+	deformVec.set(-v * 0.004, (-v * v * v) * 0.0008, 0);
 	trailBeginningGeometry.vertices[v].add(deformVec);
 	v2 = v;
 }
 for (var v = (curveSegmentsX2 + 2); v <= (curveSegmentsX2 + 2 + curveSegments); v++) {
-	deformVec.set(v2 * 0.003, (-v2 * v2 * v2) * 0.0004, 0);
+	deformVec.set(v2 * 0.004, (-v2 * v2 * v2) * 0.0008, 0);
 	trailBeginningGeometry.vertices[v].add(deformVec);
 	v2 -= 1;
 }
@@ -406,10 +364,60 @@ trailBeginning.geometry.computeFaceNormals();
 trailBeginning.geometry.computeVertexNormals();
 trailBeginning.geometry.verticesNeedUpdate = true;
 trailBeginning.geometry.normalsNeedUpdate = true;
-//trailBeginning.geometry.center();
 trailBeginning.geometry.computeBoundingSphere();
-trailBeginning.position.set(0, 0.7, 28);
+var trailBeginningLength = 1;
+var trailBeginningVerticalScale = 1;
 scene.add(trailBeginning);
+
+
+// MODELS
+var cycle;
+var loader = new THREE.ObjectLoader();
+
+//the following load function gives us a mesh object which is in this function's local scope.  
+// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
+// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
+loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
+	
+	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
+	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
+	//cycle.add(trailBeginning);
+	
+	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
+	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
+	
+	//shadow for black windows
+	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
+	cycleShadow[0].material.side = THREE.DoubleSide;
+	cycleShadow[0].material.opacity = 0.8;
+	//cycleShadow[0].material.color.set(0xffffff);
+	scene.add( cycleShadow[0] );
+	
+	//shadow for main colored hull
+	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
+	cycleShadow[1].material.side = THREE.DoubleSide;
+	cycleShadow[1].material.opacity = 0.8;
+	//cycleShadow[1].material.color.set(0xffffff);
+	scene.add( cycleShadow[1] );
+	
+	//shadow for wheel rims/hubcaps
+	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
+	cycleShadow[2].material.side = THREE.DoubleSide;
+	cycleShadow[2].material.opacity = 0.8;
+	//cycleShadow[2].material.color.set(0xffffff);
+	scene.add( cycleShadow[2] );
+	
+	//shadow for grey underbody chassis
+	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
+	cycleShadow[3].material.side = THREE.DoubleSide;
+	cycleShadow[3].material.opacity = 0.8;
+	//cycleShadow[3].material.color.set(0xffffff);
+	scene.add( cycleShadow[3] );
+	
+	initLevel();
+	
+} );
+
 
 // SOUNDS /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
