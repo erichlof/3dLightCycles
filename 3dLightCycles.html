@@ -71,17 +71,19 @@
 			playerAlive = true;
 			
 			// initial starting position
-			cycle.position.set(0, 0, 20);
+			cycle.position.set(0, 0, 26);
 			
 			// initial heading and rotation
 			cycleHeadingVector.copy(northVector);
 			cycle.rotation.y = north_Y_Rotation;
 			
 			// for debug flyCam
-			cameraControlsObject.position.set(5,10,50);
+			cameraControlsObject.position.set(-5,5,30);
 			
+			// for debugging jet trail
+			cameraControlsYawObject.rotation.y = -1.6;
 			// look slightly downward
-			cameraControlsPitchObject.rotation.x = -0.3;
+			cameraControlsPitchObject.rotation.x = -0.5;
 			
 			// for initial 3rd person view, pull the camera back a little
 			//camera.translateZ(cameraDistance);
@@ -138,9 +140,9 @@
 			
 			// GAME LOGIC ////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
-			if (cycle.position.z < -25) {
+			if (cycle.position.z < -30) {
 				
-				cycle.position.z = -25;
+				cycle.position.z = -30;
 				cycleHeadingVector.copy(eastVector);
 				cycle.rotation.y = east_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -148,9 +150,9 @@
 				//joystick.previousRotationY = east_Y_Rotation;
 				
 			}
-			if (cycle.position.x > 25) {
+			if (cycle.position.x > 30) {
 				
-				cycle.position.x = 25;
+				cycle.position.x = 30;
 				cycleHeadingVector.copy(southVector);
 				cycle.rotation.y = south_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -158,9 +160,9 @@
 				//joystick.previousRotationY = south_Y_Rotation;
 				
 			}
-			if (cycle.position.z > 25) {
+			if (cycle.position.z > 30) {
 				
-				cycle.position.z = 25;
+				cycle.position.z = 30;
 				cycleHeadingVector.copy(westVector);
 				cycle.rotation.y = west_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -168,9 +170,9 @@
 				//joystick.previousRotationY = west_Y_Rotation;
 				
 			}
-			if (cycle.position.x < -25) {
+			if (cycle.position.x < -30) {
 				
-				cycle.position.x = -25;
+				cycle.position.x = -30;
 				cycleHeadingVector.copy(northVector);
 				cycle.rotation.y = north_Y_Rotation;
 				//snap camera to cycle's new heading
