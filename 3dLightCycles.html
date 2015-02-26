@@ -73,17 +73,25 @@
 			// initial starting position
 			cycle.position.set(0, 0, 26);
 			
+			//trailBeginning.localToWorld(trailBeginning.position);
+			//trailBeginning.position.set(cycle.position.x, halfTrailHeight, cycle.position.z + (trailBeginningLength) );
+			//trailBeginning.worldToLocal(trailBeginning.position);
+			//trailBeginning.scale.set(1, 1, trailBeginningLength);
+			
 			// initial heading and rotation
+			cycleDirection = NORTH;
 			cycleHeadingVector.copy(northVector);
 			cycle.rotation.y = north_Y_Rotation;
 			
 			// for debug flyCam
 			cameraControlsObject.position.set(-5,5,30);
 			
-			// for debugging jet trail
+			// for debugging jet trail, look east
 			cameraControlsYawObject.rotation.y = -1.6;
+			joystick.previousRotationY = -1.6;
 			// look slightly downward
 			cameraControlsPitchObject.rotation.x = -0.5;
+			joystick.previousRotationX = -0.5;
 			
 			// for initial 3rd person view, pull the camera back a little
 			//camera.translateZ(cameraDistance);
@@ -183,6 +191,19 @@
 			
 			
 			// UPDATE GAME OBJECTS ///////////////////////////////////////////////////////////////////////////////////////////////
+			
+			testAngle += 1 * frameTime;
+			if ( testAngle > PI_2 ) {
+				testAngle = 0;
+			}
+			trailBeginningLength = Math.abs( Math.sin(testAngle) ) * 4 + 0.001 ;
+			if (trailBeginningLength > 2) trailBeginningLength = 2;
+			
+			trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+			
+			trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
+			trailBeginning.position.set(cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
+			
 			
 			// update Cycles and player camera
 			
