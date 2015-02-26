@@ -182,6 +182,7 @@ floor.rotation.x = Math.PI / -2;
 scene.add(floor);
 
 
+
 // MODELS
 var cycle;
 var loader = new THREE.ObjectLoader();
@@ -232,7 +233,8 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 // JET TRAILS
 var northSouthTrail = [];
 
-var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, 1.32, 10);
+var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, 1.4, 10);
+
 for ( var i = 0; i < northSouthTrailGeometry.faces.length; i++ ) {			
 	northSouthTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
 }
@@ -244,7 +246,6 @@ northSouthTrailGeometry.faces[ 10 ].color.set( 'rgb(255,255,255)' );//north edge
 northSouthTrailGeometry.faces[ 11 ].color.set( 'rgb(255,255,255)' );//north edge
 
 var trailLineTexture = new THREE.ImageUtils.loadTexture( 'images/lineSegment.png' );
-//trailLineTexture.minFilter = THREE.NearestMipMapNearestFilter; 
 //trailLineTexture.wrapS = trailLineTexture.wrapT = THREE.RepeatWrapping; 
 //trailLineTexture.repeat.set(2, 1);
 var trailMaterial = new THREE.MeshBasicMaterial({
@@ -254,7 +255,7 @@ var trailMaterial = new THREE.MeshBasicMaterial({
 });
 
 northSouthTrail[0] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[0].position.set(0, 0.66, 34);
+northSouthTrail[0].position.set(0, 0.7, 34);
 scene.add(northSouthTrail[0]);
 
 trailShadow[0] = new THREE.ShadowMesh(northSouthTrail[0]);
@@ -262,12 +263,14 @@ trailShadow[0].material.opacity = 0.9;
 scene.add(trailShadow[0]);
 
 northSouthTrail[1] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[1].position.set(0, 0.66, 44);
+northSouthTrail[1].position.set(0, 0.7, 44);
 scene.add(northSouthTrail[1]);
 
 trailShadow[1] = new THREE.ShadowMesh(northSouthTrail[1]);
 trailShadow[1].material.opacity = 0.9;
 scene.add(trailShadow[1]);
+
+
 
 // Jet trail beginning (White blended to cycle's color)
 
@@ -286,14 +289,32 @@ var colorDeltaR = 255 - trailColorR;
 var colorDeltaG = 255 - trailColorG;
 var colorDeltaB = 255 - trailColorB;
 var currentColorValue = new THREE.Color();
-var curveSegments = 5;
+var curveSegments = 10;
 var curveSegmentsX2 = curveSegments * 2;
-var trailBeginningGeometry = new THREE.BoxGeometry(0.05, 1.32, 5, 1, 1, curveSegments);
-var trailBeginningMaterial = new THREE.MeshBasicMaterial({ 
-	//wireframe:true, 
-	//shading: THREE.FlatShading,
-	vertexColors: THREE.VertexColors 
+var trailBeginningGeometry = new THREE.BoxGeometry(0.05, 1.4, 2, 1, 1, curveSegments);
+var v2 = 0;
+var deformVec = new THREE.Vector3();
+//when changing the top of the trailBeginning to gently curve downward towards cycle's rear wheel,
+//vertices[0]is southeast corner, [1] is east right above (north of) 0, [2] is north of that, etc.. till [curveSegments]
+// then going back south along the west side, starting at (curveSegmentsX2 + 2), continue till (curveSegmentsX2 + 2) + curveSegments
+for (var v = 0; v <= curveSegments; v++) {
+	deformVec.set(-v * 0.003, (-v * v * v) * 0.0004, 0);
+	trailBeginningGeometry.vertices[v].add(deformVec);
+	v2 = v;
+}
+for (var v = (curveSegmentsX2 + 2); v <= (curveSegmentsX2 + 2 + curveSegments); v++) {
+	deformVec.set(v2 * 0.003, (-v2 * v2 * v2) * 0.0004, 0);
+	trailBeginningGeometry.vertices[v].add(deformVec);
+	v2 -= 1;
+}
+var trailBeginningMaterial = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+/*
+var trailBeginningMaterial = new THREE.MeshLambertMaterial({
+	color: 0xffffff,
+	vertexColors: THREE.NoColors,
+	wireframe: true
 });
+*/
 
 //east side of trail wall
 for ( var i = 0; i < curveSegmentsX2; i+=2 ) {
@@ -373,10 +394,21 @@ for ( var i = curveSegmentsX2 * 2; i < curveSegmentsX2 * 3; i+=2 ) {
 	
 }
 
-
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[0] = new THREE.Color().set(currentColorText);
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[1] = new THREE.Color().set(currentColorText);
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[2] = new THREE.Color().set(currentColorText);
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[0] = new THREE.Color().set(currentColorText);
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[1] = new THREE.Color().set(currentColorText);
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[2] = new THREE.Color().set(currentColorText);
 
 trailBeginning = new THREE.Mesh(trailBeginningGeometry, trailBeginningMaterial);
-trailBeginning.position.set(0, 0.66, 26.5);
+trailBeginning.geometry.computeFaceNormals();
+trailBeginning.geometry.computeVertexNormals();
+trailBeginning.geometry.verticesNeedUpdate = true;
+trailBeginning.geometry.normalsNeedUpdate = true;
+//trailBeginning.geometry.center();
+trailBeginning.geometry.computeBoundingSphere();
+trailBeginning.position.set(0, 0.7, 28);
 scene.add(trailBeginning);
 
 // SOUNDS /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
