@@ -71,7 +71,7 @@
 			playerAlive = true;
 			
 			// initial starting position
-			cycle.position.set(0, 0, 26);
+			cycle.position.set(0, 0, 35);
 			
 			// initial heading and rotation
 			cycleDirection = NORTH;
@@ -79,7 +79,7 @@
 			cycle.rotation.y = north_Y_Rotation;
 			
 			// for debug flyCam
-			cameraControlsObject.position.set(-5,5,30);
+			cameraControlsObject.position.set(-5,5,26);
 			
 			// for debugging jet trail, look east
 			cameraControlsYawObject.rotation.y = -1.6;
@@ -143,19 +143,31 @@
 			
 			// GAME LOGIC ////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
-			if (cycle.position.z < -30) {
+			// update cycle position
+			cycle.localToWorld(cycle.position);
+			cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+			cycle.worldToLocal(cycle.position);
+			
+			//warp for debugging trails
+			                   // -35
+			if (cycle.position.z < 20) { 
 				
-				cycle.position.z = -30;
-				cycleHeadingVector.copy(eastVector);
-				cycle.rotation.y = east_Y_Rotation;
+				//warp for debugging trails
+				cycle.position.z = 35;
+				//end debug warp
+				
+				//cycle.position.z = -35;
+				//cycleHeadingVector.copy(eastVector);
+				//cycle.rotation.y = east_Y_Rotation;
+				
 				//snap camera to cycle's new heading
 				//cameraControlsYawObject.rotation.y = east_Y_Rotation;
 				//joystick.previousRotationY = east_Y_Rotation;
 				
 			}
-			if (cycle.position.x > 30) {
+			if (cycle.position.x > 35) {
 				
-				cycle.position.x = 30;
+				cycle.position.x = 35;
 				cycleHeadingVector.copy(southVector);
 				cycle.rotation.y = south_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -163,9 +175,9 @@
 				//joystick.previousRotationY = south_Y_Rotation;
 				
 			}
-			if (cycle.position.z > 30) {
+			if (cycle.position.z > 35) {
 				
-				cycle.position.z = 30;
+				cycle.position.z = 35;
 				cycleHeadingVector.copy(westVector);
 				cycle.rotation.y = west_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -173,9 +185,9 @@
 				//joystick.previousRotationY = west_Y_Rotation;
 				
 			}
-			if (cycle.position.x < -30) {
+			if (cycle.position.x < -35) {
 				
-				cycle.position.x = -30;
+				cycle.position.x = -35;
 				cycleHeadingVector.copy(northVector);
 				cycle.rotation.y = north_Y_Rotation;
 				//snap camera to cycle's new heading
@@ -187,26 +199,50 @@
 			
 			// UPDATE GAME OBJECTS ///////////////////////////////////////////////////////////////////////////////////////////////
 			
-			testAngle += 1 * frameTime;
+			
+			/*
+			testAngle += 0.1 * frameTime;
 			if ( testAngle > PI_2 ) {
 				testAngle = 0;
 			}
-			trailBeginningLength = Math.abs( Math.sin(testAngle) ) * 4 + 0.001 ;
+			*/
+			//trailBeginningLength = Math.abs( Math.sin(testAngle) ) * 4 + 0.001;
+			//trailLength = Math.abs( Math.sin(testAngle) ) * 20 + 0.001;
+			
+			trailSpawnZ = 35;
+			// record the distance between the cycle and its trail spawn point when it turned or started the match 
+			cycleTrailSpawnDistance = Math.abs(trailSpawnZ - cycle.position.z) + 0.001;
+			
+			// if the cycle is far enough away from the active trail spawn point, 
+			// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+			if (cycleTrailSpawnDistance > 1)
+				trailBeginningLength = cycleTrailSpawnDistance - 1;
+			else 
+				trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+			
+			// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
 			if (trailBeginningLength > 2) trailBeginningLength = 2;
 			
+			// if the cycle is far enough away from the active trail spawn point, 
+			// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
+			if (cycleTrailSpawnDistance > 3)
+				trailLength = cycleTrailSpawnDistance - 3;
+			else 
+				trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+			
+			// clamp trail length to 10 units, which is the maximum length of each trail wall segment
+			if (trailLength > 10) trailLength = 10;
+			
 			trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+			trailScale = trailLength / 10;
 			
 			trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
 			trailBeginning.position.set(cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
 			
+			northSouthTrail[0].scale.set(1, 1, trailScale);
+			northSouthTrail[0].position.z = trailSpawnZ - (trailLength / 2);
 			
-			// update Cycles and player camera
-			
-			// update cycle position
-			cycle.localToWorld(cycle.position);
-			//cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
-			cycle.worldToLocal(cycle.position);
-			
+			// update cycles components
 			// spin wheels
 			verticalAngle += cycleSpeed * 12 * frameTime;
 			if ( verticalAngle > TWO_PI ) {
@@ -243,8 +279,8 @@
 			cycleShadow[2].update( groundPlane, lightPosition4D );
 			cycleShadow[3].update( groundPlane, lightPosition4D );
 			
-			trailShadow[0].update( groundPlane, lightPosition4D );
-			trailShadow[1].update( groundPlane, lightPosition4D );
+			northSouthTrailShadow[0].update( groundPlane, lightPosition4D );
+			eastWestTrailShadow[0].update( groundPlane, lightPosition4D );
 			
 			// render the scene with our camera
 			renderer.render(scene, camera);
