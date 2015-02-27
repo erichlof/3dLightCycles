@@ -136,17 +136,25 @@ var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
 var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
-var cycleSpeed = 10;
+var cycleSpeed = 1;//10
 var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
 var cycleRotationAmount = 2;
 var cameraDistance = 8;
+
+var northSouthTrail = [];
+var eastWestTrail = [];
+var trailSpawnX = 0;
+var trailSpawnZ = 0;
+var cycleTrailSpawnDistance = 0;
+
 //Shadows
 var cycleShadow = [];
-var trailShadow = [];
+var northSouthTrailShadow = [];
+var eastWestTrailShadow = [];
 var normalVector = new THREE.Vector3( 0, 1, 0 );
-var planeConstant = 0.01;
+var planeConstant = 0.005;
 var groundPlane = new THREE.Plane( normalVector, planeConstant );
 var verticalAngle = 0;
 var horizontalAngle = 0;
@@ -188,9 +196,13 @@ scene.add(floor);
 
 
 // JET TRAILS
+var trailLength = 10;
+var trailScale = 1;
+var trailBeginningLength = 1;
+var trailBeginningVerticalScale = 1;
 var trailHeight = 1.4;
 var halfTrailHeight = trailHeight * 0.5;
-var northSouthTrail = [];
+
 
 var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, 10);
 
@@ -204,7 +216,19 @@ northSouthTrailGeometry.faces[ 9 ].color.set( 'rgb(255,255,255)' );//south edge
 northSouthTrailGeometry.faces[ 10 ].color.set( 'rgb(255,255,255)' );//north edge
 northSouthTrailGeometry.faces[ 11 ].color.set( 'rgb(255,255,255)' );//north edge
 
-var trailLineTexture = new THREE.ImageUtils.loadTexture( 'images/lineSegment.png' );
+var eastWestTrailGeometry = new THREE.BoxGeometry(10, trailHeight, 0.05);
+
+for ( var i = 0; i < eastWestTrailGeometry.faces.length; i++ ) {			
+	eastWestTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
+}
+eastWestTrailGeometry.faces[ 4 ].color.set( 'rgb(255,255,255)' );//top edge
+eastWestTrailGeometry.faces[ 5 ].color.set( 'rgb(255,255,255)' );//top edge
+eastWestTrailGeometry.faces[ 0 ].color.set( 'rgb(255,255,255)' );//east edge
+eastWestTrailGeometry.faces[ 1 ].color.set( 'rgb(255,255,255)' );//east edge
+eastWestTrailGeometry.faces[ 2 ].color.set( 'rgb(255,255,255)' );//west edge
+eastWestTrailGeometry.faces[ 3 ].color.set( 'rgb(255,255,255)' );//west edge
+
+var trailLineTexture = new THREE.ImageUtils.loadTexture( 'images/lineSegment01.png' );
 //trailLineTexture.wrapS = trailLineTexture.wrapT = THREE.RepeatWrapping; 
 //trailLineTexture.repeat.set(2, 1);
 var trailMaterial = new THREE.MeshBasicMaterial({
@@ -214,20 +238,20 @@ var trailMaterial = new THREE.MeshBasicMaterial({
 });
 
 northSouthTrail[0] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[0].position.set(0, halfTrailHeight, 34);
+northSouthTrail[0].position.set(0, halfTrailHeight, 30);
 scene.add(northSouthTrail[0]);
 
-trailShadow[0] = new THREE.ShadowMesh(northSouthTrail[0]);
-trailShadow[0].material.opacity = 0.9;
-scene.add(trailShadow[0]);
+northSouthTrailShadow[0] = new THREE.ShadowMesh(northSouthTrail[0]);
+northSouthTrailShadow[0].material.opacity = 0.9;
+scene.add(northSouthTrailShadow[0]);
 
-northSouthTrail[1] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[1].position.set(0, halfTrailHeight, 44);
-scene.add(northSouthTrail[1]);
+eastWestTrail[0] = new THREE.Mesh(eastWestTrailGeometry, trailMaterial);
+eastWestTrail[0].position.set(5, halfTrailHeight, 35);
+scene.add(eastWestTrail[0]);
 
-trailShadow[1] = new THREE.ShadowMesh(northSouthTrail[1]);
-trailShadow[1].material.opacity = 0.9;
-scene.add(trailShadow[1]);
+eastWestTrailShadow[0] = new THREE.ShadowMesh(eastWestTrail[0]);
+eastWestTrailShadow[0].material.opacity = 0.9;
+scene.add(eastWestTrailShadow[0]);
 
 
 
@@ -240,9 +264,9 @@ var currentColorR2 = 0;
 var currentColorG2 = 0;
 var currentColorB2 = 0;
 // this dims the color to match trail's slightly darker texture masking color
-var trailColorR = Math.floor( 255 * 0.65 );
-var trailColorG = Math.floor( 190 * 0.65 );
-var trailColorB = Math.floor( 0 * 0.65 );
+var trailColorR = Math.floor( 255 * 0.7 );// * 0.65
+var trailColorG = Math.floor( 190 * 0.7 );
+var trailColorB = Math.floor( 0 * 0.7 );
 var colorDeltaR = 255 - trailColorR;
 var colorDeltaG = 255 - trailColorG;
 var colorDeltaB = 255 - trailColorB;
@@ -352,12 +376,14 @@ for ( var i = curveSegmentsX2 * 2; i < curveSegmentsX2 * 3; i+=2 ) {
 	
 }
 
-trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[0] = new THREE.Color().set(currentColorText);
-trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[1] = new THREE.Color().set(currentColorText);
-trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[2] = new THREE.Color().set(currentColorText);
-trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[0] = new THREE.Color().set(currentColorText);
-trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[1] = new THREE.Color().set(currentColorText);
-trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[2] = new THREE.Color().set(currentColorText);
+// capped vertical end of this blended trail
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[0] = new THREE.Color().set( 'rgb(165,123,0)' );
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[1] = new THREE.Color().set('rgb(165,123,0)');
+trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[2] = new THREE.Color().set('rgb(165,123,0)');
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[0] = new THREE.Color().set('rgb(165,123,0)');
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[1] = new THREE.Color().set('rgb(165,123,0)');
+trailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[2] = new THREE.Color().set('rgb(165,123,0)');
+
 
 trailBeginning = new THREE.Mesh(trailBeginningGeometry, trailBeginningMaterial);
 trailBeginning.geometry.computeFaceNormals();
@@ -365,8 +391,7 @@ trailBeginning.geometry.computeVertexNormals();
 trailBeginning.geometry.verticesNeedUpdate = true;
 trailBeginning.geometry.normalsNeedUpdate = true;
 trailBeginning.geometry.computeBoundingSphere();
-var trailBeginningLength = 1;
-var trailBeginningVerticalScale = 1;
+
 scene.add(trailBeginning);
 
 
