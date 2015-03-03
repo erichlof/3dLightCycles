@@ -21,7 +21,7 @@ radarScene.add(camera2);
 var clock = new THREE.Clock();
 var keyboard = new THREEx.KeyboardState();
 
-//are we in portrait mobile view? if so, move the buttons over to the left a little..
+// are we in portrait mobile view? if so, move the buttons over to the left a little..
 // if not and we are in landscape mode, they can safely be moved farther right without running into each other
 var b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
 var b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
@@ -38,12 +38,12 @@ var PI_2 = Math.PI / 2;//used by controls below
 var controls = new THREEx.FirstPersonControls(camera);
 scene.add( controls.getObject() );
 var mouseControl = false;
-//if not on a mobile device, enable mouse control 
+// if not on a mobile device, enable mouse control 
 if ( !('createTouch' in document) ) {
 	mouseControl = true;
 }
 
-//the following variables will be used to calculate rotations and directions from the camera, 
+// the following variables will be used to calculate rotations and directions from the camera, 
 // such as when shooting, which direction do we shoot in?
 var cameraRotationVector = new THREE.Vector3();//for moving and firing projectiles where the camera is looking
 var cameraWorldQuaternion = new THREE.Quaternion();//for rotating scene objects to match camera's current rotation
@@ -58,7 +58,7 @@ var cameraControlsPitchObject = controls.getPitchObject();//allows access to con
 
 var renderer = new THREE.WebGLRenderer();
 
-//pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
+// pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
 //renderer.setPixelRatio(0.5);
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 document.getElementById("container").appendChild(renderer.domElement);
@@ -106,7 +106,7 @@ function onWindowResize() {
 	camera2.updateProjectionMatrix();
 	*/
 
-	//check if mobile device is in portrait or landscape mode and position buttons accordingly
+	// check if mobile device is in portrait or landscape mode and position buttons accordingly
 	b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
 	joystick._button2El.style.left = b2PercentLeft + "%";
 	b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
@@ -136,25 +136,32 @@ var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
 var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
-var cycleSpeed = 1;//10
+var cycleSpeed = 5;//10
+var cycleJustTurned = false;
+var rotateCycleRight = false;
+var rotateCycleLeft = false;
 var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
-var cycleRotationAmount = 2;
 var cameraDistance = 8;
 
+var northSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0
+var eastWestTrailCount = -1;
 var northSouthTrail = [];
 var eastWestTrail = [];
 var trailSpawnX = 0;
 var trailSpawnZ = 0;
 var cycleTrailSpawnDistance = 0;
+var animatingBlendedTrail = false;
+var testSquare = 5;
 
-//Shadows
+// Shadows
 var cycleShadow = [];
 var northSouthTrailShadow = [];
 var eastWestTrailShadow = [];
+var blendedBeginningTrailShadow;
 var normalVector = new THREE.Vector3( 0, 1, 0 );
-var planeConstant = 0.005;
+var planeConstant = 0.01;
 var groundPlane = new THREE.Plane( normalVector, planeConstant );
 var verticalAngle = 0;
 var horizontalAngle = 0;
@@ -193,6 +200,51 @@ var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 1, 1);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
+
+// MODELS
+var cycle;
+var loader = new THREE.ObjectLoader();
+
+// the following load function gives us a mesh object which is in this function's local scope.  
+// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
+// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
+loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
+	
+	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
+	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
+	//cycle.add(trailBeginning);
+	
+	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
+	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
+	
+	// shadow for black windows
+	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
+	cycleShadow[0].material.side = THREE.DoubleSide;
+	cycleShadow[0].material.opacity = 0.8;
+	scene.add( cycleShadow[0] );
+	
+	// shadow for main colored hull
+	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
+	cycleShadow[1].material.side = THREE.DoubleSide;
+	cycleShadow[1].material.opacity = 0.8;
+	scene.add( cycleShadow[1] );
+	
+	// shadow for wheel rims/hubcaps
+	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
+	cycleShadow[2].material.side = THREE.DoubleSide;
+	cycleShadow[2].material.opacity = 0.8;
+	scene.add( cycleShadow[2] );
+	
+	// shadow for grey underbody chassis
+	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
+	cycleShadow[3].material.side = THREE.DoubleSide;
+	cycleShadow[3].material.opacity = 0.8;
+	scene.add( cycleShadow[3] );
+	
+	initLevel();
+	
+} );
+
 
 
 // JET TRAILS
@@ -243,17 +295,42 @@ scene.add(northSouthTrail[0]);
 
 northSouthTrailShadow[0] = new THREE.ShadowMesh(northSouthTrail[0]);
 northSouthTrailShadow[0].material.opacity = 0.9;
+northSouthTrailShadow[0].visible = false;
 scene.add(northSouthTrailShadow[0]);
 
+// make many copies of these jet walls for later use
+for ( var i = 1; i < 1000; i++ ) {			
+	northSouthTrail[i] = northSouthTrail[0].clone();
+	northSouthTrail[i].visible = false;
+	scene.add(northSouthTrail[i]);
+	
+	northSouthTrailShadow[i] = new THREE.ShadowMesh(northSouthTrail[i]);
+	northSouthTrailShadow[i].material.opacity = 0.9;
+	northSouthTrailShadow[i].visible = false;
+	scene.add(northSouthTrailShadow[i]);
+}
+
+
 eastWestTrail[0] = new THREE.Mesh(eastWestTrailGeometry, trailMaterial);
-eastWestTrail[0].position.set(5, halfTrailHeight, 35);
+eastWestTrail[0].visible = false;
 scene.add(eastWestTrail[0]);
 
 eastWestTrailShadow[0] = new THREE.ShadowMesh(eastWestTrail[0]);
 eastWestTrailShadow[0].material.opacity = 0.9;
+eastWestTrailShadow[0].visible = false;
 scene.add(eastWestTrailShadow[0]);
 
-
+// make many copies of these jet walls for later use
+for ( var i = 1; i < 1000; i++ ) {			
+	eastWestTrail[i] = eastWestTrail[0].clone();
+	eastWestTrail[i].visible = false;
+	scene.add(eastWestTrail[i]);
+	
+	eastWestTrailShadow[i] = new THREE.ShadowMesh(eastWestTrail[i]);
+	eastWestTrailShadow[i].material.opacity = 0.9;
+	eastWestTrailShadow[i].visible = false;
+	scene.add(eastWestTrailShadow[i]);
+}
 
 // Jet trail beginning (White blended to cycle's color)
 var currentColorText = "";
@@ -263,29 +340,31 @@ var currentColorB1 = 0;
 var currentColorR2 = 0;
 var currentColorG2 = 0;
 var currentColorB2 = 0;
-// this dims the color to match trail's slightly darker texture masking color
-var trailColorR = Math.floor( 255 * 0.7 );// * 0.65
-var trailColorG = Math.floor( 190 * 0.7 );
-var trailColorB = Math.floor( 0 * 0.7 );
+// this dims the color to match the main trail's slightly darker texture masking color
+var trailColorR = Math.floor( 255 * 0.67 );
+var trailColorG = Math.floor( 190 * 0.67 );
+var trailColorB = Math.floor( 0 * 0.67 );
 var colorDeltaR = 255 - trailColorR;
 var colorDeltaG = 255 - trailColorG;
 var colorDeltaB = 255 - trailColorB;
 var currentColorValue = new THREE.Color();
 var curveSegments = 8;
-var curveSegmentsX2 = curveSegments * 2;
-var trailBeginningGeometry = new THREE.BoxGeometry(0.05, trailHeight, 1, 1, 1, curveSegments);
+var curveSegmentsX2 = curveSegments * 2; 
+// make the following 0.06 width instead of 0.05 so that the blended trail will cover up 
+// the light vertical line segment of the main trail
+var trailBeginningGeometry = new THREE.BoxGeometry(0.06, trailHeight, 1, 1, 1, curveSegments);
 var v2 = 0;
 var deformVec = new THREE.Vector3();
-//when changing the top of the trailBeginning to gently curve downward towards cycle's rear wheel,
-//vertices[0]is southeast corner, [1] is east right above (north of) 0, [2] is north of that, etc.. till [curveSegments]
+// when changing the top of the trailBeginning to gently curve downward towards cycle's rear wheel,
+// vertices[0]is southeast corner, [1] is east right above (north of) 0, [2] is north of that, etc.. till [curveSegments]
 // then going back south along the west side, starting at (curveSegmentsX2 + 2), continue till (curveSegmentsX2 + 2) + curveSegments
 for (var v = 0; v <= curveSegments; v++) {
-	deformVec.set(-v * 0.004, (-v * v * v) * 0.0008, 0);
+	deformVec.set(-v * 0.005, (-v * v * v) * 0.0008, 0); //0.004
 	trailBeginningGeometry.vertices[v].add(deformVec);
 	v2 = v;
 }
 for (var v = (curveSegmentsX2 + 2); v <= (curveSegmentsX2 + 2 + curveSegments); v++) {
-	deformVec.set(v2 * 0.004, (-v2 * v2 * v2) * 0.0008, 0);
+	deformVec.set(v2 * 0.005, (-v2 * v2 * v2) * 0.0008, 0);
 	trailBeginningGeometry.vertices[v].add(deformVec);
 	v2 -= 1;
 }
@@ -298,7 +377,7 @@ var trailBeginningMaterial = new THREE.MeshLambertMaterial({
 });
 */
 
-//east side of trail wall
+// east side of beginning trail wall
 for ( var i = 0; i < curveSegmentsX2; i+=2 ) {
 	// calculate color based on where we are along the rectangle (blends from trailColor to White, inside cycle's back wheel)
 	currentColorR1 = trailColorR + Math.floor( colorDeltaR * (i / curveSegmentsX2) );
@@ -324,7 +403,7 @@ for ( var i = 0; i < curveSegmentsX2; i+=2 ) {
 	
 }
 
-//west side of trail wall
+// west side of beginning trail wall
 for ( var i = curveSegmentsX2; i < (curveSegmentsX2 * 2); i += 2 ) {
 	
 	currentColorR1 = 255 - Math.floor( colorDeltaR * ((i - curveSegmentsX2) / curveSegmentsX2) );
@@ -348,11 +427,12 @@ for ( var i = curveSegmentsX2; i < (curveSegmentsX2 * 2); i += 2 ) {
 	
 }
 
-//texture = (209,209,209) light grey color
+// main trail texture max intensity = (209,209,209) light grey color
 colorDeltaR = 255 - 209;
 colorDeltaG = 255 - 155;
 colorDeltaB = 255 - 0;
-//top of trail wall
+
+// top of beginning trail wall
 for ( var i = curveSegmentsX2 * 2; i < curveSegmentsX2 * 3; i+=2 ) {
 	
 	currentColorR1 = 255 - Math.floor( colorDeltaR * ((i - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
@@ -376,7 +456,7 @@ for ( var i = curveSegmentsX2 * 2; i < curveSegmentsX2 * 3; i+=2 ) {
 	
 }
 
-// capped vertical end of this blended trail
+// capped vertical end-face of this blended trail
 trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[0] = new THREE.Color().set( 'rgb(165,123,0)' );
 trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[1] = new THREE.Color().set('rgb(165,123,0)');
 trailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[2] = new THREE.Color().set('rgb(165,123,0)');
@@ -394,54 +474,11 @@ trailBeginning.geometry.computeBoundingSphere();
 
 scene.add(trailBeginning);
 
+blendedBeginningTrailShadow = new THREE.ShadowMesh(trailBeginning);
+blendedBeginningTrailShadow.material.opacity = 0.9;
+scene.add(blendedBeginningTrailShadow);
 
-// MODELS
-var cycle;
-var loader = new THREE.ObjectLoader();
 
-//the following load function gives us a mesh object which is in this function's local scope.  
-// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
-// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
-loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
-	
-	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
-	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
-	//cycle.add(trailBeginning);
-	
-	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
-	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
-	
-	//shadow for black windows
-	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
-	cycleShadow[0].material.side = THREE.DoubleSide;
-	cycleShadow[0].material.opacity = 0.8;
-	//cycleShadow[0].material.color.set(0xffffff);
-	scene.add( cycleShadow[0] );
-	
-	//shadow for main colored hull
-	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
-	cycleShadow[1].material.side = THREE.DoubleSide;
-	cycleShadow[1].material.opacity = 0.8;
-	//cycleShadow[1].material.color.set(0xffffff);
-	scene.add( cycleShadow[1] );
-	
-	//shadow for wheel rims/hubcaps
-	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
-	cycleShadow[2].material.side = THREE.DoubleSide;
-	cycleShadow[2].material.opacity = 0.8;
-	//cycleShadow[2].material.color.set(0xffffff);
-	scene.add( cycleShadow[2] );
-	
-	//shadow for grey underbody chassis
-	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
-	cycleShadow[3].material.side = THREE.DoubleSide;
-	cycleShadow[3].material.opacity = 0.8;
-	//cycleShadow[3].material.color.set(0xffffff);
-	scene.add( cycleShadow[3] );
-	
-	initLevel();
-	
-} );
 
 
 // SOUNDS /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -455,7 +492,7 @@ var thrustersSoundShouldStop = false;
 var ufoSoundShouldStop = false;
 var canStartThrustSound = true;
 var canFadeThrustSound = false;
-//load the game with the sound already muted - no loud surprises!
+// load the game with the sound already muted - no loud surprises!
 // (players must turn sounds on with the button)
 Howler.mute(soundMuted);
 
@@ -501,7 +538,7 @@ var debug1Text = document.getElementById("debug1");
 
 // Misc. Elements
 
-//disable clicking and selecting/highlighting text of help, score, level, and gameOver banner texts
+// disable clicking and selecting/highlighting text of help, score, level, and gameOver banner texts
 document.getElementById("help").style.cursor = "default";
 document.getElementById("help").style.webkitUserSelect = "none";
 document.getElementById("help").style.MozUserSelect = "none";
