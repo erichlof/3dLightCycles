@@ -71,19 +71,24 @@
 			playerAlive = true;
 			
 			// initial starting position
-			cycle.position.set(0, 0, 35);
+			cycle.position.set(-testSquare, 0, testSquare);
 			
 			// initial heading and rotation
 			cycleDirection = NORTH;
 			cycleHeadingVector.copy(northVector);
-			cycle.rotation.y = north_Y_Rotation;
+			
+			// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+			cycleJustTurned = true;
+			// spawn the cycle's first jet trail
+			spawnTrail();
 			
 			// for debug flyCam
-			cameraControlsObject.position.set(-5,5,26);
+			cameraControlsObject.position.set(-5,10,26);
 			
-			// for debugging jet trail, look east
-			cameraControlsYawObject.rotation.y = -1.6;
-			joystick.previousRotationY = -1.6;
+			// for debugging jet trail, look west
+			//cameraControlsYawObject.rotation.y = 1.6;
+			//joystick.previousRotationY = 1.6;
+			
 			// look slightly downward
 			cameraControlsPitchObject.rotation.x = -0.5;
 			joystick.previousRotationX = -0.5;
@@ -125,7 +130,7 @@
 			controls.getDirection(cameraRotationVector);
 			cameraRotationVector.normalize();
 			
-			// this following gives us a rotation quaternion (4D vector), which will be useful for 
+			// the following gives us a rotation quaternion (4D vector), which will be useful for 
 			// rotating scene objects to match the camera's rotation
 			camera.getWorldQuaternion(cameraWorldQuaternion);
 			
@@ -141,106 +146,417 @@
 			
 			
 			
-			// GAME LOGIC ////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// GAME UPDATE AND LOGIC /////////////////////////////////////////////////////////////////////////////////////////////
 			
-			// update cycle position
-			cycle.localToWorld(cycle.position);
-			cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
-			cycle.worldToLocal(cycle.position);
 			
-			//warp for debugging trails
-			                   // -35
-			if (cycle.position.z < 20) { 
+			
+			// CHECK FOR AND HANDLE CYCLE TURNING
+			
+			// for debugging trails only - normally this will happen when player initiates turn
+			
+			// turning EAST
+			if (cycle.position.z < -testSquare) { 
 				
-				//warp for debugging trails
-				cycle.position.z = 35;
-				//end debug warp
+				cycle.position.z = -testSquare + 0.01; // won't actually need this
 				
-				//cycle.position.z = -35;
-				//cycleHeadingVector.copy(eastVector);
-				//cycle.rotation.y = east_Y_Rotation;
+				cycleDirection = EAST;
+				cycleHeadingVector.copy(eastVector);
+				rotateCycleRight = true;
+				trailBeginning.rotation.y = east_Y_Rotation;
+				cycleJustTurned = true;
+				// make final measurement before we cap off the current wall and turn the cycle
+				trailLength = Math.abs(trailSpawnZ - cycle.position.z) + 0.001;//+0.001
+				trailScale = trailLength / 10;
 				
-				//snap camera to cycle's new heading
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				
+				// get the correct current matrix so shadows match exactly
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
 				//cameraControlsYawObject.rotation.y = east_Y_Rotation;
 				//joystick.previousRotationY = east_Y_Rotation;
 				
 			}
-			if (cycle.position.x > 35) {
+			// turning SOUTH
+			if (cycle.position.x > testSquare) {
 				
-				cycle.position.x = 35;
+				cycle.position.x = testSquare - 0.01; // won't actually need this
+				
+				cycleDirection = SOUTH;
 				cycleHeadingVector.copy(southVector);
-				cycle.rotation.y = south_Y_Rotation;
-				//snap camera to cycle's new heading
+				rotateCycleRight = true;
+				trailBeginning.rotation.y = south_Y_Rotation;
+				cycleJustTurned = true;
+				// make final measurement before we cap off the current wall and turn the cycle
+				trailLength = Math.abs(cycle.position.x - trailSpawnX) + 0.001;//+0.001
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				
+				// get the correct current matrix so shadows match exactly
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
 				//cameraControlsYawObject.rotation.y = south_Y_Rotation;
 				//joystick.previousRotationY = south_Y_Rotation;
 				
 			}
-			if (cycle.position.z > 35) {
+			// turning WEST
+			if (cycle.position.z > testSquare) {
 				
-				cycle.position.z = 35;
+				cycle.position.z = testSquare - 0.01; // won't actually need this
+				
+				cycleDirection = WEST;
 				cycleHeadingVector.copy(westVector);
-				cycle.rotation.y = west_Y_Rotation;
-				//snap camera to cycle's new heading
+				rotateCycleRight = true;
+				trailBeginning.rotation.y = west_Y_Rotation;
+				cycleJustTurned = true;
+				// make final measurement before we cap off the current wall and turn the cycle
+				trailLength = Math.abs(cycle.position.z - trailSpawnZ) + 0.001;//+0.001
+				trailScale = trailLength / 10;
+				
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				
+				// get the correct current matrix so shadows match exactly
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
 				//cameraControlsYawObject.rotation.y = west_Y_Rotation;
 				//joystick.previousRotationY = west_Y_Rotation;
 				
-			}
-			if (cycle.position.x < -35) {
+				// for testing trails
+				testSquare += 5; 
 				
-				cycle.position.x = -35;
+			}
+			// turning NORTH
+			if (cycle.position.x < -testSquare) {
+				
+				cycle.position.x = -testSquare + 0.01; // won't actually need this
+				
+				cycleDirection = NORTH;
 				cycleHeadingVector.copy(northVector);
-				cycle.rotation.y = north_Y_Rotation;
-				//snap camera to cycle's new heading
+				rotateCycleRight = true;
+				trailBeginning.rotation.y = north_Y_Rotation;
+				cycleJustTurned = true;
+				// make final measurement before we cap off the current wall and turn the cycle
+				trailLength = Math.abs(trailSpawnX - cycle.position.x) + 0.001;//+0.001
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				
+				// get the correct current matrix so shadows match exactly
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
 				//cameraControlsYawObject.rotation.y = north_Y_Rotation;
 				//joystick.previousRotationY = north_Y_Rotation;
 				
 			}
 			
 			
-			// UPDATE GAME OBJECTS ///////////////////////////////////////////////////////////////////////////////////////////////
 			
 			
-			/*
-			testAngle += 0.1 * frameTime;
-			if ( testAngle > PI_2 ) {
-				testAngle = 0;
-			}
-			*/
-			//trailBeginningLength = Math.abs( Math.sin(testAngle) ) * 4 + 0.001;
-			//trailLength = Math.abs( Math.sin(testAngle) ) * 20 + 0.001;
 			
-			trailSpawnZ = 35;
-			// record the distance between the cycle and its trail spawn point when it turned or started the match 
-			cycleTrailSpawnDistance = Math.abs(trailSpawnZ - cycle.position.z) + 0.001;
+			// UPDATE TRAILS ///////////////////////////////////////////////////////////////////////////////////////////////
 			
-			// if the cycle is far enough away from the active trail spawn point, 
-			// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
-			if (cycleTrailSpawnDistance > 1)
-				trailBeginningLength = cycleTrailSpawnDistance - 1;
-			else 
-				trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+			// based on cycleDirection, update the current trail
 			
-			// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
-			if (trailBeginningLength > 2) trailBeginningLength = 2;
+			if (cycleDirection == NORTH) {
+				
+				// record the distance between the cycle and its trail spawn point when it turned or started the match 
+				cycleTrailSpawnDistance = Math.abs(trailSpawnZ - cycle.position.z) + 0.001;
+
+				if (animatingBlendedTrail) {
+					// if the cycle is far enough away from the active trail spawn point, 
+					// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+					if (cycleTrailSpawnDistance > 1)
+						trailBeginningLength = cycleTrailSpawnDistance - 1;
+					else 
+						trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+					// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+					if (trailBeginningLength > 2.1) {
+						trailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+						animatingBlendedTrail = false;
+					}
+
+					trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+					trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
+				}
+
+				// make blended beginning trail closely follow cycle's rear wheel                                                         
+				trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
+				// get the correct current matrix so shadows match exactly
+				trailBeginning.updateMatrixWorld(true);
+				blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+
+				// update main trail wall
+
+				// if the cycle is far enough away from the active trail spawn point, 
+				// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
+				if (cycleTrailSpawnDistance > 3)
+					trailLength = cycleTrailSpawnDistance - 3;
+				else 
+					trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+
+				
+				
+				// when trail wall segment reaches maximum 10 unit length, clamp it.
+				// also when this happens, it's time to spawn another trail segment
+				if (trailLength > 10) {
+
+					trailLength = 10;
+					// cap off current trail segment
+					northSouthTrail[northSouthTrailCount].scale.set(1, 1, 1);
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - 5;
+					// get the correct current matrix so shadows match exactly
+					northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+					northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+					
+					cycleJustTurned = false;
+					// get the next segment ready
+					spawnTrail(); // spawn another trail segement in the same direction
+
+				}
+
+				trailScale = trailLength / 10;
+
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				// update the current active blended trail so its shadow matches exactly
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				// now update the current active trail's shadow
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+
+			} // end if (cycleDirection == NORTH)
 			
-			// if the cycle is far enough away from the active trail spawn point, 
-			// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
-			if (cycleTrailSpawnDistance > 3)
-				trailLength = cycleTrailSpawnDistance - 3;
-			else 
-				trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+			else if (cycleDirection == EAST) {
+				
+				// record the distance between the cycle and its trail spawn point when it turned or started the match 
+				cycleTrailSpawnDistance = Math.abs(cycle.position.x - trailSpawnX) + 0.001;
+
+				if (animatingBlendedTrail) {
+					// if the cycle is far enough away from the active trail spawn point, 
+					// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+					if (cycleTrailSpawnDistance > 1)
+						trailBeginningLength = cycleTrailSpawnDistance - 1;
+					else 
+						trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+					// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+					if (trailBeginningLength > 2.1) {
+						trailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+						animatingBlendedTrail = false;
+					}
+
+					trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+					trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
+				}
+
+				// make blended beginning trail closely follow cycle's rear wheel                                                            
+				trailBeginning.position.set( cycle.position.x - ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
+				// get the correct current matrix so shadows match exactly
+				trailBeginning.updateMatrixWorld(true);
+				blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+
+				// update main trail wall
+
+				// if the cycle is far enough away from the active trail spawn point, 
+				// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
+				if (cycleTrailSpawnDistance > 3)
+					trailLength = cycleTrailSpawnDistance - 3;
+				else 
+					trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+
+				
+				
+				
+				// when trail wall segment reaches maximum 10 unit length, clamp it.
+				// also when this happens, it's time to spawn another trail segment
+				if (trailLength > 10) {
+
+					trailLength = 10;
+					// cap off current trail segment
+					eastWestTrail[eastWestTrailCount].scale.set(1, 1, 1);
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + 5;
+					// get the correct current matrix so shadows match exactly
+					eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+					eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+
+					cycleJustTurned = false;
+					// get the next segment ready
+					spawnTrail(); // spawn another trail segement in the same direction
+
+				}
+
+				
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				// update the current active blended trail so its shadow matches exactly
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+
+			} // end else if (cycleDirection == EAST)
 			
-			// clamp trail length to 10 units, which is the maximum length of each trail wall segment
-			if (trailLength > 10) trailLength = 10;
+			else if (cycleDirection == SOUTH) {
+				
+				// record the distance between the cycle and its trail spawn point when it turned or started the match 
+				cycleTrailSpawnDistance = Math.abs(cycle.position.z - trailSpawnZ) + 0.001;
+
+				if (animatingBlendedTrail) {
+					// if the cycle is far enough away from the active trail spawn point, 
+					// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+					if (cycleTrailSpawnDistance > 1)
+						trailBeginningLength = cycleTrailSpawnDistance - 1;
+					else 
+						trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+					// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+					if (trailBeginningLength > 2.1) {
+						trailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+						animatingBlendedTrail = false;
+					}
+
+					trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+					trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
+				}
+
+				// make blended beginning trail closely follow cycle's rear wheel                                                         
+				trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z - 1 - (trailBeginningLength / 2) );
+				// get the correct current matrix so shadows match exactly
+				trailBeginning.updateMatrixWorld(true);
+				blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+
+				// update main trail wall
+
+				// if the cycle is far enough away from the active trail spawn point, 
+				// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
+				if (cycleTrailSpawnDistance > 3)
+					trailLength = cycleTrailSpawnDistance - 3;
+				else 
+					trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+
+				
+				
+				// when trail wall segment reaches maximum 10 unit length, clamp it.
+				// also when this happens, it's time to spawn another trail segment
+				if (trailLength > 10) {
+
+					trailLength = 10;
+					// cap off current trail segment
+					northSouthTrail[northSouthTrailCount].scale.set(1, 1, 1);
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + 5;
+					// get the correct current matrix so shadows match exactly
+					northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+					northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+					
+					cycleJustTurned = false;
+					// get the next segment ready
+					spawnTrail(); // spawn another trail segement in the same direction
+
+				}
+
+				trailScale = trailLength / 10;
+
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				// update the current active blended trail so its shadow matches exactly
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				// now update the current active trail's shadow
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+
+			} // end else if (cycleDirection == SOUTH)
 			
-			trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
-			trailScale = trailLength / 10;
+			else if (cycleDirection == WEST) {
+				
+				// record the distance between the cycle and its trail spawn point when it turned or started the match 
+				cycleTrailSpawnDistance = Math.abs(trailSpawnX - cycle.position.x) + 0.001;
+
+				if (animatingBlendedTrail) {
+					// if the cycle is far enough away from the active trail spawn point, 
+					// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+					if (cycleTrailSpawnDistance > 1)
+						trailBeginningLength = cycleTrailSpawnDistance - 1;
+					else 
+						trailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+					// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+					if (trailBeginningLength > 2.1) {
+						trailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+						animatingBlendedTrail = false;
+					}
+
+					trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
+					trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
+				}
+
+				// make blended beginning trail closely follow cycle's rear wheel                                                            
+				trailBeginning.position.set( cycle.position.x + ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
+				// get the correct current matrix so shadows match exactly
+				trailBeginning.updateMatrixWorld(true);
+				blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+
+				// update main trail wall
+
+				// if the cycle is far enough away from the active trail spawn point, 
+				// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
+				if (cycleTrailSpawnDistance > 3)
+					trailLength = cycleTrailSpawnDistance - 3;
+				else 
+					trailLength = 0.001; // else, the trail doesn't have any noticable length yet
+
+				
+				
+				
+				// when trail wall segment reaches maximum 10 unit length, clamp it.
+				// also when this happens, it's time to spawn another trail segment
+				if (trailLength > 10) {
+
+					trailLength = 10;
+					// cap off current trail segment
+					eastWestTrail[eastWestTrailCount].scale.set(1, 1, 1);
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - 5;
+					// get the correct current matrix so shadows match exactly
+					eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+					eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+
+					cycleJustTurned = false;
+					// get the next segment ready
+					spawnTrail(); // spawn another trail segement in the same direction
+
+				}
+
+				
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				// update the current active blended trail so its shadow matches exactly
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+
+			} // end else if (cycleDirection == WEST)
 			
-			trailBeginning.scale.set(1, trailBeginningVerticalScale, trailBeginningLength);
-			trailBeginning.position.set(cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
 			
-			northSouthTrail[0].scale.set(1, 1, trailScale);
-			northSouthTrail[0].position.z = trailSpawnZ - (trailLength / 2);
 			
 			// update cycles components
 			// spin wheels
@@ -252,6 +568,7 @@
 			
 			cycle.children[2].material.shininess = 100 * flipper;
 			cycle.children[2].rotation.z = 0.004 * flipper;
+			
 			
 			// update Camera Object
 			// clamp vertical camera rotation so the camera doesn't go through the floor
@@ -269,18 +586,38 @@
 			//cameraControlsObject.translateY(2.5);
 			//cameraControlsObject.translateZ(-1);
 			
-			// update the cycle's matrix now before shadows are set (instead of at render time), 
+			if (cycleDirection == NORTH) cycle.position.x = trailSpawnX;
+			else if (cycleDirection == SOUTH) cycle.position.x = trailSpawnX;
+			else if (cycleDirection == EAST) cycle.position.z = trailSpawnZ;
+			else if (cycleDirection == WEST) cycle.position.z = trailSpawnZ;
+			
+			// update cycle position
+			cycle.localToWorld(cycle.position);
+			if (!rotateCycleRight && !rotateCycleLeft) {
+				cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+			}
+			
+			
+			cycle.worldToLocal(cycle.position);
+			if (rotateCycleRight) {
+				cycle.rotateOnAxis(upVector, -PI_2);
+				rotateCycleRight = false;
+			}
+			else if (rotateCycleLeft) {
+				cycle.rotateOnAxis(upVector, PI_2);
+				rotateCycleLeft = false;
+			}
+			
+			// update the cycle's matrix now before shadows areare set (instead of at render time), 
 			// so that the shadows line up exactly with the cycle
 			cycle.updateMatrixWorld(true);
-				
+			
 			// update the ShadowMeshes to follow their shadow-casting objects
 			cycleShadow[0].update( groundPlane, lightPosition4D );
 			cycleShadow[1].update( groundPlane, lightPosition4D );
 			cycleShadow[2].update( groundPlane, lightPosition4D );
 			cycleShadow[3].update( groundPlane, lightPosition4D );
-			
-			northSouthTrailShadow[0].update( groundPlane, lightPosition4D );
-			eastWestTrailShadow[0].update( groundPlane, lightPosition4D );
+		
 			
 			// render the scene with our camera
 			renderer.render(scene, camera);
@@ -292,6 +629,92 @@
 			
 
 		} // end function animate()
+		
+		
+		
+		function spawnTrail() {
+			
+			trailLength = 0.001;
+			
+			if (cycleDirection == NORTH) {
+				
+				trailSpawnX = cycle.position.x;
+				
+				if (cycleJustTurned) {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ = cycle.position.z;
+				}	
+				else {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ -= 10;
+				}
+				
+				northSouthTrailCount += 1;
+				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				northSouthTrail[northSouthTrailCount].visible = true;
+				northSouthTrailShadow[northSouthTrailCount].visible = true;
+					
+			}
+			if (cycleDirection == SOUTH) {
+				
+				trailSpawnX = cycle.position.x;
+				
+				if (cycleJustTurned) {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ = cycle.position.z;
+				}	
+				else {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ += 10;
+				}
+				
+				northSouthTrailCount += 1;
+				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				northSouthTrail[northSouthTrailCount].visible = true;
+				northSouthTrailShadow[northSouthTrailCount].visible = true;
+					
+			}
+			if (cycleDirection == EAST) {
+				
+				if (cycleJustTurned) {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ = cycle.position.z;
+				}
+				else {
+					trailSpawnX += 10;
+					trailSpawnZ = cycle.position.z;
+				}
+				
+				eastWestTrailCount += 1;
+				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				eastWestTrail[eastWestTrailCount].visible = true;
+				eastWestTrailShadow[eastWestTrailCount].visible = true;
+					
+			}
+			if (cycleDirection == WEST) {
+				
+				if (cycleJustTurned) {
+					trailSpawnX = cycle.position.x;
+					trailSpawnZ = cycle.position.z;
+				}
+				else {
+					trailSpawnX -= 10;
+					trailSpawnZ = cycle.position.z;
+				}
+				
+				eastWestTrailCount += 1;
+				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				eastWestTrail[eastWestTrailCount].visible = true;
+				eastWestTrailShadow[eastWestTrailCount].visible = true;
+					
+			}
+			
+			if (cycleJustTurned) {
+				animatingBlendedTrail = true;
+				cycleJustTurned = false;
+			}
+			
+		} // end function spawnTrail()
 		
 		
 	</script>
