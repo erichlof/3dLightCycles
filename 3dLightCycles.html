@@ -38,11 +38,11 @@
 	</div>
 	
 	<div id="help1" style="position:fixed; left:2%; bottom:4%; font-family:arial; font-size:10px; color:grey;">
-		Desktop: Mouse to rotate | Esc: exit
+		Desktop: LMouseButton: Turn L | RMouseButton: Turn R | Mouse: rotate Camera | Esc: exit
 	</div>
 
 	<div id="help2" style="position:fixed; left:2%; bottom:1%; font-family:arial; font-size:10px; color:grey;">
-		Mobile: Swipe to rotate
+		Mobile: PurpleButton: Turn L | OrangeButton: Turn R | Swipe to rotate Camera
 	</div>
 	
 	<div id="score" style="position:fixed; right:3%; top:1%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
@@ -108,7 +108,7 @@
 			// store how much time has passed since the last animation frame
 			frameTime = clock.getDelta();
 			
-			// RESPOND TO PLAYER INPUT ///////////////////////////////////////////////////////////////////////////////////////////
+			// RESPOND TO PLAYER INPUT //////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// check if joystick Stick is being moved
 			if (playerAlive) {
@@ -135,7 +135,7 @@
 			camera.getWorldQuaternion(cameraWorldQuaternion);
 			
 			// allow flying camera forward
-			if ( playerAlive && (joystick.button2Pressed || keyboard.pressed('space')) ) {
+			if ( keyboard.pressed('space') ) {
 				
 				cameraControlsObject.localToWorld(cameraControlsObject.position);
 				cameraControlsObject.translateOnAxis(cameraRotationVector, 20 * frameTime);
@@ -143,33 +143,102 @@
 				
 			}
 			
+			//if button1 is NOT pressed, reset it so we can turn again
+			if (!joystick.button1Pressed) {
+				canTurnRight = true;
+			}
+			//if button1 IS pressed, check to see if we can shoot
+			if (joystick.button1Pressed && playerAlive) {
+				if (canTurnRight) {
+					rotateCycleRight = true;
+					//turn off ability to turn cycle so we don't rapid-fire turn
+					canTurnRight = false;
+				}
+			}
+			
+			//if button2 is NOT pressed, reset it so we can turn again
+			if (!joystick.button2Pressed) {
+				canTurnLeft = true;
+			}
+			//if button2 IS pressed, check to see if we can shoot
+			if (joystick.button2Pressed && playerAlive) {
+				if (canTurnLeft) {
+					rotateCycleLeft = true;
+					//turn off ability to turn cycle so we don't rapid-fire turn
+					canTurnLeft = false;
+				}
+			}
 			
 			
 			
-			// GAME UPDATE AND LOGIC /////////////////////////////////////////////////////////////////////////////////////////////
+			// GAME STATE UPDATE AND LOGIC /////////////////////////////////////////////////////////////////////////////////////////////
 			
 			
 			
-			// CHECK FOR AND HANDLE CYCLE TURNING
 			
-			// for debugging trails only - normally this will happen when player initiates turn
+			
+			// CHECK FOR AND HANDLE CYCLE TURNING //////////////////////////////////////////////////////////////////////////////////////
+			
+			if (rotateCycleLeft) {
+				if (cycleDirection == NORTH) {
+					//cycleDirection = WEST;
+					turningWestFromNorth = true;
+				}
+				else if (cycleDirection == EAST) {
+					//cycleDirection = NORTH;
+					turningNorthFromEast = true;
+				}
+				else if (cycleDirection == SOUTH) {
+					//cycleDirection = EAST;
+					turningEastFromSouth = true;
+				}
+				else if (cycleDirection == WEST) {
+					//cycleDirection = SOUTH;
+					turningSouthFromWest = true;
+				}
+			}
+			if (rotateCycleRight) {
+				if (cycleDirection == NORTH) {
+					//cycleDirection = EAST;
+					turningEastFromNorth = true;
+				}
+				else if (cycleDirection == EAST) {
+					//cycleDirection = SOUTH;
+					turningSouthFromEast = true;
+				}
+				else if (cycleDirection == SOUTH) {
+					//cycleDirection = WEST;
+					turningWestFromSouth = true;
+				}
+				else if (cycleDirection == WEST) {
+					//cycleDirection = NORTH;
+					turningNorthFromWest = true;
+				}
+			}
 			
 			// turning EAST
-			if (cycle.position.z < -testSquare) { 
-				
-				cycle.position.z = -testSquare + 0.01; // won't actually need this
+			if (turningEastFromNorth || turningEastFromSouth) { 
 				
 				cycleDirection = EAST;
 				cycleHeadingVector.copy(eastVector);
-				rotateCycleRight = true;
+				
 				trailBeginning.rotation.y = east_Y_Rotation;
 				cycleJustTurned = true;
 				// make final measurement before we cap off the current wall and turn the cycle
-				trailLength = Math.abs(trailSpawnZ - cycle.position.z) + 0.001;//+0.001
+				if (turningEastFromNorth)
+					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
+				if (turningEastFromSouth)
+					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
 				trailScale = trailLength / 10;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
-				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				if (turningEastFromNorth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				if (turningEastFromSouth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				
+				turningEastFromNorth = false;
+				turningEastFromSouth = false;
 				
 				// get the correct current matrix so shadows match exactly
 				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
@@ -182,22 +251,30 @@
 				//joystick.previousRotationY = east_Y_Rotation;
 				
 			}
+			
 			// turning SOUTH
-			if (cycle.position.x > testSquare) {
-				
-				cycle.position.x = testSquare - 0.01; // won't actually need this
+			if (turningSouthFromEast || turningSouthFromWest) {
 				
 				cycleDirection = SOUTH;
 				cycleHeadingVector.copy(southVector);
-				rotateCycleRight = true;
+				
 				trailBeginning.rotation.y = south_Y_Rotation;
 				cycleJustTurned = true;
 				// make final measurement before we cap off the current wall and turn the cycle
-				trailLength = Math.abs(cycle.position.x - trailSpawnX) + 0.001;//+0.001
+				if (turningSouthFromEast)
+					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
+				if (turningSouthFromWest)
+					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
 				trailScale = trailLength / 10;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
-				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				if (turningSouthFromEast)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				if (turningSouthFromWest)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				
+				turningSouthFromEast = false;
+				turningSouthFromWest = false;
 				
 				// get the correct current matrix so shadows match exactly
 				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
@@ -210,22 +287,30 @@
 				//joystick.previousRotationY = south_Y_Rotation;
 				
 			}
+			
 			// turning WEST
-			if (cycle.position.z > testSquare) {
-				
-				cycle.position.z = testSquare - 0.01; // won't actually need this
+			if (turningWestFromNorth || turningWestFromSouth) {
 				
 				cycleDirection = WEST;
 				cycleHeadingVector.copy(westVector);
-				rotateCycleRight = true;
+				
 				trailBeginning.rotation.y = west_Y_Rotation;
 				cycleJustTurned = true;
 				// make final measurement before we cap off the current wall and turn the cycle
-				trailLength = Math.abs(cycle.position.z - trailSpawnZ) + 0.001;//+0.001
+				if (turningWestFromSouth)
+					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
+				if (turningWestFromNorth)
+					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
 				trailScale = trailLength / 10;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
-				northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				if (turningWestFromSouth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				if (turningWestFromNorth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				
+				turningWestFromNorth = false;
+				turningWestFromSouth = false;
 				
 				// get the correct current matrix so shadows match exactly
 				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
@@ -237,26 +322,31 @@
 				//cameraControlsYawObject.rotation.y = west_Y_Rotation;
 				//joystick.previousRotationY = west_Y_Rotation;
 				
-				// for testing trails
-				testSquare += 5; 
-				
 			}
+			
 			// turning NORTH
-			if (cycle.position.x < -testSquare) {
-				
-				cycle.position.x = -testSquare + 0.01; // won't actually need this
+			if (turningNorthFromEast || turningNorthFromWest) {
 				
 				cycleDirection = NORTH;
 				cycleHeadingVector.copy(northVector);
-				rotateCycleRight = true;
+			
 				trailBeginning.rotation.y = north_Y_Rotation;
 				cycleJustTurned = true;
 				// make final measurement before we cap off the current wall and turn the cycle
-				trailLength = Math.abs(trailSpawnX - cycle.position.x) + 0.001;//+0.001
+				if (turningNorthFromWest)
+					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
+				if (turningNorthFromEast)
+					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
 				trailScale = trailLength / 10;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
-				eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				if (turningNorthFromWest)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				if (turningNorthFromEast)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				
+				turningNorthFromEast = false;
+				turningNorthFromWest = false;
 				
 				// get the correct current matrix so shadows match exactly
 				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
@@ -271,10 +361,44 @@
 			}
 			
 			
+			// UPDATE CYCLE ORIENTATION AND POSITION  ////////////////////////////////////////////////////////////////////////////
+			
+			if (cycleDirection == NORTH) cycle.position.x = trailSpawnX;
+			else if (cycleDirection == SOUTH) cycle.position.x = trailSpawnX;
+			else if (cycleDirection == EAST) cycle.position.z = trailSpawnZ;
+			else if (cycleDirection == WEST) cycle.position.z = trailSpawnZ;
+			
+			// update cycle position
+			cycle.localToWorld(cycle.position);
+			if (!rotateCycleRight && !rotateCycleLeft) {
+				cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
+			}
+			
+			
+			cycle.worldToLocal(cycle.position);
+			if (rotateCycleRight) {
+				cycle.rotateOnAxis(upVector, -PI_2);
+				rotateCycleRight = false;
+			}
+			else if (rotateCycleLeft) {
+				cycle.rotateOnAxis(upVector, PI_2);
+				rotateCycleLeft = false;
+			}
+			
+			// update the cycle's matrix now before shadows areare set (instead of at render time), 
+			// so that the shadows line up exactly with the cycle
+			cycle.updateMatrixWorld(true);
+			
+			// update the ShadowMeshes to follow their shadow-casting objects
+			cycleShadow[0].update( groundPlane, lightPosition4D );
+			cycleShadow[1].update( groundPlane, lightPosition4D );
+			cycleShadow[2].update( groundPlane, lightPosition4D );
+			cycleShadow[3].update( groundPlane, lightPosition4D );
 			
 			
 			
-			// UPDATE TRAILS ///////////////////////////////////////////////////////////////////////////////////////////////
+			
+			// UPDATE TRAILS //////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// based on cycleDirection, update the current trail
 			
@@ -586,39 +710,8 @@
 			//cameraControlsObject.translateY(2.5);
 			//cameraControlsObject.translateZ(-1);
 			
-			if (cycleDirection == NORTH) cycle.position.x = trailSpawnX;
-			else if (cycleDirection == SOUTH) cycle.position.x = trailSpawnX;
-			else if (cycleDirection == EAST) cycle.position.z = trailSpawnZ;
-			else if (cycleDirection == WEST) cycle.position.z = trailSpawnZ;
 			
-			// update cycle position
-			cycle.localToWorld(cycle.position);
-			if (!rotateCycleRight && !rotateCycleLeft) {
-				cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
-			}
-			
-			
-			cycle.worldToLocal(cycle.position);
-			if (rotateCycleRight) {
-				cycle.rotateOnAxis(upVector, -PI_2);
-				rotateCycleRight = false;
-			}
-			else if (rotateCycleLeft) {
-				cycle.rotateOnAxis(upVector, PI_2);
-				rotateCycleLeft = false;
-			}
-			
-			// update the cycle's matrix now before shadows areare set (instead of at render time), 
-			// so that the shadows line up exactly with the cycle
-			cycle.updateMatrixWorld(true);
-			
-			// update the ShadowMeshes to follow their shadow-casting objects
-			cycleShadow[0].update( groundPlane, lightPosition4D );
-			cycleShadow[1].update( groundPlane, lightPosition4D );
-			cycleShadow[2].update( groundPlane, lightPosition4D );
-			cycleShadow[3].update( groundPlane, lightPosition4D );
 		
-			
 			// render the scene with our camera
 			renderer.render(scene, camera);
 			
@@ -649,6 +742,13 @@
 					trailSpawnZ -= 10;
 				}
 				
+				// disable matrix updating for the previous trail segment / shadow, in order to 
+				// optimize game loop time when there are lots of trail segments
+				if (northSouthTrailCount > -1) {
+					northSouthTrail[northSouthTrailCount].matrixAutoUpdate = false;
+					northSouthTrailShadow[northSouthTrailCount].matrixAutoUpdate = false;
+				}
+				
 				northSouthTrailCount += 1;
 				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
 				northSouthTrail[northSouthTrailCount].visible = true;
@@ -668,6 +768,11 @@
 					trailSpawnZ += 10;
 				}
 				
+				if (northSouthTrailCount > -1) {
+					northSouthTrail[northSouthTrailCount].matrixAutoUpdate = false;
+					northSouthTrailShadow[northSouthTrailCount].matrixAutoUpdate = false;
+				}
+				
 				northSouthTrailCount += 1;
 				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
 				northSouthTrail[northSouthTrailCount].visible = true;
@@ -685,6 +790,11 @@
 					trailSpawnZ = cycle.position.z;
 				}
 				
+				if (eastWestTrailCount > -1) {
+					eastWestTrail[eastWestTrailCount].matrixAutoUpdate = false;
+					eastWestTrailShadow[eastWestTrailCount].matrixAutoUpdate = false;
+				}
+				
 				eastWestTrailCount += 1;
 				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
 				eastWestTrail[eastWestTrailCount].visible = true;
@@ -700,6 +810,11 @@
 				else {
 					trailSpawnX -= 10;
 					trailSpawnZ = cycle.position.z;
+				}
+				
+				if (eastWestTrailCount > -1) {
+					eastWestTrail[eastWestTrailCount].matrixAutoUpdate = false;
+					eastWestTrailShadow[eastWestTrailCount].matrixAutoUpdate = false;
 				}
 				
 				eastWestTrailCount += 1;
