@@ -70,8 +70,13 @@ document.getElementById("container").addEventListener("click", function() {
 	this.requestPointerLock();
 }, false);
 
-document.getElementById("container").addEventListener("mousedown", function() {
-	//if (playerAlive) shootBullet();
+document.getElementById("container").addEventListener("mousedown", function(event) {
+	if (playerAlive) {
+		if(event.button === 0)
+			rotateCycleLeft = true;
+		else if(event.button === 2)
+			rotateCycleRight = true;
+	}	
 }, false);
 
 
@@ -136,10 +141,22 @@ var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
 var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
+var canTurnLeft = false;
+var canTurnRight = false;
 var cycleSpeed = 5;//10
+
 var cycleJustTurned = false;
 var rotateCycleRight = false;
 var rotateCycleLeft = false;
+var turningNorthFromEast = false;
+var turningNorthFromWest = false;
+var turningEastFromNorth = false;
+var turningEastFromSouth = false;
+var turningSouthFromEast = false;
+var turningSouthFromWest = false;
+var turningWestFromNorth = false;
+var turningWestFromSouth = false;
+
 var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
