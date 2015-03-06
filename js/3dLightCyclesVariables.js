@@ -144,6 +144,10 @@ var cycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
 var cycleSpeed = 5;//10
+var playingCrashAnimation = false;
+var playingTrailDisappearAnimation = false;
+var crashAnimationTimer = new THREEx.GameTimer(2);
+var trailDisappearAnimationTimer = new THREEx.GameTimer(2);
 
 var cycleJustTurned = false;
 var rotateCycleRight = false;
@@ -162,16 +166,27 @@ var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
 var cameraDistance = 8;
 
-var northSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0
+var northSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0th element
 var eastWestTrailCount = -1;
+var testNSTrailCount = -1;
+var testEWTrailCount = -1;
 var northSouthTrail = [];
 var eastWestTrail = [];
 var trailSpawnX = 0;
 var trailSpawnZ = 0;
 var cycleTrailSpawnDistance = 0;
 var animatingBlendedTrail = false;
-var testSquare = 5;
 
+var cyclePositionX = 0;
+var cyclePositionZ = 0;
+var test_NS_trailX = [];
+var test_NS_trailStartZ = [];
+var test_NS_trailEndZ = [];
+var test_NS_currentTrailStartZ = 0;
+var test_EW_trailZ = [];
+var test_EW_trailStartX = [];
+var test_EW_trailEndX = [];
+var test_EW_currentTrailStartX = 0;
 // Shadows
 var cycleShadow = [];
 var northSouthTrailShadow = [];
@@ -192,7 +207,7 @@ var flipper = 0;
 //var ambientLight = new THREE.AmbientLight('rgb(80,80,80)', 1);
 //scene.add(ambientLight);
 var directionalLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
-directionalLight.position.set(5, 20, 1);
+directionalLight.position.set(20, 50, 1);//5,20,1
 directionalLight.lookAt(scene.position);
 scene.add(directionalLight);
 
@@ -204,6 +219,7 @@ lightPosition4D.w = 0.5;
 
 
 // FLOOR
+var arenaRadius = 50;
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 floorTexture.repeat.set(36, 36);
@@ -213,7 +229,7 @@ var floorMaterial = new THREE.MeshPhongMaterial({
 	shininess: 10,
 	map: floorTexture
 });
-var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 1, 1);
+var floorGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 2, 1, 1);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
