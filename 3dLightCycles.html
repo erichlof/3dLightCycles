@@ -111,7 +111,9 @@
 			// RESPOND TO PLAYER INPUT //////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// check if joystick Stick is being moved
-			if (playerAlive) {
+			// commented out for debug flyCam mode
+			///if (playerAlive) {
+			
 				// if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
 				if (!mouseControl) {
 					
@@ -123,7 +125,7 @@
 				
 				}
 
-			}
+			///}
 			
 			// this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
