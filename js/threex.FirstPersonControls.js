@@ -20,8 +20,8 @@ THREEx.FirstPersonControls = function ( camera ) {
 	var movementY = 0;
 	
 	var onMouseMove = function ( event ) {
-
-		if (playerAlive) {
+		// commented out for debug flyCam mode
+		//if (playerAlive) {
 			movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 			movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 		
@@ -29,7 +29,7 @@ THREEx.FirstPersonControls = function ( camera ) {
 			that.pitchObject.rotation.x -= movementY * 0.002;
 
 			that.pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, that.pitchObject.rotation.x ) );
-		}
+		//}
 
 	};
 
