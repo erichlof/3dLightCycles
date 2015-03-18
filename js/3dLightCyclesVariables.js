@@ -207,7 +207,7 @@ var flipper = 0;
 //var ambientLight = new THREE.AmbientLight('rgb(80,80,80)', 1);
 //scene.add(ambientLight);
 var directionalLight = new THREE.DirectionalLight('rgb(255,255,255)', 1);
-directionalLight.position.set(20, 50, 1);//5,20,1
+directionalLight.position.set(-1000, 5000, 1000);
 directionalLight.lookAt(scene.position);
 scene.add(directionalLight);
 
@@ -220,12 +220,12 @@ lightPosition4D.w = 0.5;
 
 // FLOOR
 var arenaRadius = 100;
-var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor.png' );
+var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor2.png' );
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 floorTexture.repeat.set(arenaRadius * 0.72, arenaRadius * 0.72);
 //floorTexture.minFilter = THREE.LinearMipMapLinearFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
-	//emissive: 'rgb(5,5,5)',
+	emissive: 'rgb(10,10,10)',
 	shininess: 10,
 	map: floorTexture
 });
@@ -236,69 +236,70 @@ scene.add(floor);
 
 
 // ARENA WALLS
-var arenaNorthWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls.jpg' );
+var arenaNorthWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls2.png' );
 arenaNorthWallTexture.wrapS = THREE.ClampToEdgeWrapping;
 arenaNorthWallTexture.wrapT = THREE.RepeatWrapping;
-arenaNorthWallTexture.offset.set(0, 0.75);//NORTH WALL
+arenaNorthWallTexture.offset.set(0, 0.765);//NORTH WALL
 //arenaWestWallTexture.offset.set(0, 0);//WEST WALL
 //arenaEastWallTexture.offset.set(0, 0.5);//EAST WALL
 //arenaSouthWallTexture.offset.set(0, 0.25);//SOUTH WALL
-arenaNorthWallTexture.repeat.set(1, 0.25); 
+arenaNorthWallTexture.repeat.set(1, 0.225);
+//arenaNorthWallTexture.maxFilter = THREE.NearestFilter;
 var arenaNorthWallMaterial = new THREE.MeshBasicMaterial({
-	//emissive: 'rgb(5,5,5)',
+	//color: 'rgb(200,200,200)',
 	map: arenaNorthWallTexture
 });
-var arenaNorthWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.125, 1, 1);
+var arenaNorthWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.14, 1, 1);
 var arenaNorthWall = new THREE.Mesh(arenaNorthWallGeometry, arenaNorthWallMaterial);
 //arenaSouthWall.rotation.y = Math.PI / -2;
-arenaNorthWall.position.set(0, arenaRadius * 0.0625, -arenaRadius);
+arenaNorthWall.position.set(0, arenaRadius * 0.07, -arenaRadius);
 scene.add(arenaNorthWall);
 
-var arenaSouthWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls.jpg' );
+var arenaSouthWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls2.png' );
 //var arenaSouthWallTexture = arenaNorthWallTexture.clone();
 arenaSouthWallTexture.wrapS = THREE.ClampToEdgeWrapping;
 arenaSouthWallTexture.wrapT = THREE.RepeatWrapping;
-arenaSouthWallTexture.offset.set(0, 0.25);//SOUTH WALL
-arenaSouthWallTexture.repeat.set(1, 0.25); 
+arenaSouthWallTexture.offset.set(0, 0.265);//SOUTH WALL
+arenaSouthWallTexture.repeat.set(1, 0.225); 
 var arenaSouthWallMaterial = new THREE.MeshBasicMaterial({
 	//emissive: 'rgb(5,5,5)',
 	map: arenaSouthWallTexture
 });
-var arenaSouthWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.125, 1, 1);
+var arenaSouthWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.14, 1, 1);
 var arenaSouthWall = new THREE.Mesh(arenaSouthWallGeometry, arenaSouthWallMaterial);
-arenaSouthWall.position.set(0, arenaRadius * 0.0625, arenaRadius);
+arenaSouthWall.position.set(0, arenaRadius * 0.07, arenaRadius);
 arenaSouthWall.rotation.y = -Math.PI;
 scene.add(arenaSouthWall);
 
-var arenaEastWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls.jpg' );
+var arenaEastWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls2.png' );
 //var arenaEastWallTexture = arenaNorthWallTexture.clone();
 arenaEastWallTexture.wrapS = THREE.ClampToEdgeWrapping;
 arenaEastWallTexture.wrapT = THREE.RepeatWrapping;
-arenaEastWallTexture.offset.set(0, 0.5);//EAST WALL
-arenaEastWallTexture.repeat.set(1, 0.25); 
+arenaEastWallTexture.offset.set(0, 0.515);//EAST WALL
+arenaEastWallTexture.repeat.set(1, 0.225); 
 var arenaEastWallMaterial = new THREE.MeshBasicMaterial({
 	//emissive: 'rgb(5,5,5)',
 	map: arenaEastWallTexture
 });
-var arenaEastWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.125, 1, 1);
+var arenaEastWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.14, 1, 1);
 var arenaEastWall = new THREE.Mesh(arenaEastWallGeometry, arenaEastWallMaterial);
-arenaEastWall.position.set(arenaRadius, arenaRadius * 0.0625, 0);
+arenaEastWall.position.set(arenaRadius, arenaRadius * 0.07, 0);
 arenaEastWall.rotation.y = -Math.PI * 0.5;
 scene.add(arenaEastWall);
 
-var arenaWestWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls.jpg' );
+var arenaWestWallTexture = new THREE.ImageUtils.loadTexture( 'images/arenaWalls2.png' );
 //var arenaWestWallTexture = arenaNorthWallTexture.clone();
 arenaWestWallTexture.wrapS = THREE.ClampToEdgeWrapping;
 arenaWestWallTexture.wrapT = THREE.RepeatWrapping;
-arenaWestWallTexture.offset.set(0, 0);//WEST WALL
-arenaWestWallTexture.repeat.set(1, 0.25); 
+arenaWestWallTexture.offset.set(0, 0.015);//WEST WALL
+arenaWestWallTexture.repeat.set(1, 0.225); 
 var arenaWestWallMaterial = new THREE.MeshBasicMaterial({
 	//emissive: 'rgb(5,5,5)',
 	map: arenaWestWallTexture
 });
-var arenaWestWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.125, 1, 1);
+var arenaWestWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.14, 1, 1);
 var arenaWestWall = new THREE.Mesh(arenaWestWallGeometry, arenaWestWallMaterial);
-arenaWestWall.position.set(-arenaRadius, arenaRadius * 0.0625, 0);
+arenaWestWall.position.set(-arenaRadius, arenaRadius * 0.07, 0);
 arenaWestWall.rotation.y = Math.PI * 0.5;
 scene.add(arenaWestWall);
 
