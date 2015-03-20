@@ -10,7 +10,7 @@ var SCREEN_HEIGHT = window.innerHeight;
 var SCREEN_WIDTH_DIVISION = SCREEN_WIDTH / 4;//used for radar minicam
 var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3;//used for radar minicam
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 3000);
+var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 3000);
 scene.add(camera);
 /*
 var radarScene = new THREE.Scene();
@@ -143,7 +143,7 @@ var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
-var cycleSpeed = 5;//10
+var cycleSpeed = 15;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var crashAnimationTimer = new THREEx.GameTimer(2);
@@ -233,6 +233,23 @@ var floorGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius *
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
+
+// TEST TRANSPARENCY
+var testTransparencyTexture = new THREE.ImageUtils.loadTexture( 'images/testTransparency2.png' );
+var testTransparencyMaterial = new THREE.MeshBasicMaterial({
+	//emissive: 'rgb(10,10,10)',
+	transparent: true,
+	opacity: 1.0,
+	side: THREE.DoubleSide,
+	map: testTransparencyTexture
+});
+//testTransparencyTexture.minFilter = THREE.LinearFilter;
+var explosionTextureSize = 10;
+var testTransparencyGeometry = new THREE.PlaneBufferGeometry(explosionTextureSize, explosionTextureSize / 2, 1, 1);
+var testTransparency = new THREE.Mesh(testTransparencyGeometry, testTransparencyMaterial);
+testTransparency.position.y = explosionTextureSize / 2;
+testTransparency.visible = false;
+scene.add(testTransparency);
 
 
 // ARENA WALLS
