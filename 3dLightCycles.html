@@ -82,16 +82,23 @@
 			// spawn the cycle's first jet trail
 			spawnTrail();
 			
+			/*
 			// for debug flyCam
 			cameraControlsObject.position.set(-5,15,40);
-			
-			// for debugging jet trail, look west
-			//cameraControlsYawObject.rotation.y = 1.6;
-			//joystick.previousRotationY = 1.6;
-			
 			// look slightly downward
-			cameraControlsPitchObject.rotation.x = -0.6;
-			joystick.previousRotationX = -0.6;
+			cameraControlsPitchObject.rotation.x = -0.4;
+			joystick.previousRotationX = -0.4;
+			*/
+			
+			// for cockpit View
+			cameraControlsObject.position.copy(cycle.position);
+			//cameraControlsObject.position.y += 2;
+			// look straight ahead
+			cameraControlsPitchObject.rotation.x = 0.0;
+			joystick.previousRotationX = 0.0;
+			// snap camera to cycle's new heading
+			cameraControlsYawObject.rotation.y = north_Y_Rotation;
+			joystick.previousRotationY = north_Y_Rotation;
 			
 			// for initial 3rd person view, pull the camera back a little
 			//camera.translateZ(cameraDistance);
@@ -180,10 +187,20 @@
 				
 				crashAnimationTimer.run(frameTime);
 				
-				if (crashAnimationTimer.alarmSounding){
+				explosionTextureSize = (crashAnimationTimer.counter * 3 + 1);
+				testTransparency.scale.set(explosionTextureSize, explosionTextureSize, 1);
+				testTransparency.position.y = explosionTextureSize / 2;
+				testTransparency.material.opacity -= crashAnimationTimer.counter * 0.05;
+				
+				if (crashAnimationTimer.alarmSounding) {
+					
+					testTransparency.scale.set(1, 1, 1);
+					testTransparency.visible = false;
+					testTransparency.material.opacity = 1.0;
 					
 					playingTrailDisappearAnimation = true;
 					playingCrashAnimation = false;
+					
 					crashAnimationTimer.reset();
 					
 				}
@@ -194,7 +211,7 @@
 				
 				trailDisappearAnimationTimer.run(frameTime);
 				
-				if (trailDisappearAnimationTimer.alarmSounding){
+				if (trailDisappearAnimationTimer.alarmSounding) {
 					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
 						eastWestTrail[i].visible = false;
@@ -256,6 +273,10 @@
 					cameraControlsPitchObject.rotation.x = -0.5;
 					joystick.previousRotationX = -0.5;
 					*/
+					
+					// snap camera to cycle's new heading
+					cameraControlsYawObject.rotation.y = north_Y_Rotation;
+					joystick.previousRotationY = north_Y_Rotation;
 					
 					playingTrailDisappearAnimation = false;
 					trailDisappearAnimationTimer.reset();
@@ -330,8 +351,8 @@
 				spawnTrail();
 				
 				// snap camera to cycle's new heading
-				//cameraControlsYawObject.rotation.y = east_Y_Rotation;
-				//joystick.previousRotationY = east_Y_Rotation;
+				cameraControlsYawObject.rotation.y = east_Y_Rotation;
+				joystick.previousRotationY = east_Y_Rotation;
 				
 			}
 			
@@ -367,8 +388,8 @@
 				spawnTrail();
 				
 				// snap camera to cycle's new heading
-				//cameraControlsYawObject.rotation.y = south_Y_Rotation;
-				//joystick.previousRotationY = south_Y_Rotation;
+				cameraControlsYawObject.rotation.y = south_Y_Rotation;
+				joystick.previousRotationY = south_Y_Rotation;
 				
 			}
 			
@@ -404,8 +425,8 @@
 				spawnTrail();
 				
 				// snap camera to cycle's new heading
-				//cameraControlsYawObject.rotation.y = west_Y_Rotation;
-				//joystick.previousRotationY = west_Y_Rotation;
+				cameraControlsYawObject.rotation.y = west_Y_Rotation;
+				joystick.previousRotationY = west_Y_Rotation;
 				
 			}
 			
@@ -441,8 +462,8 @@
 				spawnTrail();
 				
 				// snap camera to cycle's new heading
-				//cameraControlsYawObject.rotation.y = north_Y_Rotation;
-				//joystick.previousRotationY = north_Y_Rotation;
+				cameraControlsYawObject.rotation.y = north_Y_Rotation;
+				joystick.previousRotationY = north_Y_Rotation;
 				
 			}
 			
@@ -796,9 +817,11 @@
 						if ( cyclePositionZ < test_EW_trailZ[i] && test_NS_currentTrailStartZ > test_EW_trailZ[i] ) {
 
 							if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
+								cycle.position.z = test_EW_trailZ[i] + 1;
 								cycleCrash();
 							}
 							if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
+								cycle.position.z = test_EW_trailZ[i] + 1;
 								cycleCrash();
 							}
 						}
@@ -813,9 +836,11 @@
 						if ( cyclePositionZ > test_EW_trailZ[i] && test_NS_currentTrailStartZ < test_EW_trailZ[i] ) {
 
 							if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
+								cycle.position.z = test_EW_trailZ[i] - 1;
 								cycleCrash();
 							}
 							if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
+								cycle.position.z = test_EW_trailZ[i] - 1;
 								cycleCrash();
 							}
 						}
@@ -830,9 +855,11 @@
 						if ( cyclePositionX > test_NS_trailX[i] && test_EW_currentTrailStartX < test_NS_trailX[i] ) {
 
 							if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
+								cycle.position.x = test_NS_trailX[i] - 1;
 								cycleCrash();
 							}
 							if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
+								cycle.position.x = test_NS_trailX[i] - 1;
 								cycleCrash();
 							}
 						}
@@ -847,9 +874,11 @@
 						if ( cyclePositionX < test_NS_trailX[i] && test_EW_currentTrailStartX > test_NS_trailX[i] ) {
 
 							if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
+								cycle.position.x = test_NS_trailX[i] + 1;
 								cycleCrash();
 							}
 							if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
+								cycle.position.x = test_NS_trailX[i] + 1;
 								cycleCrash();
 							}
 						}
@@ -858,12 +887,22 @@
 
 				}
 				
-				if ( cyclePositionX > arenaRadius || cyclePositionX < -arenaRadius )
+				if (cyclePositionX > arenaRadius) {
+					cycle.position.x = arenaRadius - 1;
 					cycleCrash();
-				
-				if ( cyclePositionZ > arenaRadius || cyclePositionZ < -arenaRadius )
+				}
+				else if (cyclePositionX < -arenaRadius) {
+					cycle.position.x = -arenaRadius + 1;
 					cycleCrash();
-
+				}
+				else if (cyclePositionZ > arenaRadius) {
+					cycle.position.z = arenaRadius - 1;
+					cycleCrash();
+				}
+				else if (cyclePositionZ < -arenaRadius) {
+					cycle.position.z = -arenaRadius + 1;
+					cycleCrash();
+				}
 				// update cycles components
 				// spin wheels
 				verticalAngle += cycleSpeed * 12 * frameTime;
@@ -888,15 +927,15 @@
 			     cameraControlsPitchObject.rotation.x > 0.0 ) {
 				//cameraControlsPitchObject.rotation.x = -0.1;
 			}
-					
+			
+			
 			// NOTE: camera.translateZ(cameraDistance) must be called when switching cameras
 			
 			// follow the player's cycle
-			//cameraControlsObject.position.copy(cycle.position);
-			
+			cameraControlsObject.position.copy(cycle.position);
 			// for cockpit view only
-			//cameraControlsObject.translateY(2.5);
-			//cameraControlsObject.translateZ(-1);
+			cameraControlsObject.translateY(1.2);
+			cameraControlsObject.translateZ(-0.5);
 			
 			
 		
@@ -1071,10 +1110,15 @@
 			trailBeginning.visible = false;
 			blendedBeginningTrailShadow.visible = false;
 			
+			testTransparency.visible = true;
+			
 			cycleShadow[0].visible = false;
 			cycleShadow[1].visible = false;
 			cycleShadow[2].visible = false;
 			cycleShadow[3].visible = false;
+			
+			testTransparency.position.copy(cycle.position);
+			testTransparency.rotation.copy(cycle.rotation);
 			
 			playingCrashAnimation = true;
 			
