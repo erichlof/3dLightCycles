@@ -13,14 +13,20 @@
 			overflow: hidden;
 		}
 		
+		#cameraButton {
+			position: absolute;
+			left: 1%;
+			top: 10%;
+		}
+		
 	</style>
 </head>
 
 <body>
 	
-	<div id="banner" style="position:fixed; left:0; right:0; top:20%; text-align:center; z-index: 10;
+	<div id="banner" style="position:fixed; left:0; right:0; top:20%; text-align:center; z-index: 1;
                                font-size:40px; font-family:arial; font-type:bold; color:rgb(255,255,255);">
-		<!-- Loading... -->
+		Loading...
 	</div>
 	
 	<div id="gameover" style="position:fixed; left:0; right:0; top:25%; text-align:center; z-index: 10;
@@ -28,6 +34,8 @@
 	</div>
 	
 	<div id="container"></div>
+	
+	<input id="cameraButton" type="button" value="Switch to Close 3rdPerson view" onclick="cameraButtonHandler()">
 
 	<div id="debug1" style="position:fixed; left:2%; top:2%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
 		
@@ -68,6 +76,7 @@
 		
 		function initLevel() {
 			
+			
 			playerAlive = true;
 			
 			// initial starting position
@@ -82,6 +91,19 @@
 			// spawn the cycle's first jet trail
 			spawnTrail();
 			
+			
+			// for cockpit View
+			if (cameraMode == CockpitCamera_MODE) {
+				//cameraControlsObject.position.copy(cycle.position);
+				//cameraControlsObject.position.y += 2;
+				// look straight ahead
+				cameraControlsPitchObject.rotation.x = 0.0;
+				joystick.previousRotationX = 0.0;
+			}
+			
+			// for initial 3rd person view, pull the camera back a little
+			//camera.translateZ(cameraDistance);
+			
 			/*
 			// for debug flyCam
 			cameraControlsObject.position.set(-5,15,40);
@@ -89,19 +111,18 @@
 			cameraControlsPitchObject.rotation.x = -0.4;
 			joystick.previousRotationX = -0.4;
 			*/
-			
-			// for cockpit View
-			cameraControlsObject.position.copy(cycle.position);
-			//cameraControlsObject.position.y += 2;
-			// look straight ahead
-			cameraControlsPitchObject.rotation.x = 0.0;
-			joystick.previousRotationX = 0.0;
+
 			// snap camera to cycle's new heading
 			cameraControlsYawObject.rotation.y = north_Y_Rotation;
 			joystick.previousRotationY = north_Y_Rotation;
 			
-			// for initial 3rd person view, pull the camera back a little
-			//camera.translateZ(cameraDistance);
+			
+			if(mouseControl){
+				bannerElement.innerHTML = 'Game Paused <br> Click to Play';
+			}
+			else {
+				bannerElement.innerHTML = '';
+			}
 			
 			animate();
 			
@@ -120,7 +141,7 @@
 			// check if joystick Stick is being moved
 			
 			// commented out for debug flyCam mode
-			///if (playerAlive) {
+			if (playerAlive) {
 			
 				// if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
 				if (!mouseControl) {
@@ -133,7 +154,7 @@
 				
 				}
 
-			///}
+			}
 			
 			// this gives us a vector in the direction that the camera is pointing,
 			// which will be useful for moving the camera 'forward' and shooting projectiles in that direction
@@ -183,6 +204,10 @@
 			
 			// GAME STATE UPDATE AND LOGIC /////////////////////////////////////////////////////////////////////////////////////////////
 			
+			// for the game's cutscenes, we remove the camera (child of controls), so we can animate it
+			// freely without user interaction. When the cutscene ends, we will re-attach it as a child of controls
+
+			///cameraControlsPitchObject.remove(camera);
 			if (playingCrashAnimation) {
 				
 				crashAnimationTimer.run(frameTime);
@@ -470,7 +495,7 @@
 			
 			// UPDATE CYCLE ORIENTATION AND POSITION  ////////////////////////////////////////////////////////////////////////////
 			
-			if (playerAlive) {
+			if (playerAlive && !gamePaused) {
 				
 				
 				if (cycleDirection == NORTH) cycle.position.x = trailSpawnX;
@@ -933,10 +958,14 @@
 			
 			// follow the player's cycle
 			cameraControlsObject.position.copy(cycle.position);
-			// for cockpit view only
-			cameraControlsObject.translateY(1.2);
-			cameraControlsObject.translateZ(-0.5);
 			
+			// for cockpit view only
+			if (cameraMode == CockpitCamera_MODE) {
+				//cameraControlsObject.localToWorld(cameraControlsObject.position);
+				cameraControlsObject.position.y += 1;
+				//cameraControlsObject.position.z -= 0.5;
+				//cameraControlsObject.worldToLocal(cameraControlsObject.position);
+			}
 			
 		
 			// render the scene with our camera
@@ -945,7 +974,7 @@
 			
 			
 			// real-time debug text output
-			debug1Text.innerHTML = "cyclePositionX: " + cyclePositionX.toFixed(1) + "<br>" + 
+			debug1Element.innerHTML = "cyclePositionX: " + cyclePositionX.toFixed(1) + "<br>" + 
 					       "cyclePositionZ: " + cyclePositionZ.toFixed(1);
 					       
 			
@@ -1121,6 +1150,57 @@
 			testTransparency.rotation.copy(cycle.rotation);
 			
 			playingCrashAnimation = true;
+			
+		}
+		
+		function cameraButtonHandler() {
+			
+			cameraMode += 1;
+			if (cameraMode > 3) cameraMode = 0;
+			
+			switch (cameraMode) {
+					
+				case CockpitCamera_MODE:
+					
+					cameraDistance = 0;
+					camera.position.set(0,0,0);
+					
+					document.getElementById("cameraButton").value = "Switch to Close 3rdPerson view";
+					
+					break;
+					
+				case Close_3rdPersonCamera_MODE:
+					
+					cameraDistance = 10;
+					camera.translateZ(cameraDistance);
+					
+					document.getElementById("cameraButton").value = "Switch to Far 3rdPerson view";
+					
+					break;
+					
+				case Remote_3rdPersonCamera_MODE:
+					
+					cameraDistance = 20;
+					camera.translateZ(cameraDistance);
+					
+					document.getElementById("cameraButton").value = "Switch to SkyCamera view";
+					
+					break;
+					
+				case SkyCamera_MODE:
+					
+					cameraDistance = 40;
+					camera.translateZ(cameraDistance);
+					
+					document.getElementById("cameraButton").value = "Switch to Cockpit view";
+					
+					break;
+					
+				default:
+					document.getElementById("cameraButton").value = "Switch to Close 3rdPerson view";
+					
+			}
+				
 			
 		}
 		
