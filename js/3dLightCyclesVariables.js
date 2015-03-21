@@ -10,7 +10,7 @@ var SCREEN_HEIGHT = window.innerHeight;
 var SCREEN_WIDTH_DIVISION = SCREEN_WIDTH / 4;//used for radar minicam
 var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3;//used for radar minicam
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 3000);
+var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.5, 2000);
 scene.add(camera);
 /*
 var radarScene = new THREE.Scene();
@@ -51,33 +51,80 @@ var cameraControlsObject = controls.getObject();//for positioning and moving the
 var cameraControlsYawObject = controls.getYawObject();//allows access to control camera's left/right movements through mobile input
 var cameraControlsPitchObject = controls.getPitchObject();//allows access to control camera's up/down movements through mobile input
 
-// for the game's cutscenes, we remove the camera (child of controls), so we can animate it
-// freely without user interaction. When the cutscene ends, we will re-attach it as a child of controls
-
-///cameraControlsPitchObject.remove(camera);
 
 var renderer = new THREE.WebGLRenderer();
-
 // pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
 //renderer.setPixelRatio(0.5);
+renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 document.getElementById("container").appendChild(renderer.domElement);
 window.addEventListener('resize', onWindowResize, false);
 var fontAspect = 0;
 
-document.getElementById("container").addEventListener("click", function() {
-	this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock;
-	this.requestPointerLock();
-}, false);
+var bannerElement = document.getElementById("banner");
+var scoreElement = document.getElementById("score");
+var gameOverElement = document.getElementById("gameover");
+var containerElement = document.getElementById("container");
+	
+// debug elements
+var debug1Element = document.getElementById("debug1");
 
-document.getElementById("container").addEventListener("mousedown", function(event) {
-	if (playerAlive) {
-		if(event.button === 0)
-			rotateCycleLeft = true;
-		else if(event.button === 2)
-			rotateCycleRight = true;
-	}	
-}, false);
+if (mouseControl) {
+	
+	document.getElementById("banner").addEventListener("click", function() {
+		this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock;
+		this.requestPointerLock();
+	}, false);
+
+	document.getElementById("container").addEventListener("click", function() {
+		this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock;
+		this.requestPointerLock();
+	}, false);
+
+	document.getElementById("banner").addEventListener("mousedown", function(event) {
+		if (playerAlive && !gamePaused) {
+			if(event.button === 0)
+				rotateCycleLeft = true;
+			else if(event.button === 2)
+				rotateCycleRight = true;
+		}	
+	}, false);
+
+	document.getElementById("container").addEventListener("mousedown", function(event) {
+		if (playerAlive && !gamePaused) {
+			if(event.button === 0)
+				rotateCycleLeft = true;
+			else if(event.button === 2)
+				rotateCycleRight = true;
+		}	
+	}, false);
+	
+	
+	var pointerlockChange = function ( event ) {
+		
+		
+		
+		if ( document.pointerLockElement === bannerElement || document.mozPointerLockElement === bannerElement || document.webkitPointerLockElement === bannerElement ||
+		   	document.pointerLockElement === containerElement || document.mozPointerLockElement === containerElement || document.webkitPointerLockElement === containerElement ) {
+			
+			bannerElement.style.display = 'none';
+			gamePaused = false;
+			
+		} else {
+			
+			bannerElement.style.display = '';
+			gamePaused = true;
+			
+		}
+		
+	};
+	
+	// Hook pointer lock state change events
+	document.addEventListener( 'pointerlockchange', pointerlockChange, false );
+	document.addEventListener( 'mozpointerlockchange', pointerlockChange, false );
+	document.addEventListener( 'webkitpointerlockchange', pointerlockChange, false );
+
+}
 
 
 
@@ -96,11 +143,11 @@ function onWindowResize() {
 	document.getElementById("sound").style.fontSize = (fontAspect * 1.8) + "px";
 	
 	fontAspect *= 2;
-	document.getElementById("score").style.fontSize = fontAspect + "px";
+	bannerElement.style.fontSize = fontAspect + "px";
+	scoreElement.style.fontSize = fontAspect + "px";
 	
 	fontAspect *= 3;
-	document.getElementById("banner").style.fontSize = fontAspect + "px";
-	document.getElementById("gameover").style.fontSize = fontAspect + "px";
+	gameOverElement.style.fontSize = fontAspect + "px";
 	
 	
 	
@@ -123,6 +170,13 @@ function onWindowResize() {
 // GAMEPLAY VARIABLES /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var playerAlive = false;
+var canPause = true;
+var gamePaused = true;
+var CockpitCamera_MODE = 0;
+var Close_3rdPersonCamera_MODE = 1;
+var Remote_3rdPersonCamera_MODE = 2;
+var SkyCamera_MODE = 3;
+var cameraMode = CockpitCamera_MODE;
 var frameTime = 0;
 var TWO_PI = Math.PI * 2;
 var PI_4 = Math.PI / 4;
@@ -360,6 +414,7 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 	cycleShadow[3].material.opacity = 0.8;
 	scene.add( cycleShadow[3] );
 	
+	onWindowResize();
 	initLevel();
 	
 } );
@@ -641,23 +696,15 @@ var soundLrgAsteroidExplode = new Howl({
 
 // when all sounds have loaded, the game animation loop is started
 function startGame () {
-	bannerText.innerHTML = "Get Ready...";
-	animate();
+	bannerElement.innerHTML = "Get Ready...";
+	initLevel();
 }
 
 */
 
 // HUD html text elements /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var bannerText = document.getElementById("banner");
-var scoreText = document.getElementById("score");
-var gameOverText = document.getElementById("gameover");
-// debug elements
-var debug1Text = document.getElementById("debug1");
-
-// Misc. Elements
-
-// disable clicking and selecting/highlighting text of help, score, level, and gameOver banner texts
+// disable clicking and selecting/highlighting text of help, score, level, and gameOver banner elements
 document.getElementById("help").style.cursor = "default";
 document.getElementById("help").style.webkitUserSelect = "none";
 document.getElementById("help").style.MozUserSelect = "none";
@@ -678,13 +725,11 @@ document.getElementById("score").style.webkitUserSelect = "none";
 document.getElementById("score").style.MozUserSelect = "none";
 document.getElementById("score").style.msUserSelect = "none";
 document.getElementById("score").style.userSelect = "none";
-document.getElementById("banner").style.cursor = "default";
-document.getElementById("banner").style.webkitUserSelect = "none";
-document.getElementById("banner").style.MozUserSelect = "none";
-document.getElementById("banner").style.msUserSelect = "none";
-document.getElementById("banner").style.userSelect = "none";
 document.getElementById("gameover").style.cursor = "default";
 document.getElementById("gameover").style.webkitUserSelect = "none";
 document.getElementById("gameover").style.MozUserSelect = "none";
 document.getElementById("gameover").style.msUserSelect = "none";
 document.getElementById("gameover").style.userSelect = "none";
+document.getElementById("banner").style.cursor = "pointer";
+document.getElementById("sound").style.cursor = "pointer";
+document.getElementById("cameraButton").style.cursor = "pointer";
