@@ -10,7 +10,7 @@ var SCREEN_HEIGHT = window.innerHeight;
 var SCREEN_WIDTH_DIVISION = SCREEN_WIDTH / 4;//used for radar minicam
 var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3;//used for radar minicam
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.5, 2000);
+var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 2000);
 scene.add(camera);
 /*
 var radarScene = new THREE.Scene();
@@ -55,7 +55,7 @@ var cameraControlsPitchObject = controls.getPitchObject();//allows access to con
 var renderer = new THREE.WebGLRenderer();
 // pixelRatio of 1 is default. Numbers less than 1 result in less pixels and larger pixels. Must be > 0.0
 //renderer.setPixelRatio(0.5);
-renderer.setPixelRatio( window.devicePixelRatio );
+//renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 document.getElementById("container").appendChild(renderer.domElement);
 window.addEventListener('resize', onWindowResize, false);
@@ -385,7 +385,6 @@ loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 	
 	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
 	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
-	//cycle.add(trailBeginning);
 	
 	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
 	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
