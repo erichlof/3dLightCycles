@@ -79,6 +79,10 @@
 			
 			playerAlive = true;
 			
+			// if on mobile device, unpause the game because there is no ESC key and no mouse capture to do
+			if ( !mouseControl )
+				gamePaused = false;
+			
 			// initial starting position
 			cycle.position.set(0, 0, 30);
 			
@@ -94,8 +98,14 @@
 			
 			// for cockpit View
 			if (cameraMode == CockpitCamera_MODE) {
-				//cameraControlsObject.position.copy(cycle.position);
-				//cameraControlsObject.position.y += 2;
+				
+				cycle.children[0].visible = false;
+				//cycle.children[1].visible = false;
+				//cycle.children[2].visible = false;
+				cycle.children[3].visible = false;
+				
+				cameraControlsObject.position.copy(cycle.position);
+				cameraControlsObject.position.y += 2;
 				// look straight ahead
 				cameraControlsPitchObject.rotation.x = 0.0;
 				joystick.previousRotationX = 0.0;
@@ -164,7 +174,7 @@
 			// the following gives us a rotation quaternion (4D vector), which will be useful for 
 			// rotating scene objects to match the camera's rotation
 			camera.getWorldQuaternion(cameraWorldQuaternion);
-			
+			/*
 			// allow flying camera forward
 			if ( keyboard.pressed('space') ) {
 				
@@ -173,6 +183,7 @@
 				cameraControlsObject.worldToLocal(cameraControlsObject.position);
 				
 			}
+			*/
 			
 			//if button1 is NOT pressed, reset it so we can turn again
 			if (!joystick.button1Pressed) {
@@ -944,39 +955,31 @@
 			
 			
 			
-			
-			
 			// update Camera Object
-			// clamp vertical camera rotation so the camera doesn't go through the floor
-			if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.1 || 
-			     cameraControlsPitchObject.rotation.x > 0.0 ) {
-				//cameraControlsPitchObject.rotation.x = -0.1;
-			}
 			
 			
 			// NOTE: camera.translateZ(cameraDistance) must be called when switching cameras
 			
 			// follow the player's cycle
 			cameraControlsObject.position.copy(cycle.position);
-			
-			// for cockpit view only
 			if (cameraMode == CockpitCamera_MODE) {
-				//cameraControlsObject.localToWorld(cameraControlsObject.position);
 				cameraControlsObject.position.y += 1;
-				//cameraControlsObject.position.z -= 0.5;
-				//cameraControlsObject.worldToLocal(cameraControlsObject.position);
+			} // clamp vertical camera rotation so the camera doesn't go through the floor
+			else if ( Math.abs(cameraControlsPitchObject.rotation.x) < 0.01 || 
+			     cameraControlsPitchObject.rotation.x > 0.0 ) {
+				
+				cameraControlsPitchObject.rotation.x = -0.01;
 			}
-			
 		
 			// render the scene with our camera
 			renderer.render(scene, camera);
 			
 			
-			
+			/*
 			// real-time debug text output
 			debug1Element.innerHTML = "cyclePositionX: " + cyclePositionX.toFixed(1) + "<br>" + 
-					       "cyclePositionZ: " + cyclePositionZ.toFixed(1);
-					       
+					             "cyclePositionZ: " + cyclePositionZ.toFixed(1);
+			*/		       
 			
 
 		} // end function animate()
@@ -1165,6 +1168,11 @@
 					cameraDistance = 0;
 					camera.position.set(0,0,0);
 					
+					cycle.children[0].visible = false;
+					//cycle.children[1].visible = false;
+					//cycle.children[2].visible = false;
+					cycle.children[3].visible = false;
+					
 					document.getElementById("cameraButton").value = "Switch to Close 3rdPerson view";
 					
 					break;
@@ -1173,6 +1181,11 @@
 					
 					cameraDistance = 10;
 					camera.translateZ(cameraDistance);
+					
+					cycle.children[0].visible = true;
+					cycle.children[1].visible = true;
+					cycle.children[2].visible = true;
+					cycle.children[3].visible = true;
 					
 					document.getElementById("cameraButton").value = "Switch to Far 3rdPerson view";
 					
@@ -1183,6 +1196,11 @@
 					cameraDistance = 20;
 					camera.translateZ(cameraDistance);
 					
+					cycle.children[0].visible = true;
+					cycle.children[1].visible = true;
+					cycle.children[2].visible = true;
+					cycle.children[3].visible = true;
+					
 					document.getElementById("cameraButton").value = "Switch to SkyCamera view";
 					
 					break;
@@ -1191,6 +1209,11 @@
 					
 					cameraDistance = 40;
 					camera.translateZ(cameraDistance);
+					
+					cycle.children[0].visible = true;
+					cycle.children[1].visible = true;
+					cycle.children[2].visible = true;
+					cycle.children[3].visible = true;
 					
 					document.getElementById("cameraButton").value = "Switch to Cockpit view";
 					
