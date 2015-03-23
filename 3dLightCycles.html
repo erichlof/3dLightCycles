@@ -76,7 +76,6 @@
 		
 		function initLevel() {
 			
-			
 			playerAlive = true;
 			
 			// if on mobile device, unpause the game because there is no ESC key and no mouse capture to do
@@ -322,8 +321,6 @@
 			}
 			
 			
-			
-			
 			// CHECK FOR AND HANDLE CYCLE TURNING //////////////////////////////////////////////////////////////////////////////////////
 			
 			if (rotateCycleLeft) {
@@ -530,8 +527,7 @@
 					cycle.rotateOnAxis(upVector, PI_2);
 					rotateCycleLeft = false;
 				}
-
-
+				
 				// update the cycle's matrix now before shadows areare set (instead of at render time), 
 				// so that the shadows line up exactly with the cycle
 				cycle.updateMatrixWorld(true);
@@ -541,9 +537,8 @@
 				cycleShadow[1].update( groundPlane, lightPosition4D );
 				cycleShadow[2].update( groundPlane, lightPosition4D );
 				cycleShadow[3].update( groundPlane, lightPosition4D );
-			
-			
-
+				
+				
 
 				// UPDATE TRAILS //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -579,16 +574,9 @@
 					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
 
 					// update main trail wall
-
-					// if the cycle is far enough away from the active trail spawn point, 
-					// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
-					if (cycleTrailSpawnDistance > 3)
-						trailLength = cycleTrailSpawnDistance - 3;
-					else 
-						trailLength = 0.001; // else, the trail doesn't have any noticable length yet
-
-
-
+					
+					trailLength = cycleTrailSpawnDistance - 3;
+					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
 					if (trailLength > 10) {
@@ -651,17 +639,9 @@
 					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
 
 					// update main trail wall
-
-					// if the cycle is far enough away from the active trail spawn point, 
-					// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
-					if (cycleTrailSpawnDistance > 3)
-						trailLength = cycleTrailSpawnDistance - 3;
-					else 
-						trailLength = 0.001; // else, the trail doesn't have any noticable length yet
-
-
-
-
+					
+					trailLength = cycleTrailSpawnDistance - 3;
+					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
 					if (trailLength > 10) {
@@ -724,15 +704,8 @@
 
 					// update main trail wall
 
-					// if the cycle is far enough away from the active trail spawn point, 
-					// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
-					if (cycleTrailSpawnDistance > 3)
-						trailLength = cycleTrailSpawnDistance - 3;
-					else 
-						trailLength = 0.001; // else, the trail doesn't have any noticable length yet
-
-
-
+					trailLength = cycleTrailSpawnDistance - 3;
+					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
 					if (trailLength > 10) {
@@ -795,15 +768,7 @@
 
 					// update main trail wall
 
-					// if the cycle is far enough away from the active trail spawn point, 
-					// make the trail wall start following the back wheel of the cycle and the white->cycleColor blended beginning trail
-					if (cycleTrailSpawnDistance > 3)
-						trailLength = cycleTrailSpawnDistance - 3;
-					else 
-						trailLength = 0.001; // else, the trail doesn't have any noticable length yet
-
-
-
+					trailLength = cycleTrailSpawnDistance - 3;	
 
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
@@ -835,8 +800,6 @@
 					test_EW_trailEndX[testEWTrailCount] = cycle.position.x;
 
 				} // end else if (cycleDirection == WEST)
-
-
 				
 				
 				// CHECK FOR COLLISIONS WITH TRAILS AND ARENA WALLS //////////////////////////////////////////////////////////////////
@@ -939,6 +902,8 @@
 					cycle.position.z = -arenaRadius + 1;
 					cycleCrash();
 				}
+				
+				
 				// update cycles components
 				// spin wheels
 				verticalAngle += cycleSpeed * 12 * frameTime;
@@ -954,10 +919,9 @@
 			} // end if (playerAlive)
 			
 			
+				
 			
 			// update Camera Object
-			
-			
 			// NOTE: camera.translateZ(cameraDistance) must be called when switching cameras
 			
 			// follow the player's cycle
@@ -1013,6 +977,8 @@
 				else { // spawn another trail wall segment in the same direction
 					trailSpawnX = cycle.position.x;
 					trailSpawnZ -= 10;
+					// record the distance between the cycle and the new trail spawn point 
+					trailLength = Math.abs( trailSpawnZ - (cycle.position.z + 3) ) + 0.001;
 				}
 				
 				// disable matrix updating for the previous trail segment / shadow, in order to 
@@ -1028,6 +994,7 @@
 				northSouthTrailShadow[northSouthTrailCount].visible = true;
 					
 			}
+			
 			if (cycleDirection == SOUTH) {
 				
 				if (cycleJustTurned) {
@@ -1051,6 +1018,8 @@
 				else {
 					trailSpawnX = cycle.position.x;
 					trailSpawnZ += 10;
+					
+					trailLength = Math.abs( (cycle.position.z - 3) - trailSpawnZ ) + 0.001;
 				}
 				
 				if (northSouthTrailCount > -1) {
@@ -1063,6 +1032,7 @@
 				northSouthTrailShadow[northSouthTrailCount].visible = true;
 					
 			}
+			
 			if (cycleDirection == EAST) {
 				
 				if (cycleJustTurned) {
@@ -1083,6 +1053,8 @@
 				else {
 					trailSpawnX += 10;
 					trailSpawnZ = cycle.position.z;
+					
+					trailLength = Math.abs( (cycle.position.x - 3) - trailSpawnX ) + 0.001;
 				}
 				
 				if (eastWestTrailCount > -1) {
@@ -1095,6 +1067,7 @@
 				eastWestTrailShadow[eastWestTrailCount].visible = true;
 					
 			}
+			
 			if (cycleDirection == WEST) {
 				
 				if (cycleJustTurned) {
@@ -1115,6 +1088,8 @@
 				else {
 					trailSpawnX -= 10;
 					trailSpawnZ = cycle.position.z;
+					
+					trailLength = Math.abs( trailSpawnX - (cycle.position.x + 3) ) + 0.001;
 				}
 				
 				if (eastWestTrailCount > -1) {
@@ -1134,6 +1109,7 @@
 			}
 			
 		} // end function spawnTrail()
+		
 		
 		function cycleCrash () {
 			
@@ -1155,6 +1131,7 @@
 			playingCrashAnimation = true;
 			
 		}
+		
 		
 		function cameraButtonHandler() {
 			
