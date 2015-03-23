@@ -169,6 +169,7 @@ function onWindowResize() {
 
 // GAMEPLAY VARIABLES /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//var variablesReady = 0;
 var playerAlive = false;
 var canPause = true;
 var gamePaused = true;
@@ -373,51 +374,6 @@ var arenaWestWall = new THREE.Mesh(arenaWestWallGeometry, arenaWestWallMaterial)
 arenaWestWall.position.set(-arenaRadius, arenaRadius * 0.07, 0);
 arenaWestWall.rotation.y = Math.PI * 0.5;
 scene.add(arenaWestWall);
-
-// MODELS
-var cycle;
-var loader = new THREE.ObjectLoader();
-
-// the following load function gives us a mesh object which is in this function's local scope.  
-// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
-// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
-loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
-	
-	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
-	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
-	
-	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
-	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
-	
-	// shadow for black windows
-	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
-	cycleShadow[0].material.side = THREE.DoubleSide;
-	cycleShadow[0].material.opacity = 0.8;
-	scene.add( cycleShadow[0] );
-	
-	// shadow for main colored hull
-	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
-	cycleShadow[1].material.side = THREE.DoubleSide;
-	cycleShadow[1].material.opacity = 0.8;
-	scene.add( cycleShadow[1] );
-	
-	// shadow for wheel rims/hubcaps
-	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
-	cycleShadow[2].material.side = THREE.DoubleSide;
-	cycleShadow[2].material.opacity = 0.8;
-	scene.add( cycleShadow[2] );
-	
-	// shadow for grey underbody chassis
-	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
-	cycleShadow[3].material.side = THREE.DoubleSide;
-	cycleShadow[3].material.opacity = 0.8;
-	scene.add( cycleShadow[3] );
-	
-	onWindowResize();
-	initLevel();
-	
-} );
-
 
 
 // JET TRAILS
@@ -696,6 +652,8 @@ var soundLrgAsteroidExplode = new Howl({
 // when all sounds have loaded, the game animation loop is started
 function startGame () {
 	bannerElement.innerHTML = "Get Ready...";
+
+	onWindowResize();
 	initLevel();
 }
 
@@ -707,28 +665,76 @@ function startGame () {
 document.getElementById("help").style.cursor = "default";
 document.getElementById("help").style.webkitUserSelect = "none";
 document.getElementById("help").style.MozUserSelect = "none";
-document.getElementById("help").style.msUserSelect = "none";
+//document.getElementById("help").style.msUserSelect = "none";
 document.getElementById("help").style.userSelect = "none";
 document.getElementById("help1").style.cursor = "default";
 document.getElementById("help1").style.webkitUserSelect = "none";
 document.getElementById("help1").style.MozUserSelect = "none";
-document.getElementById("help1").style.msUserSelect = "none";
+//document.getElementById("help1").style.msUserSelect = "none";
 document.getElementById("help1").style.userSelect = "none";
 document.getElementById("help2").style.cursor = "default";
 document.getElementById("help2").style.webkitUserSelect = "none";
 document.getElementById("help2").style.MozUserSelect = "none";
-document.getElementById("help2").style.msUserSelect = "none";
+//document.getElementById("help2").style.msUserSelect = "none";
 document.getElementById("help2").style.userSelect = "none";
 document.getElementById("score").style.cursor = "default";
 document.getElementById("score").style.webkitUserSelect = "none";
 document.getElementById("score").style.MozUserSelect = "none";
-document.getElementById("score").style.msUserSelect = "none";
+//document.getElementById("score").style.msUserSelect = "none";
 document.getElementById("score").style.userSelect = "none";
 document.getElementById("gameover").style.cursor = "default";
 document.getElementById("gameover").style.webkitUserSelect = "none";
 document.getElementById("gameover").style.MozUserSelect = "none";
-document.getElementById("gameover").style.msUserSelect = "none";
+//document.getElementById("gameover").style.msUserSelect = "none";
 document.getElementById("gameover").style.userSelect = "none";
 document.getElementById("banner").style.cursor = "pointer";
 document.getElementById("sound").style.cursor = "pointer";
 document.getElementById("cameraButton").style.cursor = "pointer";
+
+//variablesReady += 1;
+
+// MODELS
+var cycle;
+var loader = new THREE.ObjectLoader();
+
+// the following load function gives us a mesh object which is in this function's local scope.  
+// We call the mesh's clone function to copy it (and its properties) and place the end result in 'cycle', 
+// which is a THREE.Mesh declared (above) globally, giving us access to change its position/rotation/etc..
+loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
+	
+	cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
+	scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
+	
+	cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
+	cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
+	
+	// shadow for black windows
+	cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
+	cycleShadow[0].material.side = THREE.DoubleSide;
+	cycleShadow[0].material.opacity = 0.8;
+	scene.add( cycleShadow[0] );
+	
+	// shadow for main colored hull
+	cycleShadow[1] = new THREE.ShadowMesh( cycle.children[1] );
+	cycleShadow[1].material.side = THREE.DoubleSide;
+	cycleShadow[1].material.opacity = 0.8;
+	scene.add( cycleShadow[1] );
+	
+	// shadow for wheel rims/hubcaps
+	cycleShadow[2] = new THREE.ShadowMesh( cycle.children[2] );
+	cycleShadow[2].material.side = THREE.DoubleSide;
+	cycleShadow[2].material.opacity = 0.8;
+	scene.add( cycleShadow[2] );
+	
+	// shadow for grey underbody chassis
+	cycleShadow[3] = new THREE.ShadowMesh( cycle.children[3] );
+	cycleShadow[3].material.side = THREE.DoubleSide;
+	cycleShadow[3].material.opacity = 0.8;
+	scene.add( cycleShadow[3] );
+	
+	onWindowResize();
+	initLevel();
+	
+} );
+
+
