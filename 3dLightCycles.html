@@ -3,7 +3,10 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta charset="utf-8">
+	
 	<title>3dLightCycles</title>
+	
 	<style>
 
 		body {
@@ -20,8 +23,10 @@
 		}
 		
 	</style>
+	
 </head>
 
+	
 <body>
 	
 	<div id="banner" style="position:fixed; left:0; right:0; top:20%; text-align:center; z-index: 1;
@@ -61,7 +66,7 @@
 		Sound: Off
 	</div>	
 
-	<script src="js/three.min.js"></script> 
+	 <script src="js/three.min.js"></script> 
 	<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script> -->
 	<script src="js/ShadowMesh.js"></script>
 	<script src="js/threex.keyboardstate.js"></script>
@@ -72,8 +77,7 @@
 	<script src="js/3dLightCyclesVariables.js"></script>
 	
 	<script>
-		
-		
+			
 		function initLevel() {
 			
 			playerAlive = true;
@@ -94,6 +98,14 @@
 			// spawn the cycle's first jet trail
 			spawnTrail();
 			
+			if (mouseControl) {
+				
+				northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
+				northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+				trailBeginning.scale.set(0.001, 0.001, 0.001);
+				trailBeginning.position.copy(cycle.position);
+			}
 			
 			// for cockpit View
 			if (cameraMode == CockpitCamera_MODE) {
@@ -132,6 +144,7 @@
 			else {
 				bannerElement.innerHTML = '';
 			}
+
 			
 			animate();
 			
@@ -139,6 +152,7 @@
 		
 
 		function animate() {
+			
 			
 			// keep looping through animate()
 			requestAnimationFrame(animate);
@@ -267,7 +281,8 @@
 					playerAlive = true;
 					cycle.visible = true;
 					trailBeginning.visible = true;
-					blendedBeginningTrailShadow.visible = true;
+					if (cameraMode != CockpitCamera_MODE)
+						blendedBeginningTrailShadow.visible = true;
 					
 					cycleShadow[0].visible = true;
 					cycleShadow[1].visible = true;
@@ -528,19 +543,14 @@
 					rotateCycleLeft = false;
 				}
 				
+				
 				// update the cycle's matrix now before shadows areare set (instead of at render time), 
 				// so that the shadows line up exactly with the cycle
 				cycle.updateMatrixWorld(true);
-
-				// update the ShadowMeshes to follow their shadow-casting objects
-				cycleShadow[0].update( groundPlane, lightPosition4D );
-				cycleShadow[1].update( groundPlane, lightPosition4D );
-				cycleShadow[2].update( groundPlane, lightPosition4D );
-				cycleShadow[3].update( groundPlane, lightPosition4D );
 				
 				
 
-				// UPDATE TRAILS //////////////////////////////////////////////////////////////////////////////////////////////////////
+			// UPDATE TRAILS //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 				// based on cycleDirection, update the current trail
 
@@ -561,6 +571,7 @@
 						if (trailBeginningLength > 2.1) {
 							trailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
 							animatingBlendedTrail = false;
+							//blendedBeginningTrailShadow.visible = true;
 						}
 
 						trailBeginningVerticalScale = (trailBeginningLength < 1.0) ? trailBeginningLength : 1;
@@ -569,13 +580,11 @@
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                         
 					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
-					// get the correct current matrix so shadows match exactly
-					trailBeginning.updateMatrixWorld(true);
-					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
 
 					// update main trail wall
-					
-					trailLength = cycleTrailSpawnDistance - 3;
+					if (cycleTrailSpawnDistance > 3)
+						trailLength = cycleTrailSpawnDistance - 3;
+					else trailLength = 0.001;
 					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
@@ -634,13 +643,11 @@
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                            
 					trailBeginning.position.set( cycle.position.x - ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
-					// get the correct current matrix so shadows match exactly
-					trailBeginning.updateMatrixWorld(true);
-					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
-
-					// update main trail wall
 					
-					trailLength = cycleTrailSpawnDistance - 3;
+					// update main trail wall
+					if (cycleTrailSpawnDistance > 3)
+						trailLength = cycleTrailSpawnDistance - 3;
+					else trailLength = 0.001;
 					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
@@ -698,13 +705,11 @@
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                         
 					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z - 1 - (trailBeginningLength / 2) );
-					// get the correct current matrix so shadows match exactly
-					trailBeginning.updateMatrixWorld(true);
-					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
 
 					// update main trail wall
-
-					trailLength = cycleTrailSpawnDistance - 3;
+					if (cycleTrailSpawnDistance > 3)
+						trailLength = cycleTrailSpawnDistance - 3;
+					else trailLength = 0.001;
 					
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
@@ -762,13 +767,11 @@
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                            
 					trailBeginning.position.set( cycle.position.x + ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
-					// get the correct current matrix so shadows match exactly
-					trailBeginning.updateMatrixWorld(true);
-					blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
 
 					// update main trail wall
-
-					trailLength = cycleTrailSpawnDistance - 3;	
+					if (cycleTrailSpawnDistance > 3)
+						trailLength = cycleTrailSpawnDistance - 3;
+					else trailLength = 0.001;	
 
 					// when trail wall segment reaches maximum 10 unit length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
@@ -934,17 +937,29 @@
 				
 				cameraControlsPitchObject.rotation.x = -0.01;
 			}
+			
+			// UPDATE SHADOWS
+			// get the correct current matrix so shadows match exactly
+			trailBeginning.updateMatrixWorld(true);
+			blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+			
+			northSouthTrailShadow[0].update( groundPlane, lightPosition4D );
+				
+			cycleShadow[0].update( groundPlane, lightPosition4D );
+			cycleShadow[1].update( groundPlane, lightPosition4D );
+			cycleShadow[2].update( groundPlane, lightPosition4D );
+			cycleShadow[3].update( groundPlane, lightPosition4D );
 		
+			
 			// render the scene with our camera
 			renderer.render(scene, camera);
 			
-			
 			/*
 			// real-time debug text output
-			debug1Element.innerHTML = "cyclePositionX: " + cyclePositionX.toFixed(1) + "<br>" + 
-					             "cyclePositionZ: " + cyclePositionZ.toFixed(1);
-			*/		       
-			
+			debug1Element.innerHTML = trailBeginning.geometry.faces[0].vertexColors[0].r + "<br>" + 
+					          trailBeginning.geometry.faces[0].vertexColors[0].g + "<br>" + 
+						  trailBeginning.geometry.faces[0].vertexColors[0].b + "<br>" ;		       
+			*/
 
 		} // end function animate()
 		
@@ -1150,6 +1165,8 @@
 					//cycle.children[2].visible = false;
 					cycle.children[3].visible = false;
 					
+					blendedBeginningTrailShadow.visible = false;
+					
 					document.getElementById("cameraButton").value = "Switch to Close 3rdPerson view";
 					
 					break;
@@ -1163,6 +1180,8 @@
 					cycle.children[1].visible = true;
 					cycle.children[2].visible = true;
 					cycle.children[3].visible = true;
+					
+					blendedBeginningTrailShadow.visible = true;
 					
 					document.getElementById("cameraButton").value = "Switch to Far 3rdPerson view";
 					
@@ -1178,6 +1197,8 @@
 					cycle.children[2].visible = true;
 					cycle.children[3].visible = true;
 					
+					blendedBeginningTrailShadow.visible = true;
+					
 					document.getElementById("cameraButton").value = "Switch to SkyCamera view";
 					
 					break;
@@ -1191,6 +1212,8 @@
 					cycle.children[1].visible = true;
 					cycle.children[2].visible = true;
 					cycle.children[3].visible = true;
+					
+					blendedBeginningTrailShadow.visible = true;
 					
 					document.getElementById("cameraButton").value = "Switch to Cockpit view";
 					
