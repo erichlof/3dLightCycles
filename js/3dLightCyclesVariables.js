@@ -174,9 +174,9 @@ var gamePaused = true;
 //var gameBeginningFlag = true;
 var CockpitCamera_MODE = 0;
 var Close_3rdPersonCamera_MODE = 1;
-var Remote_3rdPersonCamera_MODE = 2;
+var Far_3rdPersonCamera_MODE = 2;
 var SkyCamera_MODE = 3;
-var cameraMode = CockpitCamera_MODE;
+var cameraMode = Close_3rdPersonCamera_MODE;
 var frameTime = 0;
 var TWO_PI = Math.PI * 2;
 var PI_4 = Math.PI / 4;
@@ -197,7 +197,7 @@ var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
-var cycleSpeed = 25;
+var cycleSpeed = 20;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var crashAnimationTimer = new THREEx.GameTimer(2);
@@ -218,7 +218,7 @@ var turningWestFromSouth = false;
 var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
-var cameraDistance = 8;
+var cameraDistance = 0;
 
 var northSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0th element
 var eastWestTrailCount = -1;
@@ -538,7 +538,7 @@ scene.add(trailBeginning);
 
 blendedBeginningTrailShadow = new THREE.ShadowMesh(trailBeginning);
 blendedBeginningTrailShadow.material.opacity = 0.9;
-blendedBeginningTrailShadow.visible = false;
+//blendedBeginningTrailShadow.visible = false;
 scene.add(blendedBeginningTrailShadow);
 
 
