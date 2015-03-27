@@ -7,16 +7,18 @@
 
 var SCREEN_WIDTH = window.innerWidth;
 var SCREEN_HEIGHT = window.innerHeight;
-var SCREEN_WIDTH_DIVISION = SCREEN_WIDTH / 4;//used for radar minicam
-var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3;//used for radar minicam
+var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3.5; // used for enemy's camera
+var SCREEN_HEIGHT_DIVISION_X_2_4 = SCREEN_HEIGHT_DIVISION * 2.4; // a little less than 2.5, so there is a dividing black bar between camera views
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 2000);
+var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_2_4, 0.1, 2000);
 scene.add(camera);
 /*
 var radarScene = new THREE.Scene();
-var camera2 = new THREE.PerspectiveCamera(70, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 2000);
+var camera2 = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION, 0.1, 2000);
 radarScene.add(camera2);
 */
+var enemyCamera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION, 0.1, 2000);
+scene.add(enemyCamera);
 
 var clock = new THREE.Clock();
 var keyboard = new THREEx.KeyboardState();
@@ -35,8 +37,11 @@ var joystick = new VirtualJoystick({
 });
 
 var PI_2 = Math.PI / 2;//used by controls below
-var controls = new THREEx.FirstPersonControls(camera);
+var controls = new THREEx.FirstPersonControls(camera, true);
 scene.add( controls.getObject() );
+var enemyControls = new THREEx.FirstPersonControls(enemyCamera, false);
+scene.add( enemyControls.getObject() );
+
 var mouseControl = false;
 // if not on a mobile device, enable mouse control 
 if ( !('createTouch' in document) ) {
@@ -50,6 +55,12 @@ var cameraWorldQuaternion = new THREE.Quaternion();//for rotating scene objects 
 var cameraControlsObject = controls.getObject();//for positioning and moving the camera itself
 var cameraControlsYawObject = controls.getYawObject();//allows access to control camera's left/right movements through mobile input
 var cameraControlsPitchObject = controls.getPitchObject();//allows access to control camera's up/down movements through mobile input
+
+var enemyCameraRotationVector = new THREE.Vector3();
+var enemyCameraWorldQuaternion = new THREE.Quaternion();
+var enemyCameraControlsObject = enemyControls.getObject();
+var enemyCameraControlsYawObject = enemyControls.getYawObject();
+var enemyCameraControlsPitchObject = enemyControls.getPitchObject();
 
 
 var renderer = new THREE.WebGLRenderer();
@@ -131,6 +142,9 @@ function onWindowResize() {
 	SCREEN_WIDTH = window.innerWidth;
 	SCREEN_HEIGHT = window.innerHeight;
 	
+	SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3.5;
+	SCREEN_HEIGHT_DIVISION_X_2_4 = SCREEN_HEIGHT_DIVISION * 2.4;
+	
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	
 	fontAspect = (SCREEN_WIDTH / 175) * (SCREEN_HEIGHT / 200);
@@ -149,12 +163,12 @@ function onWindowResize() {
 	
 	
 	
-	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_2_4;
 	camera.updateProjectionMatrix();
-	/*
-	camera2.aspect = SCREEN_WIDTH_DIVISION / SCREEN_HEIGHT_DIVISION;
-	camera2.updateProjectionMatrix();
-	*/
+	
+	enemyCamera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION;
+	enemyCamera.updateProjectionMatrix();
+	
 
 	// check if mobile device is in portrait or landscape mode and position buttons accordingly
 	b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
@@ -178,6 +192,7 @@ var Close_3rdPersonCamera_MODE = 1;
 var Far_3rdPersonCamera_MODE = 2;
 var SkyCamera_MODE = 3;
 var cameraMode = Close_3rdPersonCamera_MODE;
+var enemyCameraMode = Close_3rdPersonCamera_MODE;
 var frameTime = 0;
 var TWO_PI = Math.PI * 2;
 var PI_4 = Math.PI / 4;
@@ -200,8 +215,8 @@ var cycleHeadingVector = new THREE.Vector3();
 var enemyCycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
-var cycleSpeed = 5;//20
-var enemyCycleSpeed = 5;
+var cycleSpeed = 20;
+var enemyCycleSpeed = 20;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var crashAnimationTimer = new THREEx.GameTimer(2);
@@ -235,6 +250,7 @@ var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
 var forwardVector = new THREE.Vector3(0, 0, -1);
 var cameraDistance = 0;
+var enemyCameraDistance = 0;
 
 var northSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0th element
 var eastWestTrailCount = -1;
