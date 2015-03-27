@@ -17,9 +17,9 @@
 		}
 		
 		#cameraButton {
-			position: absolute;
+			position: fixed;
 			left: 1%;
-			top: 10%;
+			top: 2%;
 		}
 		
 	</style>
@@ -40,7 +40,7 @@
 	
 	<div id="container"></div>
 	
-	<input id="cameraButton" type="button" value="Click for Far-3rdPerson view" onclick="cameraButtonHandler()">
+	<input id="cameraButton" type="button" value="to Far-3rdPerson view" onclick="cameraButtonHandler()">
 
 	<div id="debug1" style="position:fixed; left:2%; top:2%; font-family:arial; font-type:bold; color:rgb(255,255,255);">
 		
@@ -107,7 +107,7 @@
 			cycleJustTurned = true;
 			// spawn the cycle's first jet trail
 			spawnTrail();
-			// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+			// trigger a 'dummy' enemyCycleJustTurned event to start new blended trail formation
 			enemyCycleJustTurned = true;
 			// spawn the cycle's first jet trail
 			///enemySpawnTrail();
@@ -132,13 +132,21 @@
 			// for initial 3rd person view, pull the camera back a little
 			cameraDistance = 7;
 			camera.translateZ(cameraDistance);
+			// for initial 3rd person view, pull enemy's camera back a little
+			enemyCameraDistance = 7;
+			enemyCamera.translateZ(enemyCameraDistance);
 			
-			// look slightly downward
+			// tilt player's camera slightly downward
 			cameraControlsPitchObject.rotation.x = -0.4;
 			joystick.previousRotationX = -0.4;
 			// look in the cycle's initial direction: north
 			cameraControlsYawObject.rotation.y = north_Y_Rotation;
 			joystick.previousRotationY = north_Y_Rotation;
+			
+			// tilt enemy's camera slightly downward
+			enemyCameraControlsPitchObject.rotation.x = -0.4;
+			// look in the enemyCycle's initial direction: south
+			enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
 			
 			
 			if(mouseControl){
@@ -579,12 +587,11 @@
 				
 				
 				spawnTrail();
-				
-				
-				// snap camera to cycle's new heading
-				cameraControlsYawObject.rotation.y = east_Y_Rotation;
-				joystick.previousRotationY = east_Y_Rotation;
 				*/
+				
+				// snap enemy's camera to enemyCycle's new heading
+				enemyCameraControlsYawObject.rotation.y = east_Y_Rotation;
+				
 			}
 			
 			// enemy turning SOUTH
@@ -619,11 +626,11 @@
 				
 				
 				spawnTrail();
-				
-				// snap camera to cycle's new heading
-				cameraControlsYawObject.rotation.y = south_Y_Rotation;
-				joystick.previousRotationY = south_Y_Rotation;
 				*/
+				
+				// snap enemy's camera to enemyCycle's new heading
+				enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
+				
 			}
 			
 			// enemy turning WEST
@@ -658,11 +665,11 @@
 				
 				
 				spawnTrail();
-				
-				// snap camera to cycle's new heading
-				cameraControlsYawObject.rotation.y = west_Y_Rotation;
-				joystick.previousRotationY = west_Y_Rotation;
 				*/
+				
+				// snap enemy's camera to enemyCycle's new heading
+				enemyCameraControlsYawObject.rotation.y = west_Y_Rotation;
+				
 			}
 			
 			// enemy turning NORTH
@@ -697,11 +704,11 @@
 				
 				
 				spawnTrail();
-				
-				// snap camera to cycle's new heading
-				cameraControlsYawObject.rotation.y = north_Y_Rotation;
-				joystick.previousRotationY = north_Y_Rotation;
 				*/
+				
+				// snap enemy's camera to enemyCycle's new heading
+				enemyCameraControlsYawObject.rotation.y = north_Y_Rotation;
+				
 			}
 			
 			
@@ -1009,14 +1016,21 @@
 				} // end else if (cycleDirection == WEST)
 				
 				
+				
 				// CHECK FOR COLLISIONS WITH TRAILS AND ARENA WALLS //////////////////////////////////////////////////////////////////
 
+				
 				// set up a reference to cycle's position for faster loop lookup
 				cyclePositionX = cycle.position.x;
 				cyclePositionZ = cycle.position.z;
 
 
 				if (cycleDirection == NORTH) {
+					
+					if (cyclePositionZ < -arenaRadius) {
+						cycle.position.z = -arenaRadius + 1;
+						cycleCrash();
+					}
 
 					for ( var i = 0; i < testEWTrailCount; i++ ) {
 
@@ -1036,6 +1050,11 @@
 
 				}
 				else if (cycleDirection == SOUTH) {
+					
+					if (cyclePositionZ > arenaRadius) {
+						cycle.position.z = arenaRadius - 1;
+						cycleCrash();
+					}
 
 					for ( var i = 0; i < testEWTrailCount; i++ ) {
 
@@ -1056,6 +1075,11 @@
 				}
 				else if (cycleDirection == EAST) {
 					
+					if (cyclePositionX > arenaRadius) {
+						cycle.position.x = arenaRadius - 1;
+						cycleCrash();
+					}
+					
 					for ( var i = 0; i < testNSTrailCount; i++ ) {
 
 						if ( cyclePositionX > test_NS_trailX[i] && test_EW_currentTrailStartX < test_NS_trailX[i] ) {
@@ -1075,6 +1099,11 @@
 				}
 				else if (cycleDirection == WEST) {
 					
+					if (cyclePositionX < -arenaRadius) {
+						cycle.position.x = -arenaRadius + 1;
+						cycleCrash();
+					}
+					
 					for ( var i = 0; i < testNSTrailCount; i++ ) {
 
 						if ( cyclePositionX < test_NS_trailX[i] && test_EW_currentTrailStartX > test_NS_trailX[i] ) {
@@ -1093,22 +1122,6 @@
 
 				}
 				
-				if (cyclePositionX > arenaRadius) {
-					cycle.position.x = arenaRadius - 1;
-					cycleCrash();
-				}
-				else if (cyclePositionX < -arenaRadius) {
-					cycle.position.x = -arenaRadius + 1;
-					cycleCrash();
-				}
-				else if (cyclePositionZ > arenaRadius) {
-					cycle.position.z = arenaRadius - 1;
-					cycleCrash();
-				}
-				else if (cyclePositionZ < -arenaRadius) {
-					cycle.position.z = -arenaRadius + 1;
-					cycleCrash();
-				}
 				
 				
 				if (enemyCycle.position.x > arenaRadius) {
@@ -1116,17 +1129,17 @@
 					//enemyCycleCrash();
 					enemyTurnCycleRight = true;
 				}
-				else if (enemyCycle.position.x < -arenaRadius) {
+				if (enemyCycle.position.x < -arenaRadius) {
 					enemyCycle.position.x = -arenaRadius + 1;
 					//enemyCycleCrash();
 					enemyTurnCycleRight = true;
 				}
-				else if (enemyCycle.position.z > arenaRadius) {
+				if (enemyCycle.position.z > arenaRadius) {
 					enemyCycle.position.z = arenaRadius - 1;
 					//enemyCycleCrash();
 					enemyTurnCycleRight = true;
 				}
-				else if (enemyCycle.position.z < -arenaRadius) {
+				if (enemyCycle.position.z < -arenaRadius) {
 					enemyCycle.position.z = -arenaRadius + 1;
 					//enemyCycleCrash();
 					enemyTurnCycleRight = true;
@@ -1164,6 +1177,12 @@
 				cameraControlsPitchObject.rotation.x = -0.01;
 			}
 			
+			// follow the enemy's cycle
+			enemyCameraControlsObject.position.copy(enemyCycle.position);
+			if (enemyCameraMode == CockpitCamera_MODE) {
+				enemyCameraControlsObject.position.y += 1;
+			}
+			
 			// UPDATE SHADOWS
 			// get the correct current matrix so shadows match exactly
 			trailBeginning.updateMatrixWorld(true);
@@ -1182,8 +1201,28 @@
 			enemyCycleShadow[3].update( groundPlane, lightPosition4D );
 		
 			
-			// render the scene with our camera
+			// set up the main viewport in the bottom portion of the webpage
+			renderer.setViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION_X_2_4);
+			
+			// render the player's view with our camera
 			renderer.render(scene, camera);
+			
+			// enable scissor test
+			renderer.enableScissorTest( true );
+			// this will cut out a rectangular section from the top portion of the webpage
+			renderer.setScissor( 0, SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION );
+			
+			// now tell renderer to draw inside this top section
+			renderer.setViewport(0, SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION );
+			
+			// render the enemy's view with the enemy's camera
+			renderer.render(scene, enemyCamera);
+			
+			// reset scissor test (disable it)
+			renderer.enableScissorTest( false );
+			
+			
+			
 			
 			/*
 			// real-time debug text output
@@ -1401,7 +1440,7 @@
 					
 					blendedBeginningTrailShadow.visible = false;
 					
-					document.getElementById("cameraButton").value = "Click for Close-3rdPerson view";
+					document.getElementById("cameraButton").value = "to Close-3rdPerson view";
 					
 					break;
 					
@@ -1417,7 +1456,7 @@
 					
 					blendedBeginningTrailShadow.visible = true;
 					
-					document.getElementById("cameraButton").value = "Click for Far-3rdPerson view";
+					document.getElementById("cameraButton").value = "to Far-3rdPerson view";
 					
 					break;
 					
@@ -1433,7 +1472,7 @@
 					
 					blendedBeginningTrailShadow.visible = true;
 					
-					document.getElementById("cameraButton").value = "Click for SkyCamera view";
+					document.getElementById("cameraButton").value = "to SkyCamera view";
 					
 					break;
 					
@@ -1449,12 +1488,12 @@
 					
 					blendedBeginningTrailShadow.visible = true;
 					
-					document.getElementById("cameraButton").value = "Click for Cockpit view";
+					document.getElementById("cameraButton").value = "to Cockpit view";
 					
 					break;
 					
 				default:
-					document.getElementById("cameraButton").value = "Click for Far-3rdPerson view";
+					document.getElementById("cameraButton").value = "to Far-3rdPerson view";
 					
 			}
 				
