@@ -84,18 +84,18 @@ if (mouseControl) {
 	document.getElementById("banner").addEventListener("mousedown", function(event) {
 		if (playerAlive && !gamePaused) {
 			if(event.button === 0)
-				rotateCycleLeft = true;
+				turnCycleLeft = true;
 			else if(event.button === 2)
-				rotateCycleRight = true;
+				turnCycleRight = true;
 		}	
 	}, false);
 
 	document.getElementById("container").addEventListener("mousedown", function(event) {
 		if (playerAlive && !gamePaused) {
 			if(event.button === 0)
-				rotateCycleLeft = true;
+				turnCycleLeft = true;
 			else if(event.button === 2)
-				rotateCycleRight = true;
+				turnCycleRight = true;
 		}	
 	}, false);
 	
@@ -169,6 +169,7 @@ function onWindowResize() {
 
 //var variablesReady = 0;
 var playerAlive = false;
+var enemyAlive = false;
 var canPause = true;
 var gamePaused = true;
 //var gameBeginningFlag = true;
@@ -190,22 +191,25 @@ var EAST = 1;
 var SOUTH = 2;
 var WEST = 3;
 var cycleDirection = NORTH;
+var enemyCycleDirection = SOUTH;
 var northVector = new THREE.Vector3(0, 0, -1);
 var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
 var westVector = new THREE.Vector3(-1, 0, 0);
 var cycleHeadingVector = new THREE.Vector3();
+var enemyCycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
-var cycleSpeed = 20;
+var cycleSpeed = 5;//20
+var enemyCycleSpeed = 5;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var crashAnimationTimer = new THREEx.GameTimer(2);
 var trailDisappearAnimationTimer = new THREEx.GameTimer(2);
 
 var cycleJustTurned = false;
-var rotateCycleRight = false;
-var rotateCycleLeft = false;
+var turnCycleRight = false;
+var turnCycleLeft = false;
 var turningNorthFromEast = false;
 var turningNorthFromWest = false;
 var turningEastFromNorth = false;
@@ -214,6 +218,18 @@ var turningSouthFromEast = false;
 var turningSouthFromWest = false;
 var turningWestFromNorth = false;
 var turningWestFromSouth = false;
+
+var enemyCycleJustTurned = false;
+var enemyTurnCycleRight = false;
+var enemyTurnCycleLeft = false;
+var enemyTurningNorthFromEast = false;
+var enemyTurningNorthFromWest = false;
+var enemyTurningEastFromNorth = false;
+var enemyTurningEastFromSouth = false;
+var enemyTurningSouthFromEast = false;
+var enemyTurningSouthFromWest = false;
+var enemyTurningWestFromNorth = false;
+var enemyTurningWestFromSouth = false;
 
 var upVector = new THREE.Vector3(0, 1, 0);
 var rightVector = new THREE.Vector3(1, 0, 0);
@@ -243,6 +259,7 @@ var test_EW_trailEndX = [];
 var test_EW_currentTrailStartX = 0;
 // Shadows
 var cycleShadow = [];
+var enemyCycleShadow = [];
 var northSouthTrailShadow = [];
 var eastWestTrailShadow = [];
 var blendedBeginningTrailShadow;
@@ -313,7 +330,7 @@ arenaNorthWallTexture.offset.set(0, 0.765);//NORTH WALL
 //arenaWestWallTexture.offset.set(0, 0);//WEST WALL
 //arenaEastWallTexture.offset.set(0, 0.5);//EAST WALL
 //arenaSouthWallTexture.offset.set(0, 0.25);//SOUTH WALL
-arenaNorthWallTexture.repeat.set(1, 0.225);
+arenaNorthWallTexture.repeat.set(1, 0.225);// 1, 0.225
 //arenaNorthWallTexture.maxFilter = THREE.NearestFilter;
 var arenaNorthWallMaterial = new THREE.MeshBasicMaterial({
 	//color: 'rgb(200,200,200)',
@@ -372,25 +389,6 @@ var arenaWestWall = new THREE.Mesh(arenaWestWallGeometry, arenaWestWallMaterial)
 arenaWestWall.position.set(-arenaRadius, arenaRadius * 0.07, 0);
 arenaWestWall.rotation.y = Math.PI * 0.5;
 scene.add(arenaWestWall);
-
-/*
-// TEST for MOBILE
-var TESTBeginningMaterial = new THREE.MeshBasicMaterial({
-	vertexColors: THREE.VertexColors
-	//side: THREE.DoubleSide
-});							   
-var TESTBeginningGeometry = new THREE.BoxGeometry(10, 5, 1, 8, 1, 1);
-
-for (var i = 0; i < TESTBeginningGeometry.faces.length; i++) {
-	TESTBeginningGeometry.faces[i].vertexColors[0] = new THREE.Color().setStyle('rgb(255,0,0)');
-	TESTBeginningGeometry.faces[i].vertexColors[1] = new THREE.Color().setStyle('rgb(0,255,0)');
-	TESTBeginningGeometry.faces[i].vertexColors[2] = new THREE.Color().setStyle('rgb(0,0,255)');
-}
-
-var TESTtrailBeginning = new THREE.Mesh(TESTBeginningGeometry, TESTBeginningMaterial);
-scene.add(TESTtrailBeginning);
-*/
-
 
 
 // JET TRAIL BLENDED, CURVED BEGINNING SEGMENT (White, blended to cycle's color)
@@ -706,7 +704,8 @@ document.getElementById("cameraButton").style.cursor = "pointer";
 //variablesReady += 1;
 
 // MODELS
-var cycle;
+var cycle = new THREE.Mesh();
+var enemyCycle = new THREE.Mesh();
 var loader = new THREE.ObjectLoader();
 
 window.onload = function() {
@@ -745,6 +744,43 @@ window.onload = function() {
 		cycleShadow[3].material.side = THREE.DoubleSide;
 		cycleShadow[3].material.opacity = 0.8;
 		scene.add( cycleShadow[3] );
+
+	} );
+	
+	loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
+
+		// ENEMY CYCLE
+		enemyCycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
+		scene.add(enemyCycle);//add the cycle mesh to the scene, so it becomes a game object
+
+		//enemyCycle.rotation.set(0, Math.PI, 0);
+		enemyCycle.children[1].material.color.set('rgb(0,50,255)');// main hull blue color
+		enemyCycle.children[1].material.emissive.set('rgb(0,10,30)');// main hull emissive
+		enemyCycle.children[3].material.emissive.set('rgb(10,10,10)');// grey underbody chassis
+
+		// shadow for black windows
+		enemyCycleShadow[0] = new THREE.ShadowMesh( enemyCycle.children[0] );
+		enemyCycleShadow[0].material.side = THREE.DoubleSide;
+		enemyCycleShadow[0].material.opacity = 0.8;
+		scene.add( enemyCycleShadow[0] );
+
+		// shadow for main colored hull
+		enemyCycleShadow[1] = new THREE.ShadowMesh( enemyCycle.children[1] );
+		enemyCycleShadow[1].material.side = THREE.DoubleSide;
+		enemyCycleShadow[1].material.opacity = 0.8;
+		scene.add( enemyCycleShadow[1] );
+
+		// shadow for wheel rims/hubcaps
+		enemyCycleShadow[2] = new THREE.ShadowMesh( enemyCycle.children[2] );
+		enemyCycleShadow[2].material.side = THREE.DoubleSide;
+		enemyCycleShadow[2].material.opacity = 0.8;
+		scene.add( enemyCycleShadow[2] );
+
+		// shadow for grey underbody chassis
+		enemyCycleShadow[3] = new THREE.ShadowMesh( enemyCycle.children[3] );
+		enemyCycleShadow[3].material.side = THREE.DoubleSide;
+		enemyCycleShadow[3].material.opacity = 0.8;
+		scene.add( enemyCycleShadow[3] );
 		
 
 		onWindowResize();
