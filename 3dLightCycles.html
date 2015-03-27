@@ -81,22 +81,36 @@
 		function initLevel() {
 			
 			playerAlive = true;
+			enemyAlive = true;
 			
 			// if on mobile device, unpause the game because there is no ESC key and no mouse capture to do
 			if ( !mouseControl )
 				gamePaused = false;
 			
 			// initial starting position
-			cycle.position.set(0, 0, 30);
+			cycle.position.set(0, 0, 40);
+			// initial starting position
+			enemyCycle.position.set(0, 0, -40);
 			
 			// initial heading and rotation
 			cycleDirection = NORTH;
 			cycleHeadingVector.copy(northVector);
+			// initial heading and rotation
+			enemyCycleDirection = SOUTH;
+			enemyCycleHeadingVector.copy(southVector);
+			
+			//enemyCycle.localToWorld(enemyCycle.position);
+			enemyCycle.rotateOnAxis(upVector, Math.PI);
+			//enemyCycle.worldToLocal(enemyCycle.position);
 			
 			// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
 			cycleJustTurned = true;
 			// spawn the cycle's first jet trail
 			spawnTrail();
+			// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+			enemyCycleJustTurned = true;
+			// spawn the cycle's first jet trail
+			///enemySpawnTrail();
 			
 			if (mouseControl) {
 				
@@ -194,7 +208,7 @@
 			//if button1 IS pressed, check to see if we can shoot
 			if (joystick.button1Pressed && playerAlive) {
 				if (canTurnRight) {
-					rotateCycleRight = true;
+					turnCycleRight = true;
 					//turn off ability to turn cycle so we don't rapid-fire turn
 					canTurnRight = false;
 				}
@@ -207,7 +221,7 @@
 			//if button2 IS pressed, check to see if we can shoot
 			if (joystick.button2Pressed && playerAlive) {
 				if (canTurnLeft) {
-					rotateCycleLeft = true;
+					turnCycleLeft = true;
 					//turn off ability to turn cycle so we don't rapid-fire turn
 					canTurnLeft = false;
 				}
@@ -327,7 +341,7 @@
 			
 			// CHECK FOR AND HANDLE CYCLE TURNING //////////////////////////////////////////////////////////////////////////////////////
 			
-			if (rotateCycleLeft) {
+			if (turnCycleLeft) {
 				if (cycleDirection == NORTH) {
 					turningWestFromNorth = true;
 				}
@@ -341,7 +355,7 @@
 					turningSouthFromWest = true;
 				}
 			}
-			if (rotateCycleRight) {
+			if (turnCycleRight) {
 				if (cycleDirection == NORTH) {
 					turningEastFromNorth = true;
 				}
@@ -353,6 +367,35 @@
 				}
 				else if (cycleDirection == WEST) {
 					turningNorthFromWest = true;
+				}
+			}
+			
+			if (enemyTurnCycleLeft) {
+				if (enemyCycleDirection == NORTH) {
+					enemyTurningWestFromNorth = true;
+				}
+				else if (enemyCycleDirection == EAST) {
+					enemyTurningNorthFromEast = true;
+				}
+				else if (enemyCycleDirection == SOUTH) {
+					enemyTurningEastFromSouth = true;
+				}
+				else if (enemyCycleDirection == WEST) {
+					enemyTurningSouthFromWest = true;
+				}
+			}
+			if (enemyTurnCycleRight) {
+				if (enemyCycleDirection == NORTH) {
+					enemyTurningEastFromNorth = true;
+				}
+				else if (enemyCycleDirection == EAST) {
+					enemyTurningSouthFromEast = true;
+				}
+				else if (enemyCycleDirection == SOUTH) {
+					enemyTurningWestFromSouth = true;
+				}
+				else if (enemyCycleDirection == WEST) {
+					enemyTurningNorthFromWest = true;
 				}
 			}
 			
@@ -505,6 +548,164 @@
 			}
 			
 			
+			// enemy turning EAST
+			if (enemyTurningEastFromNorth || enemyTurningEastFromSouth) { 
+				
+				enemyCycleDirection = EAST;
+				enemyCycleHeadingVector.copy(eastVector);
+				
+				//enemyTrailBeginning.rotation.y = east_Y_Rotation;
+				enemyCycleJustTurned = true;
+				/*
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (turningEastFromNorth)
+					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
+				if (turningEastFromSouth)
+					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
+				trailScale = trailLength / 10;
+				
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				if (turningEastFromNorth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				if (turningEastFromSouth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				*/
+				enemyTurningEastFromNorth = false;
+				enemyTurningEastFromSouth = false;
+				/*
+				// get the correct current matrix so shadows match exactly
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				
+				
+				spawnTrail();
+				
+				
+				// snap camera to cycle's new heading
+				cameraControlsYawObject.rotation.y = east_Y_Rotation;
+				joystick.previousRotationY = east_Y_Rotation;
+				*/
+			}
+			
+			// enemy turning SOUTH
+			if (enemyTurningSouthFromEast || enemyTurningSouthFromWest) {
+				
+				enemyCycleDirection = SOUTH;
+				enemyCycleHeadingVector.copy(southVector);
+				
+				//enemyTrailBeginning.rotation.y = south_Y_Rotation;
+				enemyCycleJustTurned = true;
+				/*
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (turningSouthFromEast)
+					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
+				if (turningSouthFromWest)
+					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				if (turningSouthFromEast)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				if (turningSouthFromWest)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				*/
+				
+				enemyTurningSouthFromEast = false;
+				enemyTurningSouthFromWest = false;
+				
+				/*
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
+				cameraControlsYawObject.rotation.y = south_Y_Rotation;
+				joystick.previousRotationY = south_Y_Rotation;
+				*/
+			}
+			
+			// enemy turning WEST
+			if (enemyTurningWestFromNorth || enemyTurningWestFromSouth) {
+				
+				enemyCycleDirection = WEST;
+				enemyCycleHeadingVector.copy(westVector);
+				
+				//enemyTrailBeginning.rotation.y = west_Y_Rotation;
+				enemyCycleJustTurned = true;
+				/*
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (turningWestFromSouth)
+					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
+				if (turningWestFromNorth)
+					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
+				trailScale = trailLength / 10;
+				
+				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
+				if (turningWestFromSouth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
+				if (turningWestFromNorth)
+					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
+				*/
+				
+				enemyTurningWestFromNorth = false;
+				enemyTurningWestFromSouth = false;
+				
+				/*
+				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
+				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
+				cameraControlsYawObject.rotation.y = west_Y_Rotation;
+				joystick.previousRotationY = west_Y_Rotation;
+				*/
+			}
+			
+			// enemy turning NORTH
+			if (enemyTurningNorthFromEast || enemyTurningNorthFromWest) {
+				
+				enemyCycleDirection = NORTH;
+				enemyCycleHeadingVector.copy(northVector);
+			
+				//enemyTrailBeginning.rotation.y = north_Y_Rotation;
+				enemyCycleJustTurned = true;
+				/*
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (turningNorthFromWest)
+					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
+				if (turningNorthFromEast)
+					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
+				trailScale = trailLength / 10;
+				
+				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
+				if (turningNorthFromWest)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
+				if (turningNorthFromEast)
+					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
+				*/
+				
+				enemyTurningNorthFromEast = false;
+				enemyTurningNorthFromWest = false;
+				
+				/*
+				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
+				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				
+				
+				spawnTrail();
+				
+				// snap camera to cycle's new heading
+				cameraControlsYawObject.rotation.y = north_Y_Rotation;
+				joystick.previousRotationY = north_Y_Rotation;
+				*/
+			}
+			
+			
+			
 			// UPDATE CYCLE ORIENTATION AND POSITION  ////////////////////////////////////////////////////////////////////////////
 			
 			if (playerAlive && !gamePaused) {
@@ -517,26 +718,40 @@
 
 				// update cycle position
 				cycle.localToWorld(cycle.position);
-				if ( !rotateCycleRight && !rotateCycleLeft ) {
+				if ( !turnCycleRight && !turnCycleLeft ) {
 					cycle.translateOnAxis(cycleHeadingVector, cycleSpeed * frameTime);
 				}
-
-
+				// if cycle has turned, update its orientation
 				cycle.worldToLocal(cycle.position);
-				if (rotateCycleRight) {
+				if (turnCycleRight) {
 					cycle.rotateOnAxis(upVector, -PI_2);
-					rotateCycleRight = false;
+					turnCycleRight = false;
 				}
-				else if (rotateCycleLeft) {
+				else if (turnCycleLeft) {
 					cycle.rotateOnAxis(upVector, PI_2);
-					rotateCycleLeft = false;
+					turnCycleLeft = false;
 				}
 				
+				// update enemyCycle position
+				enemyCycle.localToWorld(enemyCycle.position);
+				if ( !enemyTurnCycleRight && !enemyTurnCycleLeft ) {
+					enemyCycle.translateOnAxis(enemyCycleHeadingVector, enemyCycleSpeed * frameTime);
+				}
+				// if cycle has turned, update its orientation
+				enemyCycle.worldToLocal(enemyCycle.position);
+				if (enemyTurnCycleRight) {
+					enemyCycle.rotateOnAxis(upVector, -PI_2);
+					enemyTurnCycleRight = false;
+				}
+				else if (enemyTurnCycleLeft) {
+					enemyCycle.rotateOnAxis(upVector, PI_2);
+					enemyTurnCycleLeft = false;
+				}
 				
 				// update the cycle's matrix now before shadows areare set (instead of at render time), 
 				// so that the shadows line up exactly with the cycle
 				cycle.updateMatrixWorld(true);
-				
+				enemyCycle.updateMatrixWorld(true);
 				
 
 			// UPDATE TRAILS //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -896,16 +1111,41 @@
 				}
 				
 				
+				if (enemyCycle.position.x > arenaRadius) {
+					enemyCycle.position.x = arenaRadius - 1;
+					//enemyCycleCrash();
+					enemyTurnCycleRight = true;
+				}
+				else if (enemyCycle.position.x < -arenaRadius) {
+					enemyCycle.position.x = -arenaRadius + 1;
+					//enemyCycleCrash();
+					enemyTurnCycleRight = true;
+				}
+				else if (enemyCycle.position.z > arenaRadius) {
+					enemyCycle.position.z = arenaRadius - 1;
+					//enemyCycleCrash();
+					enemyTurnCycleRight = true;
+				}
+				else if (enemyCycle.position.z < -arenaRadius) {
+					enemyCycle.position.z = -arenaRadius + 1;
+					//enemyCycleCrash();
+					enemyTurnCycleRight = true;
+				}
+				
+				
 				// update cycles components
 				// spin wheels
-				verticalAngle += cycleSpeed * 12 * frameTime;
+				verticalAngle += (cycleSpeed * 12) * frameTime;
 				if ( verticalAngle > TWO_PI ) {
 					verticalAngle -= TWO_PI;
 					flipper = !flipper;
 				}
 
 				cycle.children[2].material.shininess = 100 * flipper;
-				cycle.children[2].rotation.z = 0.004 * flipper;
+				cycle.children[2].rotation.z = 0.003 * flipper;
+				
+				enemyCycle.children[2].material.shininess = 100 * flipper;
+				enemyCycle.children[2].rotation.z = 0.003 * flipper;
 				
 			
 			} // end if (playerAlive)
@@ -935,6 +1175,11 @@
 			cycleShadow[1].update( groundPlane, lightPosition4D );
 			cycleShadow[2].update( groundPlane, lightPosition4D );
 			cycleShadow[3].update( groundPlane, lightPosition4D );
+			
+			enemyCycleShadow[0].update( groundPlane, lightPosition4D );
+			enemyCycleShadow[1].update( groundPlane, lightPosition4D );
+			enemyCycleShadow[2].update( groundPlane, lightPosition4D );
+			enemyCycleShadow[3].update( groundPlane, lightPosition4D );
 		
 			
 			// render the scene with our camera
