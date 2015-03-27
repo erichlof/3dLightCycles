@@ -4,7 +4,7 @@
  * https://github.com/erichlof
  */
 
-THREEx.FirstPersonControls = function ( camera ) {
+THREEx.FirstPersonControls = function ( camera, isPlayerControlled ) {
 
 	camera.rotation.set( 0, 0, 0 );
 
@@ -19,21 +19,23 @@ THREEx.FirstPersonControls = function ( camera ) {
 	var movementX = 0;
 	var movementY = 0;
 	
-	var onMouseMove = function ( event ) {
-		// commented out for debug flyCam mode
-		//if (playerAlive) {
+	if ( isPlayerControlled ) {
+		
+		var onMouseMove = function ( event ) {
+
 			movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 			movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-		
+
 			that.yawObject.rotation.y -= movementX * 0.002;
 			that.pitchObject.rotation.x -= movementY * 0.002;
 
 			that.pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, that.pitchObject.rotation.x ) );
-		//}
+			
+		};
 
-	};
-
-	document.addEventListener( 'mousemove', onMouseMove, false );
+		document.addEventListener( 'mousemove', onMouseMove, false );
+		
+	}
 	
 
 	this.getObject = function () {
