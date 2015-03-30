@@ -132,19 +132,18 @@
 			// for initial 3rd person view, pull the camera back a little
 			cameraDistance = 7;
 			camera.translateZ(cameraDistance);
-			// for initial 3rd person view, pull enemy's camera back a little
-			enemyCameraDistance = 7;
-			enemyCamera.translateZ(enemyCameraDistance);
-			
-			// tilt player's camera slightly downward
+			// tilt player's camera downward
 			cameraControlsPitchObject.rotation.x = -0.4;
 			joystick.previousRotationX = -0.4;
 			// look in the cycle's initial direction: north
 			cameraControlsYawObject.rotation.y = north_Y_Rotation;
 			joystick.previousRotationY = north_Y_Rotation;
 			
+			// for initial 3rd person view, pull enemy's camera back a little
+			enemyCameraDistance = 9;
+			enemyCamera.translateZ(enemyCameraDistance);
 			// tilt enemy's camera slightly downward
-			enemyCameraControlsPitchObject.rotation.x = -0.4;
+			enemyCameraControlsPitchObject.rotation.x = -0.15;
 			// look in the enemyCycle's initial direction: south
 			enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
 			
@@ -1201,19 +1200,19 @@
 			enemyCycleShadow[3].update( groundPlane, lightPosition4D );
 		
 			
-			// set up the main viewport in the bottom portion of the webpage
-			renderer.setViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION_X_2_4);
+			// set up the main viewport in the top portion of the webpage
+			renderer.setViewport(0, SCREEN_HEIGHT_DIVISION, SCREEN_WIDTH, SCREEN_HEIGHT_MINUS_SCREEN_HEIGHT_DIVISION);
 			
 			// render the player's view with our camera
 			renderer.render(scene, camera);
 			
 			// enable scissor test
 			renderer.enableScissorTest( true );
-			// this will cut out a rectangular section from the top portion of the webpage
-			renderer.setScissor( 0, SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION );
+			// this will cut out a rectangular section from the bottom portion of the webpage
+			renderer.setScissor( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION_X_0_9 );
 			
-			// now tell renderer to draw inside this top section
-			renderer.setViewport(0, SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION );
+			// now tell renderer to draw inside this bottom section
+			renderer.setViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT_DIVISION_X_0_9 );
 			
 			// render the enemy's view with the enemy's camera
 			renderer.render(scene, enemyCamera);
