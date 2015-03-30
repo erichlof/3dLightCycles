@@ -7,17 +7,13 @@
 
 var SCREEN_WIDTH = window.innerWidth;
 var SCREEN_HEIGHT = window.innerHeight;
-var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3.5; // used for enemy's camera
-var SCREEN_HEIGHT_DIVISION_X_2_4 = SCREEN_HEIGHT_DIVISION * 2.4; // a little less than 2.5, so there is a dividing black bar between camera views
+var SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3.5; // used for dual camera
+var SCREEN_HEIGHT_DIVISION_X_0_9 = SCREEN_HEIGHT_DIVISION * 0.9; // 0.9, so there is a dividing black bar between camera views
+var SCREEN_HEIGHT_MINUS_SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION;
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_2_4, 0.1, 2000);
+var camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT_MINUS_SCREEN_HEIGHT_DIVISION, 0.1, 2000);
 scene.add(camera);
-/*
-var radarScene = new THREE.Scene();
-var camera2 = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION, 0.1, 2000);
-radarScene.add(camera2);
-*/
-var enemyCamera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION, 0.1, 2000);
+var enemyCamera = new THREE.PerspectiveCamera(25, SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_0_9, 0.1, 2000);
 scene.add(enemyCamera);
 
 var clock = new THREE.Clock();
@@ -143,7 +139,8 @@ function onWindowResize() {
 	SCREEN_HEIGHT = window.innerHeight;
 	
 	SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT / 3.5;
-	SCREEN_HEIGHT_DIVISION_X_2_4 = SCREEN_HEIGHT_DIVISION * 2.4;
+	SCREEN_HEIGHT_DIVISION_X_0_9 = SCREEN_HEIGHT_DIVISION * 0.9;
+	SCREEN_HEIGHT_MINUS_SCREEN_HEIGHT_DIVISION = SCREEN_HEIGHT - SCREEN_HEIGHT_DIVISION;
 	
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	
@@ -152,7 +149,7 @@ function onWindowResize() {
 	if (fontAspect < 4) fontAspect = 4;
 	
 	
-	document.getElementById("sound").style.fontSize = (fontAspect * 1.8) + "px";
+	document.getElementById("sound").style.fontSize = (fontAspect) + "px";
 	
 	fontAspect *= 2;
 	bannerElement.style.fontSize = fontAspect + "px";
@@ -163,10 +160,10 @@ function onWindowResize() {
 	
 	
 	
-	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_2_4;
+	camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_MINUS_SCREEN_HEIGHT_DIVISION;
 	camera.updateProjectionMatrix();
 	
-	enemyCamera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION;
+	enemyCamera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT_DIVISION_X_0_9;
 	enemyCamera.updateProjectionMatrix();
 	
 
