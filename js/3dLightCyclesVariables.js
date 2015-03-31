@@ -731,8 +731,11 @@ window.onload = function() {
 		cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
 		scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
 
-		cycle.children[1].material.emissive.set('rgb(30,10,0)');//main hull
-		cycle.children[3].material.emissive.set('rgb(10,10,10)');//underbody chassis
+		cycle.children[1].material.color.set('rgb(158,123,55)');// main colored hull
+		cycle.children[1].material.specular.set('rgb(255,210,52)');// main hull specular highlight color
+		cycle.children[1].material.emissive.set('rgb(25,5,0)');// main colored hull emissive
+		
+		cycle.children[3].material.emissive.set('rgb(10,10,10)');// grey underbody chassis
 
 		// shadow for black windows
 		cycleShadow[0] = new THREE.ShadowMesh( cycle.children[0] );
@@ -767,7 +770,8 @@ window.onload = function() {
 		scene.add(enemyCycle);//add the cycle mesh to the scene, so it becomes a game object
 
 		//enemyCycle.rotation.set(0, Math.PI, 0);
-		enemyCycle.children[1].material.color.set('rgb(0,50,255)');// main hull blue color
+		enemyCycle.children[1].material.color.set('rgb(0,84,183)');// main colored hull
+		enemyCycle.children[1].material.specular.set('rgb(133,142,219)');// main hull specular highlight color
 		enemyCycle.children[1].material.emissive.set('rgb(0,10,30)');// main hull emissive
 		enemyCycle.children[3].material.emissive.set('rgb(10,10,10)');// grey underbody chassis
 
