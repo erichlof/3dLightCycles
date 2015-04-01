@@ -216,8 +216,9 @@ var cycleSpeed = 20;
 var enemyCycleSpeed = 20;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
-var crashAnimationTimer = new THREEx.GameTimer(2);
-var trailDisappearAnimationTimer = new THREEx.GameTimer(2);
+var trailLoweringAmount = 0;
+var crashAnimationTimer = new THREEx.GameTimer(1.5);
+var trailDisappearAnimationTimer = new THREEx.GameTimer(3);
 
 var cycleJustTurned = false;
 var turnCycleRight = false;
@@ -309,7 +310,7 @@ floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(arenaRadius * 0.72, arenaRadius * 0.72);
 //floorTexture.minFilter = THREE.LinearMipMapLinearFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
-	emissive: 'rgb(10,10,10)',
+	//emissive: 'rgb(10,10,10)',
 	shininess: 10,
 	map: floorTexture
 });
@@ -731,9 +732,9 @@ window.onload = function() {
 		cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
 		scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
 
-		cycle.children[1].material.color.set('rgb(158,123,55)');// main colored hull
-		cycle.children[1].material.specular.set('rgb(255,210,52)');// main hull specular highlight color
-		cycle.children[1].material.emissive.set('rgb(25,5,0)');// main colored hull emissive
+		cycle.children[1].material.color.set('rgb(130,100,55)');// main colored hull
+		cycle.children[1].material.specular.set('rgb(255,200,5)');// main hull specular highlight color
+		cycle.children[1].material.emissive.set('rgb(30,15,0)');// main colored hull emissive
 		
 		cycle.children[3].material.emissive.set('rgb(10,10,10)');// grey underbody chassis
 
@@ -772,7 +773,8 @@ window.onload = function() {
 		//enemyCycle.rotation.set(0, Math.PI, 0);
 		enemyCycle.children[1].material.color.set('rgb(0,84,183)');// main colored hull
 		enemyCycle.children[1].material.specular.set('rgb(133,142,219)');// main hull specular highlight color
-		enemyCycle.children[1].material.emissive.set('rgb(0,10,30)');// main hull emissive
+		enemyCycle.children[1].material.emissive.set('rgb(0,10,30)');// main colored hull emissive
+		
 		enemyCycle.children[3].material.emissive.set('rgb(10,10,10)');// grey underbody chassis
 
 		// shadow for black windows
