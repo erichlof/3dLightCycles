@@ -133,8 +133,8 @@
 			cameraDistance = 7;
 			camera.translateZ(cameraDistance);
 			// tilt player's camera downward
-			cameraControlsPitchObject.rotation.x = -0.4;
-			joystick.previousRotationX = -0.4;
+			cameraControlsPitchObject.rotation.x = -0.25;
+			joystick.previousRotationX = -0.25;
 			// look in the cycle's initial direction: north
 			cameraControlsYawObject.rotation.y = north_Y_Rotation;
 			joystick.previousRotationY = north_Y_Rotation;
@@ -257,6 +257,17 @@
 					testTransparency.visible = false;
 					testTransparency.material.opacity = 1.0;
 					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						
+						eastWestTrail[i].matrixAutoUpdate = true;
+						
+					}
+					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+
+						northSouthTrail[i].matrixAutoUpdate = true;
+						
+					}
+					
 					playingTrailDisappearAnimation = true;
 					playingCrashAnimation = false;
 					
@@ -266,20 +277,56 @@
 				
 			}
 			
+			
 			if (playingTrailDisappearAnimation) {
 				
 				trailDisappearAnimationTimer.run(frameTime);
+				trailLoweringAmount = 0.3 * trailDisappearAnimationTimer.counter * frameTime;
+				
+				if (northSouthTrail[0].scale.y > 0.2) {
+					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						eastWestTrail[i].position.y -= trailLoweringAmount;
+						eastWestTrail[i].scale.y -= trailLoweringAmount;
+						eastWestTrail[i].updateMatrixWorld(true);
+						eastWestTrailShadow[i].update( groundPlane, lightPosition4D );	
+					}
+					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+						northSouthTrail[i].position.y -= trailLoweringAmount;
+						northSouthTrail[i].scale.y -= trailLoweringAmount;
+						northSouthTrail[i].updateMatrixWorld(true);
+						northSouthTrailShadow[i].update( groundPlane, lightPosition4D );	
+					}
+					
+				}
+				else if (northSouthTrail[0].scale.y < 0.2) {
+					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						eastWestTrail[i].position.y = halfTrailHeight;
+						eastWestTrail[i].scale.y = 1;
+						eastWestTrail[i].visible = false;
+						eastWestTrailShadow[i].visible = false;
+					}
+					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+						northSouthTrail[i].position.y = halfTrailHeight;
+						northSouthTrail[i].scale.y = 1;
+						northSouthTrail[i].visible = false;
+						northSouthTrailShadow[i].visible = false;
+					}
+					
+				}
+				
 				
 				if (trailDisappearAnimationTimer.alarmSounding) {
 					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						eastWestTrail[i].scale.y = 1;
 						eastWestTrail[i].visible = false;
-						eastWestTrail[i].matrixAutoUpdate = true;
 						eastWestTrailShadow[i].visible = false;
 					}
 					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+						northSouthTrail[i].scale.y = 1;
 						northSouthTrail[i].visible = false;
-						northSouthTrail[i].matrixAutoUpdate = true;
 						northSouthTrailShadow[i].visible = false; 
 					}
 					
