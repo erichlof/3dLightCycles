@@ -1066,22 +1066,34 @@
 				
 				crashAnimationTimer.run(frameTime);
 				
-				explosionTextureSize = (crashAnimationTimer.counter * 20);
+				explosionTextureSize = (crashAnimationTimer.counter * 20) + 0.001;
 				
-				explosionRings.scale.set(explosionTextureSize * 0.5, explosionTextureSize, 1);
-				if ( explosionTextureSize < 5 )
+				explosionRings.scale.set(explosionTextureSize * 1.5, explosionTextureSize * 1.5, 1);
+				if ( explosionTextureSize < 10 )
 					explosionRings.material.opacity = 1;
 				else if ( explosionTextureSize < 20 )
-					explosionRings.material.opacity = 1 / ( explosionTextureSize * 0.5 );
+					explosionRings.material.opacity = 1 / ( explosionTextureSize * 0.1 );
 				else if ( explosionTextureSize < 30 )
+					explosionRings.material.opacity = 1 / ( explosionTextureSize * 0.2 );
+				else if ( explosionTextureSize < 40 )
 					explosionRings.material.opacity = 1 / ( explosionTextureSize * explosionTextureSize );
 				
-				
+				explosionFlare.scale.set(explosionTextureSize * 5, explosionTextureSize * 5, 1);
+				if ( explosionTextureSize < 1 )
+					explosionFlare.material.opacity = 1;
+				else if ( explosionTextureSize < 6 )
+					explosionFlare.material.opacity = 1 / ( explosionTextureSize * 0.4 );
+				else explosionFlare.material.opacity = 0;
+					
 				if (crashAnimationTimer.alarmSounding) {
 					
 					explosionRings.scale.set(1, 1, 1);
 					explosionRings.visible = false;
 					explosionRings.material.opacity = 1.0;
+					
+					explosionFlare.scale.set(1, 1, 1);
+					explosionFlare.visible = false;
+					explosionFlare.material.opacity = 1.0;
 					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
 						
@@ -1185,7 +1197,7 @@
 					
 					// initial starting position
 					cycle.localToWorld(cycle.position);
-					cycle.position.set(0, 0, 30);
+					cycle.position.set(-2, 0, 40);
 					
 					// reset initial heading and rotation
 					cycleDirection = NORTH;
@@ -1454,15 +1466,18 @@
 			trailBeginning.visible = false;
 			blendedBeginningTrailShadow.visible = false;
 			
-			explosionRings.visible = true;
-			
 			cycleShadow[0].visible = false;
 			cycleShadow[1].visible = false;
 			cycleShadow[2].visible = false;
 			cycleShadow[3].visible = false;
 			
+			explosionRings.visible = true;
 			explosionRings.position.copy(cycle.position);
 			explosionRings.rotation.copy(cycle.rotation);
+			
+			explosionFlare.visible = true;
+			explosionFlare.position.copy(cycle.position);
+			explosionFlare.rotation.copy(cycle.rotation);
 			
 			playingCrashAnimation = true;
 			
