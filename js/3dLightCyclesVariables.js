@@ -319,20 +319,38 @@ var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
 
-// TEST TRANSPARENCY
-var explosionRingsTexture = new THREE.ImageUtils.loadTexture( 'images/explosionRings.png' );
+// EXPLOSION RINGS
+var explosionRingsTexture = new THREE.ImageUtils.loadTexture( 'images/explosionRings2.png' );
 var explosionRingsMaterial = new THREE.MeshBasicMaterial({
+	depthTest: false,
+	depthWrite: false,
 	transparent: true,
 	opacity: 1.0,
 	side: THREE.DoubleSide,
 	map: explosionRingsTexture
 });
-var explosionTextureSize = 5;
-var explosionRingsGeometry = new THREE.PlaneBufferGeometry(explosionTextureSize, explosionTextureSize / 2, 1, 1);
+var explosionTextureSize = 1;
+var explosionRingsGeometry = new THREE.PlaneBufferGeometry(explosionTextureSize, explosionTextureSize, 1, 1);
 var explosionRings = new THREE.Mesh(explosionRingsGeometry, explosionRingsMaterial);
-explosionRings.position.y = -10;//pre-load the texture under the grid floor
+explosionRings.position.set(arenaRadius, 0, arenaRadius);//pre-load the texture, place off to the side for now
 explosionRings.visible = true;
 scene.add(explosionRings);
+
+// EXPLOSION FLARE
+var explosionFlareTexture = new THREE.ImageUtils.loadTexture( 'images/explosionFlare.png' );
+var explosionFlareMaterial = new THREE.MeshBasicMaterial({
+	depthTest: false,
+	depthWrite: false,
+	transparent: true,
+	opacity: 1.0,
+	side: THREE.DoubleSide,
+	map: explosionFlareTexture
+});
+var explosionFlareGeometry = new THREE.PlaneBufferGeometry(explosionTextureSize, explosionTextureSize, 1, 1);
+var explosionFlare = new THREE.Mesh(explosionFlareGeometry, explosionFlareMaterial);
+explosionFlare.position.set(arenaRadius, 0, arenaRadius);//pre-load the texture, place off to the side for now
+explosionFlare.visible = true;
+scene.add(explosionFlare);
 
 
 // ARENA WALLS
