@@ -303,6 +303,7 @@ lightPosition4D.z = directionalLight.position.z;
 lightPosition4D.w = 0.5;
 
 
+
 // FLOOR
 var arenaRadius = 100;
 var floorTexture = new THREE.ImageUtils.loadTexture( 'images/grid_floor2.png' );
@@ -310,6 +311,7 @@ floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(arenaRadius * 0.72, arenaRadius * 0.72);
 //floorTexture.minFilter = THREE.LinearMipMapLinearFilter; 
 var floorMaterial = new THREE.MeshPhongMaterial({
+	depthWrite: false,
 	emissive: 'rgb(5,5,5)',
 	shininess: 10,
 	map: floorTexture
@@ -318,6 +320,7 @@ var floorGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius *
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = Math.PI / -2;
 scene.add(floor);
+
 
 // EXPLOSION RINGS
 var explosionRingsTexture = new THREE.ImageUtils.loadTexture( 'images/explosionRings2.png' );
@@ -364,12 +367,10 @@ arenaNorthWallTexture.offset.set(0, 0.765);//NORTH WALL
 arenaNorthWallTexture.repeat.set(1, 0.225);// 1, 0.225
 //arenaNorthWallTexture.maxFilter = THREE.NearestFilter;
 var arenaNorthWallMaterial = new THREE.MeshBasicMaterial({
-	//color: 'rgb(200,200,200)',
 	map: arenaNorthWallTexture
 });
 var arenaNorthWallGeometry = new THREE.PlaneBufferGeometry(arenaRadius * 2, arenaRadius * 0.14, 1, 1);
 var arenaNorthWall = new THREE.Mesh(arenaNorthWallGeometry, arenaNorthWallMaterial);
-//arenaSouthWall.rotation.y = Math.PI / -2;
 arenaNorthWall.position.set(0, arenaRadius * 0.07, -arenaRadius);
 scene.add(arenaNorthWall);
 
@@ -420,6 +421,7 @@ var arenaWestWall = new THREE.Mesh(arenaWestWallGeometry, arenaWestWallMaterial)
 arenaWestWall.position.set(-arenaRadius, arenaRadius * 0.07, 0);
 arenaWestWall.rotation.y = Math.PI * 0.5;
 scene.add(arenaWestWall);
+
 
 
 // JET TRAIL BLENDED, CURVED BEGINNING SEGMENT (White, blended to cycle's color)
@@ -648,6 +650,7 @@ for ( var i = 1; i < 1000; i++ ) {
 	eastWestTrailShadow[i].visible = false;
 	scene.add(eastWestTrailShadow[i]);
 }
+
 
 
 
