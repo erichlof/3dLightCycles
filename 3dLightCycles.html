@@ -1119,38 +1119,40 @@
 			if (playingTrailDisappearAnimation) {
 				
 				trailDisappearAnimationTimer.run(frameTime);
-				trailLoweringAmount = 0.3 * trailDisappearAnimationTimer.counter * frameTime;
+				trailLoweringAmount =  trailDisappearAnimationTimer.counter * 0.5;
 				
-				if (northSouthTrail[0].scale.y > 0.2) {
+				if (northSouthTrail[0].scale.y >= 0.05) {
 					
-					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
-						eastWestTrail[i].position.y -= trailLoweringAmount;
-						eastWestTrail[i].scale.y -= trailLoweringAmount;
-						eastWestTrail[i].updateMatrixWorld(true);
-						eastWestTrailShadow[i].update( groundPlane, lightPosition4D );	
-					}
 					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
-						northSouthTrail[i].position.y -= trailLoweringAmount;
-						northSouthTrail[i].scale.y -= trailLoweringAmount;
+						northSouthTrail[i].position.y = halfTrailHeight - (trailLoweringAmount * 0.7 );
+						northSouthTrail[i].scale.y = 1 - trailLoweringAmount;
 						northSouthTrail[i].updateMatrixWorld(true);
 						northSouthTrailShadow[i].update( groundPlane, lightPosition4D );	
 					}
 					
-				}
-				else if (northSouthTrail[0].scale.y < 0.2) {
-					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
-						eastWestTrail[i].position.y = halfTrailHeight;
-						eastWestTrail[i].scale.y = 1;
-						eastWestTrail[i].visible = false;
-						eastWestTrailShadow[i].visible = false;
-					}
+						eastWestTrail[i].position.y = halfTrailHeight - (trailLoweringAmount * 0.7 );
+						eastWestTrail[i].scale.y = 1 - trailLoweringAmount;
+						eastWestTrail[i].updateMatrixWorld(true);
+						eastWestTrailShadow[i].update( groundPlane, lightPosition4D );	
+					}	
+					
+				}
+				else if (northSouthTrail[0].scale.y < 0.05) {
+					
 					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
 						northSouthTrail[i].position.y = halfTrailHeight;
 						northSouthTrail[i].scale.y = 1;
 						northSouthTrail[i].visible = false;
 						northSouthTrailShadow[i].visible = false;
 					}
+					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						eastWestTrail[i].position.y = halfTrailHeight;
+						eastWestTrail[i].scale.y = 1;
+						eastWestTrail[i].visible = false;
+						eastWestTrailShadow[i].visible = false;
+					}	
 					
 				}
 				
