@@ -112,14 +112,14 @@
 			// spawn the cycle's first jet trail
 			///enemySpawnTrail();
 			
-			if (mouseControl) {
-				
+			//if (mouseControl) {
+				// shrink the first jet trail so we can't see it until the cycle has pulled away
 				northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
 				northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
 				
 				trailBeginning.scale.set(0.001, 0.001, 0.001);
 				trailBeginning.position.copy(cycle.position);
-			}
+			//}
 			
 			/*
 			// for debug flyCam
@@ -313,7 +313,7 @@
 					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
 				if (turningEastFromSouth)
 					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 				if (turningEastFromNorth)
@@ -350,7 +350,7 @@
 					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
 				if (turningSouthFromWest)
 					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 				if (turningSouthFromEast)
@@ -387,7 +387,7 @@
 					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
 				if (turningWestFromNorth)
 					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 				if (turningWestFromSouth)
@@ -424,7 +424,7 @@
 					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
 				if (turningNorthFromEast)
 					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 				if (turningNorthFromWest)
@@ -463,7 +463,7 @@
 					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
 				if (turningEastFromSouth)
 					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 				if (turningEastFromNorth)
@@ -501,7 +501,7 @@
 					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
 				if (turningSouthFromWest)
 					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 				if (turningSouthFromEast)
@@ -540,7 +540,7 @@
 					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
 				if (turningWestFromNorth)
 					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 				if (turningWestFromSouth)
@@ -579,7 +579,7 @@
 					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
 				if (turningNorthFromEast)
 					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
-				trailScale = trailLength / 10;
+				trailScale = trailLength / MAX_Trail_Length;
 				
 				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 				if (turningNorthFromWest)
@@ -683,21 +683,21 @@
 					}
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                         
-					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength / 2) );
+					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength * 0.5) );
 
 					// update main trail wall
 					if (cycleTrailSpawnDistance > 3)
 						trailLength = cycleTrailSpawnDistance - 3;
 					else trailLength = 0.001;
 					
-					// when trail wall segment reaches maximum 10 unit length, clamp it.
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
-					if (trailLength > 10) {
+					if (trailLength > MAX_Trail_Length) {
 
-						trailLength = 10;
+						trailLength = MAX_Trail_Length;
 						// cap off current trail segment
 						northSouthTrail[northSouthTrailCount].scale.set(1, 1, 1);
-						northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - 5;
+						northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - HALF_MAX_Trail_Length;
 						// get the correct current matrix so shadows match exactly
 						northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
 						northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
@@ -708,7 +708,7 @@
 
 					}
 
-					trailScale = trailLength / 10;
+					trailScale = trailLength / MAX_Trail_Length;
 
 					northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
@@ -753,14 +753,14 @@
 						trailLength = cycleTrailSpawnDistance - 3;
 					else trailLength = 0.001;
 					
-					// when trail wall segment reaches maximum 10 unit length, clamp it.
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
-					if (trailLength > 10) {
+					if (trailLength > MAX_Trail_Length) {
 
-						trailLength = 10;
+						trailLength = MAX_Trail_Length;
 						// cap off current trail segment
 						eastWestTrail[eastWestTrailCount].scale.set(1, 1, 1);
-						eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + 5;
+						eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + HALF_MAX_Trail_Length;
 						// get the correct current matrix so shadows match exactly
 						eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
 						eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
@@ -772,7 +772,7 @@
 					}
 
 
-					trailScale = trailLength / 10;
+					trailScale = trailLength / MAX_Trail_Length;
 
 					eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
@@ -815,14 +815,14 @@
 						trailLength = cycleTrailSpawnDistance - 3;
 					else trailLength = 0.001;
 					
-					// when trail wall segment reaches maximum 10 unit length, clamp it.
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
-					if (trailLength > 10) {
+					if (trailLength > MAX_Trail_Length) {
 
-						trailLength = 10;
+						trailLength = MAX_Trail_Length;
 						// cap off current trail segment
 						northSouthTrail[northSouthTrailCount].scale.set(1, 1, 1);
-						northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + 5;
+						northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + HALF_MAX_Trail_Length;
 						// get the correct current matrix so shadows match exactly
 						northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
 						northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
@@ -833,7 +833,7 @@
 
 					}
 
-					trailScale = trailLength / 10;
+					trailScale = trailLength / MAX_Trail_Length;
 
 					northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
 					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
@@ -877,14 +877,14 @@
 						trailLength = cycleTrailSpawnDistance - 3;
 					else trailLength = 0.001;	
 
-					// when trail wall segment reaches maximum 10 unit length, clamp it.
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
 					// also when this happens, it's time to spawn another trail segment
-					if (trailLength > 10) {
+					if (trailLength > MAX_Trail_Length) {
 
-						trailLength = 10;
+						trailLength = MAX_Trail_Length;
 						// cap off current trail segment
 						eastWestTrail[eastWestTrailCount].scale.set(1, 1, 1);
-						eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - 5;
+						eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - HALF_MAX_Trail_Length;
 						// get the correct current matrix so shadows match exactly
 						eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
 						eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
@@ -896,7 +896,7 @@
 					}
 
 
-					trailScale = trailLength / 10;
+					trailScale = trailLength / MAX_Trail_Length;
 
 					eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
 					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
@@ -1211,6 +1211,13 @@
 					
 					// spawn the cycle's first jet trail
 					spawnTrail();
+					
+					// shrink the first jet trail so we can't see it until the cycle has pulled away
+					northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
+					northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+					trailBeginning.scale.set(0.001, 0.001, 0.001);
+					trailBeginning.position.copy(cycle.position);
 
 					/*
 					// for debug flyCam
@@ -1326,7 +1333,7 @@
 				}	
 				else { // spawn another trail wall segment in the same direction
 					trailSpawnX = cycle.position.x;
-					trailSpawnZ -= 10;
+					trailSpawnZ -= MAX_Trail_Length;
 					// record the distance between the cycle and the new trail spawn point 
 					trailLength = Math.abs( trailSpawnZ - (cycle.position.z + 3) ) + 0.001;
 				}
@@ -1367,7 +1374,7 @@
 				}	
 				else {
 					trailSpawnX = cycle.position.x;
-					trailSpawnZ += 10;
+					trailSpawnZ += MAX_Trail_Length;
 					
 					trailLength = Math.abs( (cycle.position.z - 3) - trailSpawnZ ) + 0.001;
 				}
@@ -1401,7 +1408,7 @@
 					}
 				}
 				else {
-					trailSpawnX += 10;
+					trailSpawnX += MAX_Trail_Length;
 					trailSpawnZ = cycle.position.z;
 					
 					trailLength = Math.abs( (cycle.position.x - 3) - trailSpawnX ) + 0.001;
@@ -1436,7 +1443,7 @@
 					}
 				}
 				else {
-					trailSpawnX -= 10;
+					trailSpawnX -= MAX_Trail_Length;
 					trailSpawnZ = cycle.position.z;
 					
 					trailLength = Math.abs( trailSpawnX - (cycle.position.x + 3) ) + 0.001;
