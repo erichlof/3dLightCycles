@@ -426,7 +426,9 @@ scene.add(arenaWestWall);
 
 // JET TRAIL BLENDED, CURVED BEGINNING SEGMENT (White, blended to cycle's color)
 
-var trailLength = 10;
+var trailLength = 1;
+var MAX_Trail_Length = 20;
+var HALF_MAX_Trail_Length = 10;
 var trailScale = 1;
 var trailBeginningLength = 1;
 var trailBeginningVerticalScale = 1;
@@ -575,7 +577,7 @@ scene.add(blendedBeginningTrailShadow);
 
 // MAIN JET TRAILS
 
-var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, 10);
+var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, MAX_Trail_Length);
 
 for ( var i = 0; i < northSouthTrailGeometry.faces.length; i++ ) {			
 	northSouthTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
@@ -587,7 +589,7 @@ northSouthTrailGeometry.faces[ 9 ].color.set( 'rgb(255,255,255)' );//south edge
 northSouthTrailGeometry.faces[ 10 ].color.set( 'rgb(255,255,255)' );//north edge
 northSouthTrailGeometry.faces[ 11 ].color.set( 'rgb(255,255,255)' );//north edge
 
-var eastWestTrailGeometry = new THREE.BoxGeometry(10, trailHeight, 0.05);
+var eastWestTrailGeometry = new THREE.BoxGeometry(MAX_Trail_Length, trailHeight, 0.05);
 
 for ( var i = 0; i < eastWestTrailGeometry.faces.length; i++ ) {			
 	eastWestTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
