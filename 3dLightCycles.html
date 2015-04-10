@@ -98,10 +98,8 @@
 			// initial heading and rotation
 			enemyCycleDirection = SOUTH;
 			enemyCycleHeadingVector.copy(southVector);
-			
-			//enemyCycle.localToWorld(enemyCycle.position);
 			enemyCycle.rotateOnAxis(upVector, Math.PI);
-			//enemyCycle.worldToLocal(enemyCycle.position);
+			enemyTrailBeginning.rotation.y = south_Y_Rotation;
 			
 			// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
 			cycleJustTurned = true;
@@ -109,17 +107,24 @@
 			spawnTrail();
 			// trigger a 'dummy' enemyCycleJustTurned event to start new blended trail formation
 			enemyCycleJustTurned = true;
-			// spawn the cycle's first jet trail
-			///enemySpawnTrail();
+			// spawn the enemy cycle's first jet trail
+			enemySpawnTrail();
 			
-			//if (mouseControl) {
-				// shrink the first jet trail so we can't see it until the cycle has pulled away
-				northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
-				northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+			
+			// shrink the first jet trail so we can't see it until the cycle has pulled away
+			northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
+			northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
 				
-				trailBeginning.scale.set(0.001, 0.001, 0.001);
-				trailBeginning.position.copy(cycle.position);
-			//}
+			trailBeginning.scale.set(0.001, 0.001, 0.001);
+			trailBeginning.position.copy(cycle.position);
+			
+			// shrink the enemy's first jet trail so we can't see it until the enemy cycle has pulled away
+			enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyCycle.position.z;
+			enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+			enemyTrailBeginning.scale.set(0.001, 0.001, 0.001);
+			enemyTrailBeginning.position.copy(enemyCycle.position);
+			
 			
 			/*
 			// for debug flyCam
@@ -173,7 +178,7 @@
 			
 			// check if joystick Stick is being moved
 			
-			// commented out for debug flyCam mode
+			// uncomment the following to lock mobile camera during cycle crash animation
 			//if (playerAlive) {
 			
 				// if not playing on desktop, get the rotation from the mobile-touch virtual Joystick
@@ -455,32 +460,30 @@
 				enemyCycleDirection = EAST;
 				enemyCycleHeadingVector.copy(eastVector);
 				
-				//enemyTrailBeginning.rotation.y = east_Y_Rotation;
+				enemyTrailBeginning.rotation.y = east_Y_Rotation;
 				enemyCycleJustTurned = true;
-				/*
-				// make final measurement before we cap off the current wall and turn the cycle
-				if (turningEastFromNorth)
-					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
-				if (turningEastFromSouth)
-					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
-				trailScale = trailLength / MAX_Trail_Length;
 				
-				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
-				if (turningEastFromNorth)
-					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
-				if (turningEastFromSouth)
-					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
-				*/
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (enemyTurningEastFromNorth)
+					enemyTrailLength = Math.abs(enemyTrailSpawnZ - enemyCycle.position.z) - 0.02;
+				if (enemyTurningEastFromSouth)
+					enemyTrailLength = Math.abs(enemyCycle.position.z - enemyTrailSpawnZ) - 0.02;
+				enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+				
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, enemyTrailScale);
+				if (enemyTurningEastFromNorth)
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ - (enemyTrailLength / 2);
+				if (enemyTurningEastFromSouth)
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ + (enemyTrailLength / 2);
+				
 				enemyTurningEastFromNorth = false;
 				enemyTurningEastFromSouth = false;
-				/*
+				
 				// get the correct current matrix so shadows match exactly
-				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
-				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+				enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
 				
-				
-				spawnTrail();
-				*/
+				enemySpawnTrail();
 				
 				// snap enemy's camera to enemyCycle's new heading
 				enemyCameraControlsYawObject.rotation.y = east_Y_Rotation;
@@ -493,38 +496,36 @@
 				enemyCycleDirection = SOUTH;
 				enemyCycleHeadingVector.copy(southVector);
 				
-				//enemyTrailBeginning.rotation.y = south_Y_Rotation;
+				enemyTrailBeginning.rotation.y = south_Y_Rotation;
 				enemyCycleJustTurned = true;
-				/*
-				// make final measurement before we cap off the current wall and turn the cycle
-				if (turningSouthFromEast)
-					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
-				if (turningSouthFromWest)
-					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
-				trailScale = trailLength / MAX_Trail_Length;
 				
-				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
-				if (turningSouthFromEast)
-					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
-				if (turningSouthFromWest)
-					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
-				*/
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (enemyTurningSouthFromEast)
+					enemyTrailLength = Math.abs(enemyCycle.position.x - enemyTrailSpawnX) - 0.02;
+				if (enemyTurningSouthFromWest)
+					enemyTrailLength = Math.abs(enemyTrailSpawnX - enemyCycle.position.x) - 0.02;
+				enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+				
+				enemyEastWestTrail[enemyEastWestTrailCount].scale.set(enemyTrailScale, 1, 1);
+				if (enemyTurningSouthFromEast)
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX + (enemyTrailLength / 2);
+				if (enemyTurningSouthFromWest)
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX - (enemyTrailLength / 2);
+				
 				
 				enemyTurningSouthFromEast = false;
 				enemyTurningSouthFromWest = false;
 				
-				/*
-				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
-				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+				enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
 				
-				
-				spawnTrail();
-				*/
+				enemySpawnTrail();
 				
 				// snap enemy's camera to enemyCycle's new heading
 				enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
 				
 			}
+			
 			
 			// enemy turning WEST
 			if (enemyTurningWestFromNorth || enemyTurningWestFromSouth) {
@@ -532,33 +533,33 @@
 				enemyCycleDirection = WEST;
 				enemyCycleHeadingVector.copy(westVector);
 				
-				//enemyTrailBeginning.rotation.y = west_Y_Rotation;
+				enemyTrailBeginning.rotation.y = west_Y_Rotation;
 				enemyCycleJustTurned = true;
-				/*
-				// make final measurement before we cap off the current wall and turn the cycle
-				if (turningWestFromSouth)
-					trailLength = Math.abs(cycle.position.z - trailSpawnZ) - 0.02;
-				if (turningWestFromNorth)
-					trailLength = Math.abs(trailSpawnZ - cycle.position.z) - 0.02;
-				trailScale = trailLength / MAX_Trail_Length;
 				
-				northSouthTrail[northSouthTrailCount].scale.set(1, 1, trailScale);
-				if (turningWestFromSouth)
-					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ + (trailLength / 2);
-				if (turningWestFromNorth)
-					northSouthTrail[northSouthTrailCount].position.z = trailSpawnZ - (trailLength / 2);
-				*/
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (enemyTurningWestFromSouth)
+					enemyTrailLength = Math.abs(enemyCycle.position.z - enemyTrailSpawnZ) - 0.02;
+				if (enemyTurningWestFromNorth)
+					enemyTrailLength = Math.abs(enemyTrailSpawnZ - enemyCycle.position.z) - 0.02;
+				enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+				
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, enemyTrailScale);
+				if (enemyTurningWestFromSouth)
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ + (enemyTrailLength / 2);
+				if (enemyTurningWestFromNorth)
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ - (enemyTrailLength / 2);
+				
 				
 				enemyTurningWestFromNorth = false;
 				enemyTurningWestFromSouth = false;
 				
-				/*
-				northSouthTrail[northSouthTrailCount].updateMatrixWorld(true);
-				northSouthTrailShadow[northSouthTrailCount].update( groundPlane, lightPosition4D );
+				
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+				enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
 				
 				
-				spawnTrail();
-				*/
+				enemySpawnTrail();
+				
 				
 				// snap enemy's camera to enemyCycle's new heading
 				enemyCameraControlsYawObject.rotation.y = west_Y_Rotation;
@@ -571,33 +572,33 @@
 				enemyCycleDirection = NORTH;
 				enemyCycleHeadingVector.copy(northVector);
 			
-				//enemyTrailBeginning.rotation.y = north_Y_Rotation;
+				enemyTrailBeginning.rotation.y = north_Y_Rotation;
 				enemyCycleJustTurned = true;
-				/*
-				// make final measurement before we cap off the current wall and turn the cycle
-				if (turningNorthFromWest)
-					trailLength = Math.abs(trailSpawnX - cycle.position.x) - 0.02;
-				if (turningNorthFromEast)
-					trailLength = Math.abs(cycle.position.x - trailSpawnX) - 0.02;
-				trailScale = trailLength / MAX_Trail_Length;
 				
-				eastWestTrail[eastWestTrailCount].scale.set(trailScale, 1, 1);
-				if (turningNorthFromWest)
-					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX - (trailLength / 2);
-				if (turningNorthFromEast)
-					eastWestTrail[eastWestTrailCount].position.x = trailSpawnX + (trailLength / 2);
-				*/
+				// make final measurement before we cap off the current wall and turn the cycle
+				if (enemyTurningNorthFromWest)
+					enemyTrailLength = Math.abs(enemyTrailSpawnX - enemyCycle.position.x) - 0.02;
+				if (enemyTurningNorthFromEast)
+					enemyTrailLength = Math.abs(enemyCycle.position.x - enemyTrailSpawnX) - 0.02;
+				enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+				
+				enemyEastWestTrail[enemyEastWestTrailCount].scale.set(enemyTrailScale, 1, 1);
+				if (enemyTurningNorthFromWest)
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX - (enemyTrailLength / 2);
+				if (enemyTurningNorthFromEast)
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX + (enemyTrailLength / 2);
+				
 				
 				enemyTurningNorthFromEast = false;
 				enemyTurningNorthFromWest = false;
 				
-				/*
-				eastWestTrail[eastWestTrailCount].updateMatrixWorld(true);
-				eastWestTrailShadow[eastWestTrailCount].update( groundPlane, lightPosition4D );
+				
+				enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+				enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
 				
 				
-				spawnTrail();
-				*/
+				enemySpawnTrail();
+				
 				
 				// snap enemy's camera to enemyCycle's new heading
 				enemyCameraControlsYawObject.rotation.y = north_Y_Rotation;
@@ -610,11 +611,16 @@
 			
 			if (playerAlive && !gamePaused) {
 				
-				
+				// keep cycles' positions stable, due to floating point error
 				if (cycleDirection == NORTH) cycle.position.x = trailSpawnX;
 				else if (cycleDirection == SOUTH) cycle.position.x = trailSpawnX;
 				else if (cycleDirection == EAST) cycle.position.z = trailSpawnZ;
 				else if (cycleDirection == WEST) cycle.position.z = trailSpawnZ;
+				
+				if (enemyCycleDirection == NORTH) enemyCycle.position.x = enemyTrailSpawnX;
+				else if (enemyCycleDirection == SOUTH) enemyCycle.position.x = enemyTrailSpawnX;
+				else if (enemyCycleDirection == EAST) enemyCycle.position.z = enemyTrailSpawnZ;
+				else if (enemyCycleDirection == WEST) enemyCycle.position.z = enemyTrailSpawnZ;
 
 				// update cycle position
 				cycle.localToWorld(cycle.position);
@@ -683,7 +689,7 @@
 					}
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                         
-					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z + 1 + (trailBeginningLength * 0.5) );
+					trailBeginning.position.set( cycle.position.x, HALF_TRAIL_HEIGHT, cycle.position.z + 1 + (trailBeginningLength * 0.5) );
 
 					// update main trail wall
 					if (cycleTrailSpawnDistance > 3)
@@ -746,7 +752,7 @@
 					}
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                            
-					trailBeginning.position.set( cycle.position.x - ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
+					trailBeginning.position.set( cycle.position.x - ( 1 + (trailBeginningLength / 2) ), HALF_TRAIL_HEIGHT, cycle.position.z );
 					
 					// update main trail wall
 					if (cycleTrailSpawnDistance > 3)
@@ -808,7 +814,7 @@
 					}
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                         
-					trailBeginning.position.set( cycle.position.x, halfTrailHeight, cycle.position.z - 1 - (trailBeginningLength / 2) );
+					trailBeginning.position.set( cycle.position.x, HALF_TRAIL_HEIGHT, cycle.position.z - 1 - (trailBeginningLength / 2) );
 
 					// update main trail wall
 					if (cycleTrailSpawnDistance > 3)
@@ -870,7 +876,7 @@
 					}
 
 					// make blended beginning trail closely follow cycle's rear wheel                                                            
-					trailBeginning.position.set( cycle.position.x + ( 1 + (trailBeginningLength / 2) ), halfTrailHeight, cycle.position.z );
+					trailBeginning.position.set( cycle.position.x + ( 1 + (trailBeginningLength / 2) ), HALF_TRAIL_HEIGHT, cycle.position.z );
 
 					// update main trail wall
 					if (cycleTrailSpawnDistance > 3)
@@ -907,6 +913,259 @@
 					test_EW_trailEndX[testEWTrailCount] = cycle.position.x;
 
 				} // end else if (cycleDirection == WEST)
+				
+				
+				// UPDATE ENEMY CYCLE's TRAILS
+				
+				if (enemyCycleDirection == NORTH) {
+
+					// record the distance between the cycle and its trail spawn point when it turned or started the match 
+					enemyCycleTrailSpawnDistance = Math.abs(enemyTrailSpawnZ - enemyCycle.position.z) + 0.001;
+
+					if (enemyAnimatingBlendedTrail) {
+						// if the cycle is far enough away from the active trail spawn point, 
+						// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+						if (enemyCycleTrailSpawnDistance > 1)
+							enemyTrailBeginningLength = enemyCycleTrailSpawnDistance - 1;
+						else 
+							enemyTrailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+						// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+						if (enemyTrailBeginningLength > 2.1) {
+							enemyTrailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+							enemyAnimatingBlendedTrail = false;
+						}
+
+						enemyTrailBeginningVerticalScale = (enemyTrailBeginningLength < 1.0) ? enemyTrailBeginningLength : 1;
+						enemyTrailBeginning.scale.set(1, enemyTrailBeginningVerticalScale, enemyTrailBeginningLength);
+					}
+
+					// make blended beginning trail closely follow cycle's rear wheel                                                         
+					enemyTrailBeginning.position.set( enemyCycle.position.x, HALF_TRAIL_HEIGHT, enemyCycle.position.z + 1 + (enemyTrailBeginningLength * 0.5) );
+
+					// update main trail wall
+					if (enemyCycleTrailSpawnDistance > 3)
+						enemyTrailLength = enemyCycleTrailSpawnDistance - 3;
+					else enemyTrailLength = 0.001;
+					
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
+					// also when this happens, it's time to spawn another trail segment
+					if (enemyTrailLength > MAX_Trail_Length) {
+
+						enemyTrailLength = MAX_Trail_Length;
+						// cap off current trail segment
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, 1);
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ - HALF_MAX_Trail_Length;
+						// get the correct current matrix so shadows match exactly
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+						enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
+
+						enemyCycleJustTurned = false;
+						// get the next segment ready
+						enemySpawnTrail(); // spawn another trail segement in the same direction
+
+					}
+
+					enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, enemyTrailScale);
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ - (enemyTrailLength / 2);
+					// update the current active blended trail so its shadow matches exactly
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+					// now update the current active trail's shadow
+					enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
+
+					// update the active blended trail's collision geometry
+					enemyTest_NS_trailEndZ[enemyTestNSTrailCount] = enemyCycle.position.z;
+
+				} // end if (enemyCycleDirection == NORTH)
+
+				
+				else if (enemyCycleDirection == EAST) {
+
+					// record the distance between the cycle and its trail spawn point when it turned or started the match 
+					enemyCycleTrailSpawnDistance = Math.abs(enemyCycle.position.x - enemyTrailSpawnX) + 0.001;
+
+					if (enemyAnimatingBlendedTrail) {
+						// if the cycle is far enough away from the active trail spawn point, 
+						// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+						if (enemyCycleTrailSpawnDistance > 1)
+							enemyTrailBeginningLength = enemyCycleTrailSpawnDistance - 1;
+						else 
+							enemyTrailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+						// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+						if (enemyTrailBeginningLength > 2.1) {
+							enemyTrailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+							enemyAnimatingBlendedTrail = false;
+						}
+
+						enemyTrailBeginningVerticalScale = (enemyTrailBeginningLength < 1.0) ? enemyTrailBeginningLength : 1;
+						enemyTrailBeginning.scale.set(1, enemyTrailBeginningVerticalScale, enemyTrailBeginningLength);
+					}
+
+					// make blended beginning trail closely follow cycle's rear wheel                                                            
+					enemyTrailBeginning.position.set( enemyCycle.position.x - ( 1 + (enemyTrailBeginningLength / 2) ), HALF_TRAIL_HEIGHT, enemyCycle.position.z );
+					
+					// update main trail wall
+					if (enemyCycleTrailSpawnDistance > 3)
+						enemyTrailLength = enemyCycleTrailSpawnDistance - 3;
+					else enemyTrailLength = 0.001;
+					
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
+					// also when this happens, it's time to spawn another trail segment
+					if (enemyTrailLength > MAX_Trail_Length) {
+
+						enemyTrailLength = MAX_Trail_Length;
+						// cap off current trail segment
+						enemyEastWestTrail[enemyEastWestTrailCount].scale.set(1, 1, 1);
+						enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX + HALF_MAX_Trail_Length;
+						// get the correct current matrix so shadows match exactly
+						enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+						enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
+
+						enemyCycleJustTurned = false;
+						// get the next segment ready
+						enemySpawnTrail(); // spawn another trail segement in the same direction
+
+					}
+
+
+					enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+
+					enemyEastWestTrail[enemyEastWestTrailCount].scale.set(enemyTrailScale, 1, 1);
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX + (enemyTrailLength / 2);
+					// update the current active blended trail so its shadow matches exactly
+					enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+					enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
+
+					enemyTest_EW_trailEndX[enemyTestEWTrailCount] = enemyCycle.position.x;
+
+				} // end else if (enemyCycleDirection == EAST)
+
+				else if (enemyCycleDirection == SOUTH) {
+
+					// record the distance between the cycle and its trail spawn point when it turned or started the match 
+					enemyCycleTrailSpawnDistance = Math.abs(enemyCycle.position.z - enemyTrailSpawnZ) + 0.001;
+
+					if (enemyAnimatingBlendedTrail) {
+						// if the cycle is far enough away from the active trail spawn point, 
+						// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+						if (enemyCycleTrailSpawnDistance > 1)
+							enemyTrailBeginningLength = enemyCycleTrailSpawnDistance - 1;
+						else 
+							enemyTrailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+						// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+						if (enemyTrailBeginningLength > 2.1) {
+							enemyTrailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+							enemyAnimatingBlendedTrail = false;
+						}
+
+						enemyTrailBeginningVerticalScale = (enemyTrailBeginningLength < 1.0) ? enemyTrailBeginningLength : 1;
+						enemyTrailBeginning.scale.set(1, enemyTrailBeginningVerticalScale, enemyTrailBeginningLength);
+					}
+
+					// make blended beginning trail closely follow cycle's rear wheel                                                         
+					enemyTrailBeginning.position.set( enemyCycle.position.x, HALF_TRAIL_HEIGHT, enemyCycle.position.z - 1 - (enemyTrailBeginningLength / 2) );
+
+					// update main trail wall
+					if (enemyCycleTrailSpawnDistance > 3)
+						enemyTrailLength = enemyCycleTrailSpawnDistance - 3;
+					else enemyTrailLength = 0.001;
+					
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
+					// also when this happens, it's time to spawn another trail segment
+					if (enemyTrailLength > MAX_Trail_Length) {
+
+						enemyTrailLength = MAX_Trail_Length;
+						// cap off current trail segment
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, 1);
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ + HALF_MAX_Trail_Length;
+						// get the correct current matrix so shadows match exactly
+						enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+						enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
+
+						enemyCycleJustTurned = false;
+						// get the next segment ready
+						enemySpawnTrail(); // spawn another trail segement in the same direction
+
+					}
+
+					enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(1, 1, enemyTrailScale);
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyTrailSpawnZ + (enemyTrailLength / 2);
+					// update the current active blended trail so its shadow matches exactly
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].updateMatrixWorld(true);
+					// now update the current active trail's shadow
+					enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].update( groundPlane, lightPosition4D );
+
+					enemyTest_NS_trailEndZ[enemyTestNSTrailCount] = enemyCycle.position.z;
+
+				} // end else if (enemyCycleDirection == SOUTH)
+
+				else if (enemyCycleDirection == WEST) {
+
+					// record the distance between the cycle and its trail spawn point when it turned or started the match 
+					enemyCycleTrailSpawnDistance = Math.abs(enemyTrailSpawnX - enemyCycle.position.x) + 0.001;
+
+					if (enemyAnimatingBlendedTrail) {
+						// if the cycle is far enough away from the active trail spawn point, 
+						// make the white->cycleColor blended beginning trail start closely following the back wheel of the cycle
+						if (enemyCycleTrailSpawnDistance > 1)
+							enemyTrailBeginningLength = enemyCycleTrailSpawnDistance - 1;
+						else 
+							enemyTrailBeginningLength = 0.001; // else, the trail beginning doesn't have any noticable length yet
+
+						// clamp white->cycleColor blended beginning trail (nearest cycle's rear wheel) to a short length of 2 units
+						if (enemyTrailBeginningLength > 2.1) {
+							enemyTrailBeginningLength = 2.1;//2.1 instead of 2 to cover up light vertical line segment
+							enemyAnimatingBlendedTrail = false;
+						}
+
+						enemyTrailBeginningVerticalScale = (enemyTrailBeginningLength < 1.0) ? enemyTrailBeginningLength : 1;
+						enemyTrailBeginning.scale.set(1, enemyTrailBeginningVerticalScale, enemyTrailBeginningLength);
+					}
+
+					// make blended beginning trail closely follow cycle's rear wheel                                                            
+					enemyTrailBeginning.position.set( enemyCycle.position.x + ( 1 + (enemyTrailBeginningLength / 2) ), HALF_TRAIL_HEIGHT, enemyCycle.position.z );
+
+					// update main trail wall
+					if (enemyCycleTrailSpawnDistance > 3)
+						enemyTrailLength = enemyCycleTrailSpawnDistance - 3;
+					else enemyTrailLength = 0.001;	
+
+					// when trail wall segment reaches the MAX_Trail_Length, clamp it.
+					// also when this happens, it's time to spawn another trail segment
+					if (enemyTrailLength > MAX_Trail_Length) {
+
+						enemyTrailLength = MAX_Trail_Length;
+						// cap off current trail segment
+						enemyEastWestTrail[enemyEastWestTrailCount].scale.set(1, 1, 1);
+						enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX - HALF_MAX_Trail_Length;
+						// get the correct current matrix so shadows match exactly
+						enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+						enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
+
+						enemyCycleJustTurned = false;
+						// get the next segment ready
+						enemySpawnTrail(); // spawn another trail segement in the same direction
+
+					}
+
+
+					enemyTrailScale = enemyTrailLength / MAX_Trail_Length;
+
+					enemyEastWestTrail[enemyEastWestTrailCount].scale.set(enemyTrailScale, 1, 1);
+					enemyEastWestTrail[enemyEastWestTrailCount].position.x = enemyTrailSpawnX - (enemyTrailLength / 2);
+					// update the current active blended trail so its shadow matches exactly
+					enemyEastWestTrail[enemyEastWestTrailCount].updateMatrixWorld(true);
+					enemyEastWestTrailShadow[enemyEastWestTrailCount].update( groundPlane, lightPosition4D );
+
+					enemyTest_EW_trailEndX[enemyTestEWTrailCount] = enemyCycle.position.x;
+
+				} // end else if (enemyCycleDirection == WEST)
 				
 				
 				
@@ -1041,9 +1300,9 @@
 				
 				// update cycles components
 				// spin wheels
-				verticalAngle += (cycleSpeed * 12) * frameTime;
-				if ( verticalAngle > TWO_PI ) {
-					verticalAngle -= TWO_PI;
+				wheelAngle += (cycleSpeed * 12) * frameTime;
+				if ( wheelAngle > TWO_PI ) {
+					wheelAngle -= TWO_PI;
 					flipper = !flipper;
 				}
 
@@ -1054,7 +1313,7 @@
 				enemyCycle.children[2].rotation.z = 0.003 * flipper;
 				
 			
-			} // end if (playerAlive)
+			} // end if (playerAlive && !gamePaused)
 			
 			
 			// CUTSCENES AND ANIMATIONS //////////////////////////////////////////////////////////////////////////////////////////
@@ -1095,18 +1354,40 @@
 					explosionFlare.visible = false;
 					explosionFlare.material.opacity = 1.0;
 					
-					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+					if (!playerAlive) {
 						
-						eastWestTrail[i].matrixAutoUpdate = true;
+						for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+
+							eastWestTrail[i].matrixAutoUpdate = true;
+
+						}
+						for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+
+							northSouthTrail[i].matrixAutoUpdate = true;
+
+						}
+						
+						playingTrailDisappearAnimation = true;
 						
 					}
-					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+					else if (!enemyAlive) {
+						
+						for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
 
-						northSouthTrail[i].matrixAutoUpdate = true;
+							enemyEastWestTrail[i].matrixAutoUpdate = true;
+
+						}
+						for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+
+							enemyNorthSouthTrail[i].matrixAutoUpdate = true;
+
+						}
+						
+						enemyPlayingTrailDisappearAnimation = true;
 						
 					}
 					
-					playingTrailDisappearAnimation = true;
+					
 					playingCrashAnimation = false;
 					
 					crashAnimationTimer.reset();
@@ -1124,14 +1405,14 @@
 				if (northSouthTrail[0].scale.y >= 0.05) {
 					
 					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
-						northSouthTrail[i].position.y = halfTrailHeight - (trailLoweringAmount * 0.7 );
+						northSouthTrail[i].position.y = HALF_TRAIL_HEIGHT - (trailLoweringAmount * 0.7 );
 						northSouthTrail[i].scale.y = 1 - trailLoweringAmount;
 						northSouthTrail[i].updateMatrixWorld(true);
 						northSouthTrailShadow[i].update( groundPlane, lightPosition4D );	
 					}
 					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
-						eastWestTrail[i].position.y = halfTrailHeight - (trailLoweringAmount * 0.7 );
+						eastWestTrail[i].position.y = HALF_TRAIL_HEIGHT - (trailLoweringAmount * 0.7 );
 						eastWestTrail[i].scale.y = 1 - trailLoweringAmount;
 						eastWestTrail[i].updateMatrixWorld(true);
 						eastWestTrailShadow[i].update( groundPlane, lightPosition4D );	
@@ -1141,14 +1422,14 @@
 				else if (northSouthTrail[0].scale.y < 0.05) {
 					
 					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
-						northSouthTrail[i].position.y = halfTrailHeight;
+						northSouthTrail[i].position.y = HALF_TRAIL_HEIGHT;
 						northSouthTrail[i].scale.y = 1;
 						northSouthTrail[i].visible = false;
 						northSouthTrailShadow[i].visible = false;
 					}
 					
 					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
-						eastWestTrail[i].position.y = halfTrailHeight;
+						eastWestTrail[i].position.y = HALF_TRAIL_HEIGHT;
 						eastWestTrail[i].scale.y = 1;
 						eastWestTrail[i].visible = false;
 						eastWestTrailShadow[i].visible = false;
@@ -1175,6 +1456,33 @@
 					testNSTrailCount = -1;
 					testEWTrailCount = -1;
 					
+					for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
+
+						enemyEastWestTrail[i].matrixAutoUpdate = true;
+
+					}
+					for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+
+						enemyNorthSouthTrail[i].matrixAutoUpdate = true;
+
+					}
+					
+					for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
+						enemyEastWestTrail[i].scale.y = 1;
+						enemyEastWestTrail[i].visible = false;
+						enemyEastWestTrailShadow[i].visible = false;
+					}
+					for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+						enemyNorthSouthTrail[i].scale.y = 1;
+						enemyNorthSouthTrail[i].visible = false;
+						enemyNorthSouthTrailShadow[i].visible = false; 
+					}
+					
+					enemyNorthSouthTrailCount = -1;
+					enemyEastWestTrailCount = -1;
+					enemyTestNSTrailCount = -1;
+					enemyTestEWTrailCount = -1;
+					
 					playerAlive = true;
 					cycle.visible = true;
 					trailBeginning.visible = true;
@@ -1197,15 +1505,36 @@
 						cycle.rotateOnAxis(upVector, Math.PI);
 					}
 					
-					// initial starting position
-					cycle.localToWorld(cycle.position);
-					cycle.position.set(-2, 0, 40);
+					enemyCycle.worldToLocal(enemyCycle.position);
+					if (enemyCycleDirection == WEST) {
+						enemyCycle.rotateOnAxis(upVector, PI_2);
+					}
+					if (enemyCycleDirection == EAST) {
+						enemyCycle.rotateOnAxis(upVector, -PI_2);
+					}
+					if (enemyCycleDirection == NORTH) {
+						enemyCycle.rotateOnAxis(upVector, Math.PI);
+					}
 					
 					// reset initial heading and rotation
 					cycleDirection = NORTH;
 					cycleHeadingVector.copy(northVector);
-
 					trailBeginning.rotation.y = north_Y_Rotation;
+					
+					// reset initial heading and rotation
+					enemyCycleDirection = SOUTH;
+					enemyCycleHeadingVector.copy(southVector);
+					enemyTrailBeginning.rotation.y = south_Y_Rotation;
+					
+					
+					// initial starting position
+					///cycle.localToWorld(cycle.position);
+					cycle.position.set(-2, 0, 40);
+					
+					// initial starting position
+					///enemyCycle.localToWorld(enemyCycle.position);
+					enemyCycle.position.set(2, 0, -30);
+					
 					// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
 					cycleJustTurned = true;
 					
@@ -1218,6 +1547,20 @@
 				
 					trailBeginning.scale.set(0.001, 0.001, 0.001);
 					trailBeginning.position.copy(cycle.position);
+					
+					
+					// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+					enemyCycleJustTurned = true;
+					
+					// spawn the enemy cycle's first jet trail
+					enemySpawnTrail();
+					
+					// shrink the first jet trail so we can't see it until the enemy cycle has pulled away
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyCycle.position.z;
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+					enemyTrailBeginning.scale.set(0.001, 0.001, 0.001);
+					enemyTrailBeginning.position.copy(enemyCycle.position);
 
 					/*
 					// for debug flyCam
@@ -1228,12 +1571,196 @@
 					joystick.previousRotationX = -0.5;
 					*/
 					
+					enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
+					
 					// snap camera to cycle's new heading
 					cameraControlsYawObject.rotation.y = north_Y_Rotation;
 					joystick.previousRotationY = north_Y_Rotation;
 					
 					playingTrailDisappearAnimation = false;
 					trailDisappearAnimationTimer.reset();
+					
+				}
+				
+			}
+			
+			
+			if (enemyPlayingTrailDisappearAnimation) {
+				
+				enemyTrailDisappearAnimationTimer.run(frameTime);
+				enemyTrailLoweringAmount =  enemyTrailDisappearAnimationTimer.counter * 0.5;
+				
+				if (enemyNorthSouthTrail[0].scale.y >= 0.05) {
+					
+					for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+						enemyNorthSouthTrail[i].position.y = HALF_TRAIL_HEIGHT - (enemyTrailLoweringAmount * 0.7 );
+						enemyNorthSouthTrail[i].scale.y = 1 - enemyTrailLoweringAmount;
+						enemyNorthSouthTrail[i].updateMatrixWorld(true);
+						enemyNorthSouthTrailShadow[i].update( groundPlane, lightPosition4D );	
+					}
+					
+					for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
+						enemyEastWestTrail[i].position.y = HALF_TRAIL_HEIGHT - (enemyTrailLoweringAmount * 0.7 );
+						enemyEastWestTrail[i].scale.y = 1 - enemyTrailLoweringAmount;
+						enemyEastWestTrail[i].updateMatrixWorld(true);
+						enemyEastWestTrailShadow[i].update( groundPlane, lightPosition4D );	
+					}	
+					
+				}
+				else if (enemyNorthSouthTrail[0].scale.y < 0.05) {
+					
+					for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+						enemyNorthSouthTrail[i].position.y = HALF_TRAIL_HEIGHT;
+						enemyNorthSouthTrail[i].scale.y = 1;
+						enemyNorthSouthTrail[i].visible = false;
+						enemyNorthSouthTrailShadow[i].visible = false;
+					}
+					
+					for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
+						enemyEastWestTrail[i].position.y = HALF_TRAIL_HEIGHT;
+						enemyEastWestTrail[i].scale.y = 1;
+						enemyEastWestTrail[i].visible = false;
+						enemyEastWestTrailShadow[i].visible = false;
+					}	
+					
+				}
+				
+				
+				if (enemyTrailDisappearAnimationTimer.alarmSounding) {
+					
+					for ( var i = 0; i <= enemyEastWestTrailCount; i++ ) {
+						enemyEastWestTrail[i].scale.y = 1;
+						enemyEastWestTrail[i].visible = false;
+						enemyEastWestTrailShadow[i].visible = false;
+					}
+					for ( var i = 0; i <= enemyNorthSouthTrailCount; i++ ) {
+						enemyNorthSouthTrail[i].scale.y = 1;
+						enemyNorthSouthTrail[i].visible = false;
+						enemyNorthSouthTrailShadow[i].visible = false; 
+					}
+					
+					enemyNorthSouthTrailCount = -1;
+					enemyEastWestTrailCount = -1;
+					enemyTestNSTrailCount = -1;
+					enemyTestEWTrailCount = -1;
+					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+
+						eastWestTrail[i].matrixAutoUpdate = true;
+
+					}
+					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+
+						northSouthTrail[i].matrixAutoUpdate = true;
+
+					}
+					
+					for ( var i = 0; i <= eastWestTrailCount; i++ ) {
+						eastWestTrail[i].scale.y = 1;
+						eastWestTrail[i].visible = false;
+						eastWestTrailShadow[i].visible = false;
+					}
+					for ( var i = 0; i <= northSouthTrailCount; i++ ) {
+						northSouthTrail[i].scale.y = 1;
+						northSouthTrail[i].visible = false;
+						northSouthTrailShadow[i].visible = false; 
+					}
+					
+					northSouthTrailCount = -1;
+					eastWestTrailCount = -1;
+					testNSTrailCount = -1;
+					testEWTrailCount = -1;
+					
+					enemyAlive = true;
+					enemyCycle.visible = true;
+					enemyTrailBeginning.visible = true;
+					
+					enemyBlendedBeginningTrailShadow.visible = true;
+					
+					enemyCycleShadow[0].visible = true;
+					enemyCycleShadow[1].visible = true;
+					enemyCycleShadow[2].visible = true;
+					enemyCycleShadow[3].visible = true;
+					
+					
+					enemyCycle.worldToLocal(enemyCycle.position);
+					if (enemyCycleDirection == WEST) {
+						enemyCycle.rotateOnAxis(upVector, PI_2);
+					}
+					if (enemyCycleDirection == EAST) {
+						enemyCycle.rotateOnAxis(upVector, -PI_2);
+					}
+					if (enemyCycleDirection == NORTH) {
+						enemyCycle.rotateOnAxis(upVector, Math.PI);
+					}
+					
+					
+					cycle.worldToLocal(cycle.position);
+					if (cycleDirection == WEST) {
+						cycle.rotateOnAxis(upVector, -PI_2);
+					}
+					if (cycleDirection == EAST) {
+						cycle.rotateOnAxis(upVector, PI_2);
+					}
+					if (cycleDirection == SOUTH) {
+						cycle.rotateOnAxis(upVector, Math.PI);
+					}
+					
+					// reset initial heading and rotation
+					enemyCycleDirection = SOUTH;
+					enemyCycleHeadingVector.copy(southVector);
+					enemyTrailBeginning.rotation.y = south_Y_Rotation;
+					
+					// reset initial heading and rotation
+					cycleDirection = NORTH;
+					cycleHeadingVector.copy(northVector);
+					trailBeginning.rotation.y = north_Y_Rotation;
+					
+					// initial starting position
+					///enemyCycle.localToWorld(enemyCycle.position);
+					enemyCycle.position.set(2, 0, -30);
+					
+					// initial starting position
+					///cycle.localToWorld(cycle.position);
+					cycle.position.set(-2, 0, 40);
+					
+					
+					// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+					enemyCycleJustTurned = true;
+					
+					// spawn the enemy cycle's first jet trail
+					enemySpawnTrail();
+					
+					// shrink the first jet trail so we can't see it until the enemy cycle has pulled away
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.z = enemyCycle.position.z;
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+					enemyTrailBeginning.scale.set(0.001, 0.001, 0.001);
+					enemyTrailBeginning.position.copy(enemyCycle.position);
+					
+					
+					// trigger a 'dummy' cycleJustTurned event to start new blended trail formation
+					cycleJustTurned = true;
+					
+					// spawn the cycle's first jet trail
+					spawnTrail();
+					
+					// shrink the first jet trail so we can't see it until the cycle has pulled away
+					northSouthTrail[northSouthTrailCount].position.z = cycle.position.z;
+					northSouthTrail[northSouthTrailCount].scale.set(0.001, 0.001, 0.001);
+				
+					trailBeginning.scale.set(0.001, 0.001, 0.001);
+					trailBeginning.position.copy(cycle.position);
+					
+					
+					enemyCameraControlsYawObject.rotation.y = south_Y_Rotation;
+					
+					// snap camera to cycle's new heading
+					cameraControlsYawObject.rotation.y = north_Y_Rotation;
+					joystick.previousRotationY = north_Y_Rotation;
+					
+					enemyPlayingTrailDisappearAnimation = false;
+					enemyTrailDisappearAnimationTimer.reset();
 					
 				}
 				
@@ -1261,8 +1788,11 @@
 			// get the correct current matrix so shadows match exactly
 			trailBeginning.updateMatrixWorld(true);
 			blendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
-			
 			northSouthTrailShadow[0].update( groundPlane, lightPosition4D );
+			
+			enemyTrailBeginning.updateMatrixWorld(true);
+			enemyBlendedBeginningTrailShadow.update( groundPlane, lightPosition4D );
+			enemyNorthSouthTrailShadow[0].update( groundPlane, lightPosition4D );
 				
 			cycleShadow[0].update( groundPlane, lightPosition4D );
 			cycleShadow[1].update( groundPlane, lightPosition4D );
@@ -1346,7 +1876,7 @@
 				
 				
 				northSouthTrailCount += 1;
-				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, HALF_TRAIL_HEIGHT, trailSpawnZ);
 				northSouthTrail[northSouthTrailCount].visible = true;
 				northSouthTrailShadow[northSouthTrailCount].visible = true;
 					
@@ -1384,7 +1914,7 @@
 				}
 				
 				northSouthTrailCount += 1;
-				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				northSouthTrail[northSouthTrailCount].position.set(trailSpawnX, HALF_TRAIL_HEIGHT, trailSpawnZ);
 				northSouthTrail[northSouthTrailCount].visible = true;
 				northSouthTrailShadow[northSouthTrailCount].visible = true;
 					
@@ -1419,7 +1949,7 @@
 				}
 				
 				eastWestTrailCount += 1;
-				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, HALF_TRAIL_HEIGHT, trailSpawnZ);
 				eastWestTrail[eastWestTrailCount].visible = true;
 				eastWestTrailShadow[eastWestTrailCount].visible = true;
 					
@@ -1454,7 +1984,7 @@
 				}
 				
 				eastWestTrailCount += 1;
-				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, halfTrailHeight, trailSpawnZ);
+				eastWestTrail[eastWestTrailCount].position.set(trailSpawnX, HALF_TRAIL_HEIGHT, trailSpawnZ);
 				eastWestTrail[eastWestTrailCount].visible = true;
 				eastWestTrailShadow[eastWestTrailCount].visible = true;
 					
@@ -1466,6 +1996,164 @@
 			}
 			
 		} // end function spawnTrail()
+		
+		function enemySpawnTrail() {
+			
+			enemyTrailLength = 0.001;
+			
+			if (enemyCycleDirection == NORTH) {
+				
+				if (enemyCycleJustTurned) {
+					
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTestNSTrailCount += 1;
+					enemyTest_NS_trailX[enemyTestNSTrailCount] = enemyTrailSpawnX;
+					enemyTest_NS_trailStartZ[enemyTestNSTrailCount] = enemyTrailSpawnZ;
+					
+					// record the current blended trail starting point for later checking
+					enemyTest_NS_currentTrailStartZ = enemyTrailSpawnZ;
+					// cap off the current collision test trail in the previous direction
+					if (enemyTestEWTrailCount > -1) {
+						enemyTest_EW_trailEndX[enemyTestEWTrailCount] = enemyTrailSpawnX;
+					}
+					
+				}	
+				else { // spawn another trail wall segment in the same direction
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ -= MAX_Trail_Length;
+					// record the distance between the cycle and the new trail spawn point 
+					enemyTrailLength = Math.abs( enemyTrailSpawnZ - (enemyCycle.position.z + 3) ) + 0.001;
+				}
+				
+				// disable matrix updating for the previous trail segment / shadow, in order to 
+				// optimize game loop time when there are lots of trail segments
+				if (enemyNorthSouthTrailCount > -1) {
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].matrixAutoUpdate = false;
+				}
+				
+				
+				enemyNorthSouthTrailCount += 1;
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.set(enemyTrailSpawnX, HALF_TRAIL_HEIGHT, enemyTrailSpawnZ);
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].visible = true;
+				enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].visible = true;
+					
+			}
+			
+			if (enemyCycleDirection == SOUTH) {
+				
+				if (enemyCycleJustTurned) {
+					
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTestNSTrailCount += 1;
+					enemyTest_NS_trailX[enemyTestNSTrailCount] = enemyTrailSpawnX;
+					enemyTest_NS_trailStartZ[enemyTestNSTrailCount] = enemyTrailSpawnZ;
+					
+					// record the current blended trail starting point for later checking
+					enemyTest_NS_currentTrailStartZ = enemyTrailSpawnZ;
+					// cap off the current collision test trail in the previous direction
+					if (enemyTestEWTrailCount > -1) {
+						enemyTest_EW_trailEndX[enemyTestEWTrailCount] = enemyTrailSpawnX;
+					}
+					
+				}	
+				else {
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ += MAX_Trail_Length;
+					
+					enemyTrailLength = Math.abs( (enemyCycle.position.z - 3) - enemyTrailSpawnZ ) + 0.001;
+				}
+				
+				if (enemyNorthSouthTrailCount > -1) {
+					enemyNorthSouthTrail[enemyNorthSouthTrailCount].matrixAutoUpdate = false;
+				}
+				
+				enemyNorthSouthTrailCount += 1;
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].position.set(enemyTrailSpawnX, HALF_TRAIL_HEIGHT, enemyTrailSpawnZ);
+				enemyNorthSouthTrail[enemyNorthSouthTrailCount].visible = true;
+				enemyNorthSouthTrailShadow[enemyNorthSouthTrailCount].visible = true;
+					
+			}
+			
+			if (enemyCycleDirection == EAST) {
+				
+				if (enemyCycleJustTurned) {
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTestEWTrailCount += 1;
+					enemyTest_EW_trailStartX[enemyTestEWTrailCount] = enemyTrailSpawnX;
+					enemyTest_EW_trailZ[enemyTestEWTrailCount] = enemyTrailSpawnZ;
+					
+					// record the current blended trail starting point for later checking
+					enemyTest_EW_currentTrailStartX = enemyTrailSpawnX;
+					
+					if (enemyTestNSTrailCount > -1) {
+						enemyTest_NS_trailEndZ[enemyTestNSTrailCount] = enemyTrailSpawnZ;
+					}
+				}
+				else {
+					enemyTrailSpawnX += MAX_Trail_Length;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTrailLength = Math.abs( (enemyCycle.position.x - 3) - enemyTrailSpawnX ) + 0.001;
+				}
+				
+				if (enemyEastWestTrailCount > -1) {
+					enemyEastWestTrail[enemyEastWestTrailCount].matrixAutoUpdate = false;
+				}
+				
+				enemyEastWestTrailCount += 1;
+				enemyEastWestTrail[enemyEastWestTrailCount].position.set(enemyTrailSpawnX, HALF_TRAIL_HEIGHT, enemyTrailSpawnZ);
+				enemyEastWestTrail[enemyEastWestTrailCount].visible = true;
+				enemyEastWestTrailShadow[enemyEastWestTrailCount].visible = true;
+					
+			}
+			
+			if (enemyCycleDirection == WEST) {
+				
+				if (enemyCycleJustTurned) {
+					enemyTrailSpawnX = enemyCycle.position.x;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTestEWTrailCount += 1;
+					enemyTest_EW_trailStartX[enemyTestEWTrailCount] = enemyTrailSpawnX;
+					enemyTest_EW_trailZ[enemyTestEWTrailCount] = enemyTrailSpawnZ;
+					
+					// record the current blended trail starting point for later checking
+					enemyTest_EW_currentTrailStartX = enemyTrailSpawnX;
+					
+					if (enemyTestNSTrailCount > -1) {
+						enemyTest_NS_trailEndZ[enemyTestNSTrailCount] = enemyTrailSpawnZ;
+					}
+				}
+				else {
+					enemyTrailSpawnX -= MAX_Trail_Length;
+					enemyTrailSpawnZ = enemyCycle.position.z;
+					
+					enemyTrailLength = Math.abs( enemyTrailSpawnX - (enemyCycle.position.x + 3) ) + 0.001;
+				}
+				
+				if (enemyEastWestTrailCount > -1) {
+					enemyEastWestTrail[enemyEastWestTrailCount].matrixAutoUpdate = false;
+				}
+				
+				enemyEastWestTrailCount += 1;
+				enemyEastWestTrail[enemyEastWestTrailCount].position.set(enemyTrailSpawnX, HALF_TRAIL_HEIGHT, enemyTrailSpawnZ);
+				enemyEastWestTrail[enemyEastWestTrailCount].visible = true;
+				enemyEastWestTrailShadow[enemyEastWestTrailCount].visible = true;
+					
+			}
+			
+			if (enemyCycleJustTurned) {
+				enemyAnimatingBlendedTrail = true;
+				enemyCycleJustTurned = false;
+			}
+			
+		} // end function enemySpawnTrail()
 		
 		
 		function cycleCrash () {
@@ -1489,6 +2177,30 @@
 			explosionFlare.rotation.copy(cycle.rotation);
 			
 			playingCrashAnimation = true;
+			
+		}
+		
+		function enemyCycleCrash () {
+			
+			enemyAlive = false;
+			enemyCycle.visible = false;
+			enemyTrailBeginning.visible = false;
+			enemyBlendedBeginningTrailShadow.visible = false;
+			
+			enemyCycleShadow[0].visible = false;
+			enemyCycleShadow[1].visible = false;
+			enemyCycleShadow[2].visible = false;
+			enemyCycleShadow[3].visible = false;
+			
+			explosionRings.visible = true;
+			explosionRings.position.copy(enemyCycle.position);
+			explosionRings.rotation.copy(enemyCycle.rotation);
+			
+			explosionFlare.visible = true;
+			explosionFlare.position.copy(enemyCycle.position);
+			explosionFlare.rotation.copy(enemyCycle.rotation);
+			
+			enemyPlayingCrashAnimation = true;
 			
 		}
 		
