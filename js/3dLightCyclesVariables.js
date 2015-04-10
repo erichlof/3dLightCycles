@@ -213,12 +213,20 @@ var enemyCycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
 var cycleSpeed = 20;
-var enemyCycleSpeed = 20;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var trailLoweringAmount = 0;
 var crashAnimationTimer = new THREEx.GameTimer(1.5);
 var trailDisappearAnimationTimer = new THREEx.GameTimer(3);
+
+var enemyCanTurnLeft = false;
+var enemyCanTurnRight = false;
+var enemyCycleSpeed = 20;
+var enemyPlayingCrashAnimation = false;
+var enemyPlayingTrailDisappearAnimation = false;
+var enemyTrailLoweringAmount = 0;
+var enemyCrashAnimationTimer = new THREEx.GameTimer(1.5);
+var enemyTrailDisappearAnimationTimer = new THREEx.GameTimer(3);
 
 var cycleJustTurned = false;
 var turnCycleRight = false;
@@ -271,18 +279,44 @@ var test_EW_trailZ = [];
 var test_EW_trailStartX = [];
 var test_EW_trailEndX = [];
 var test_EW_currentTrailStartX = 0;
+
+var enemyNorthSouthTrailCount = -1; // start this index at -1 so that during init time, 1 gets added to it, making 0th element
+var enemyEastWestTrailCount = -1;
+var enemyTestNSTrailCount = -1;
+var enemyTestEWTrailCount = -1;
+var enemyNorthSouthTrail = [];
+var enemyEastWestTrail = [];
+var enemyTrailSpawnX = 0;
+var enemyTrailSpawnZ = 0;
+var enemyCycleTrailSpawnDistance = 0;
+var enemyAnimatingBlendedTrail = false;
+
+var enemyCyclePositionX = 0;
+var enemyCyclePositionZ = 0;
+var enemyTest_NS_trailX = [];
+var enemyTest_NS_trailStartZ = [];
+var enemyTest_NS_trailEndZ = [];
+var enemyTest_NS_currentTrailStartZ = 0;
+var enemyTest_EW_trailZ = [];
+var enemyTest_EW_trailStartX = [];
+var enemyTest_EW_trailEndX = [];
+var enemyTest_EW_currentTrailStartX = 0;
+
 // Shadows
 var cycleShadow = [];
 var enemyCycleShadow = [];
 var northSouthTrailShadow = [];
 var eastWestTrailShadow = [];
 var blendedBeginningTrailShadow;
+
+var enemyNorthSouthTrailShadow = [];
+var enemyEastWestTrailShadow = [];
+var enemyBlendedBeginningTrailShadow;
+
 var normalVector = new THREE.Vector3( 0, 1, 0 );
 var planeConstant = 0.01;
 var groundPlane = new THREE.Plane( normalVector, planeConstant );
-var verticalAngle = 0;
-var horizontalAngle = 0;
-var testAngle = 0;
+var wheelAngle = 0;
 var flipper = 0;
 
 
@@ -433,7 +467,7 @@ var trailScale = 1;
 var trailBeginningLength = 1;
 var trailBeginningVerticalScale = 1;
 var trailHeight = 1.4;
-var halfTrailHeight = trailHeight * 0.5;
+var HALF_TRAIL_HEIGHT = trailHeight * 0.5;
 
 var currentColorText = "";
 var currentColorR1 = 0;
@@ -449,11 +483,20 @@ var trailColorB = Math.floor( 0 * 0.67 );
 var colorDeltaR = 255 - trailColorR;
 var colorDeltaG = 255 - trailColorG;
 var colorDeltaB = 255 - trailColorB;
+
+var enemyTrailColorR = Math.floor( 0 * 0.67 );
+var enemyTrailColorG = Math.floor( 50 * 0.67 );
+var enemyTrailColorB = Math.floor( 255 * 0.67 );
+var enemyColorDeltaR = 255 - enemyTrailColorR;
+var enemyColorDeltaG = 255 - enemyTrailColorG;
+var enemyColorDeltaB = 255 - enemyTrailColorB;
+
 var curveSegments = 8;//8
 var curveSegmentsX2 = curveSegments * 2; 
 // make the following 0.06 width instead of 0.05 so that the blended trail will cover up 
 // the light vertical line segment of the main trail
 var trailBeginningGeometry = new THREE.BoxGeometry(0.06, trailHeight, 1, 1, 1, curveSegments);
+var enemyTrailBeginningGeometry = new THREE.BoxGeometry(0.06, trailHeight, 1, 1, 1, curveSegments);
 
 var v2 = 0;
 var deformVec = new THREE.Vector3();
@@ -575,6 +618,124 @@ blendedBeginningTrailShadow.material.opacity = 0.9;
 scene.add(blendedBeginningTrailShadow);
 
 
+
+// ENEMY BLENDED TRAIL BEGINNING
+
+for (var v = 0; v <= curveSegments; v++) {
+	deformVec.set(-v * 0.005, (-v * v * v) * 0.0008, 0);
+	enemyTrailBeginningGeometry.vertices[v].add(deformVec);
+	v2 = v;
+}
+for (var v = (curveSegmentsX2 + 2); v <= (curveSegmentsX2 + 2 + curveSegments); v++) {
+	deformVec.set(v2 * 0.005, (-v2 * v2 * v2) * 0.0008, 0);
+	enemyTrailBeginningGeometry.vertices[v].add(deformVec);
+	v2 -= 1;
+}
+
+
+// east side of beginning trail wall
+for ( var i = 0; i < curveSegmentsX2; i+=2 ) {
+	// calculate color based on where we are along the rectangle (blends from trailColor to White, inside cycle's back wheel)
+	currentColorR1 = enemyTrailColorR + Math.floor( enemyColorDeltaR * (i / curveSegmentsX2) );
+	currentColorG1 = enemyTrailColorG + Math.floor( enemyColorDeltaG * (i / curveSegmentsX2) );
+	currentColorB1 = enemyTrailColorB + Math.floor( enemyColorDeltaB * (i / curveSegmentsX2) );
+	currentColorR2 = enemyTrailColorR + Math.floor( enemyColorDeltaR * ((i+2) / curveSegmentsX2) );
+	currentColorG2 = enemyTrailColorG + Math.floor( enemyColorDeltaG * ((i+2) / curveSegmentsX2) );
+	currentColorB2 = enemyTrailColorB + Math.floor( enemyColorDeltaB * ((i+2) / curveSegmentsX2) );
+	
+	// face(i) - the first series of triangles for this large rectangle
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	
+	// face(i+1) - the rest of the interlocking triangles for this large rectangle
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	
+	
+	
+	
+}
+
+// west side of beginning trail wall
+for ( var i = curveSegmentsX2; i < (curveSegmentsX2 * 2); i += 2 ) {
+	
+	currentColorR1 = 255 - Math.floor( enemyColorDeltaR * ((i - curveSegmentsX2) / curveSegmentsX2) );
+	currentColorG1 = 255 - Math.floor( enemyColorDeltaG * ((i - curveSegmentsX2) / curveSegmentsX2) );
+	currentColorB1 = 255 - Math.floor( enemyColorDeltaB * ((i - curveSegmentsX2) / curveSegmentsX2) );
+	currentColorR2 = 255 - Math.floor( enemyColorDeltaR * (((i+2) - curveSegmentsX2) / curveSegmentsX2) );
+	currentColorG2 = 255 - Math.floor( enemyColorDeltaG * (((i+2) - curveSegmentsX2) / curveSegmentsX2) );
+	currentColorB2 = 255 - Math.floor( enemyColorDeltaB * (((i+2) - curveSegmentsX2) / curveSegmentsX2) );
+	
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	
+}
+
+// main trail texture max intensity = (209,209,209) light grey color
+enemyColorDeltaR = 255 - 0;
+enemyColorDeltaG = 255 - 55;
+enemyColorDeltaB = 255 - 209;
+
+// top of beginning trail wall
+for ( var i = curveSegmentsX2 * 2; i < curveSegmentsX2 * 3; i+=2 ) {
+	
+	currentColorR1 = 255 - Math.floor( enemyColorDeltaR * ((i - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	currentColorG1 = 255 - Math.floor( enemyColorDeltaG * ((i - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	currentColorB1 = 255 - Math.floor( enemyColorDeltaB * ((i - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	currentColorR2 = 255 - Math.floor( enemyColorDeltaR * (((i+2) - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	currentColorG2 = 255 - Math.floor( enemyColorDeltaG * (((i+2) - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	currentColorB2 = 255 - Math.floor( enemyColorDeltaB * (((i+2) - (curveSegmentsX2 * 2)) / curveSegmentsX2) );
+	
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	
+	currentColorText = "rgb(" + currentColorR1 + "," + currentColorG1 + "," + currentColorB1 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[2] = new THREE.Color().setStyle(currentColorText);
+	currentColorText = "rgb(" + currentColorR2 + "," + currentColorG2 + "," + currentColorB2 + ")";
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[0] = new THREE.Color().setStyle(currentColorText);
+	enemyTrailBeginningGeometry.faces[i+1].vertexColors[1] = new THREE.Color().setStyle(currentColorText);
+	
+}
+
+// capped vertical end-face of this blended trail
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[0] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[1] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4].vertexColors[2] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[0] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[1] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+enemyTrailBeginningGeometry.faces[curveSegmentsX2 * 4+1].vertexColors[2] = new THREE.Color().setStyle( 'rgb(0,25,165)' );
+
+
+var enemyTrailBeginningMaterial = new THREE.MeshBasicMaterial({
+	vertexColors: THREE.VertexColors
+});
+var enemyTrailBeginning = new THREE.Mesh(enemyTrailBeginningGeometry, enemyTrailBeginningMaterial);
+scene.add(enemyTrailBeginning);
+
+enemyBlendedBeginningTrailShadow = new THREE.ShadowMesh(enemyTrailBeginning);
+enemyBlendedBeginningTrailShadow.material.opacity = 0.9;
+//enemyBlendedBeginningTrailShadow.visible = false;
+scene.add(enemyBlendedBeginningTrailShadow);
+
+
 // MAIN JET TRAILS
 
 var northSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, MAX_Trail_Length);
@@ -610,7 +771,7 @@ var trailMaterial = new THREE.MeshBasicMaterial({
 });
 
 northSouthTrail[0] = new THREE.Mesh(northSouthTrailGeometry, trailMaterial);
-northSouthTrail[0].position.set(0, halfTrailHeight, 30);
+northSouthTrail[0].position.set(0, HALF_TRAIL_HEIGHT, 30);
 northSouthTrail[0].visible = false;
 scene.add(northSouthTrail[0]);
 
@@ -620,7 +781,7 @@ northSouthTrailShadow[0].visible = false;
 scene.add(northSouthTrailShadow[0]);
 
 // make many copies of these jet walls for later use
-for ( var i = 1; i < 1000; i++ ) {			
+for ( var i = 1; i < 500; i++ ) {			
 	northSouthTrail[i] = northSouthTrail[0].clone();
 	northSouthTrail[i].visible = false;
 	scene.add(northSouthTrail[i]);
@@ -642,7 +803,7 @@ eastWestTrailShadow[0].visible = false;
 scene.add(eastWestTrailShadow[0]);
 
 // make many copies of these jet walls for later use
-for ( var i = 1; i < 1000; i++ ) {			
+for ( var i = 1; i < 500; i++ ) {			
 	eastWestTrail[i] = eastWestTrail[0].clone();
 	eastWestTrail[i].visible = false;
 	scene.add(eastWestTrail[i]);
@@ -653,6 +814,84 @@ for ( var i = 1; i < 1000; i++ ) {
 	scene.add(eastWestTrailShadow[i]);
 }
 
+
+// ENEMY MAIN JET TRAILS
+
+var enemyNorthSouthTrailGeometry = new THREE.BoxGeometry(0.05, trailHeight, MAX_Trail_Length);
+
+for ( var i = 0; i < enemyNorthSouthTrailGeometry.faces.length; i++ ) {			
+	enemyNorthSouthTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
+}
+enemyNorthSouthTrailGeometry.faces[ 4 ].color.set( 'rgb(255,255,255)' );//top edge
+enemyNorthSouthTrailGeometry.faces[ 5 ].color.set( 'rgb(255,255,255)' );//top edge
+enemyNorthSouthTrailGeometry.faces[ 8 ].color.set( 'rgb(255,255,255)' );//south edge
+enemyNorthSouthTrailGeometry.faces[ 9 ].color.set( 'rgb(255,255,255)' );//south edge
+enemyNorthSouthTrailGeometry.faces[ 10 ].color.set( 'rgb(255,255,255)' );//north edge
+enemyNorthSouthTrailGeometry.faces[ 11 ].color.set( 'rgb(255,255,255)' );//north edge
+
+var enemyEastWestTrailGeometry = new THREE.BoxGeometry(MAX_Trail_Length, trailHeight, 0.05);
+
+for ( var i = 0; i < enemyEastWestTrailGeometry.faces.length; i++ ) {			
+	enemyEastWestTrailGeometry.faces[ i ].color.set( 'rgb(210,210,210)' );
+}
+enemyEastWestTrailGeometry.faces[ 4 ].color.set( 'rgb(255,255,255)' );//top edge
+enemyEastWestTrailGeometry.faces[ 5 ].color.set( 'rgb(255,255,255)' );//top edge
+enemyEastWestTrailGeometry.faces[ 0 ].color.set( 'rgb(255,255,255)' );//east edge
+enemyEastWestTrailGeometry.faces[ 1 ].color.set( 'rgb(255,255,255)' );//east edge
+enemyEastWestTrailGeometry.faces[ 2 ].color.set( 'rgb(255,255,255)' );//west edge
+enemyEastWestTrailGeometry.faces[ 3 ].color.set( 'rgb(255,255,255)' );//west edge
+
+var enemyTrailLineTexture = new THREE.ImageUtils.loadTexture( 'images/lineSegment01.png' );
+
+var enemyTrailMaterial = new THREE.MeshBasicMaterial({
+	map: enemyTrailLineTexture,
+	color: 'rgb(0,50,255)',
+	vertexColors: THREE.FaceColors
+});
+
+enemyNorthSouthTrail[0] = new THREE.Mesh(enemyNorthSouthTrailGeometry, enemyTrailMaterial);
+enemyNorthSouthTrail[0].position.set(0, HALF_TRAIL_HEIGHT, 30);
+enemyNorthSouthTrail[0].visible = false;
+scene.add(enemyNorthSouthTrail[0]);
+
+enemyNorthSouthTrailShadow[0] = new THREE.ShadowMesh(enemyNorthSouthTrail[0]);
+enemyNorthSouthTrailShadow[0].material.opacity = 0.9;
+enemyNorthSouthTrailShadow[0].visible = false;
+scene.add(enemyNorthSouthTrailShadow[0]);
+
+// make many copies of these jet walls for later use
+for ( var i = 1; i < 500; i++ ) {			
+	enemyNorthSouthTrail[i] = enemyNorthSouthTrail[0].clone();
+	enemyNorthSouthTrail[i].visible = false;
+	scene.add(enemyNorthSouthTrail[i]);
+	
+	enemyNorthSouthTrailShadow[i] = new THREE.ShadowMesh(enemyNorthSouthTrail[i]);
+	enemyNorthSouthTrailShadow[i].material.opacity = 0.9;
+	enemyNorthSouthTrailShadow[i].visible = false;
+	scene.add(enemyNorthSouthTrailShadow[i]);
+}
+
+
+enemyEastWestTrail[0] = new THREE.Mesh(enemyEastWestTrailGeometry, enemyTrailMaterial);
+enemyEastWestTrail[0].visible = false;
+scene.add(enemyEastWestTrail[0]);
+
+enemyEastWestTrailShadow[0] = new THREE.ShadowMesh(enemyEastWestTrail[0]);
+enemyEastWestTrailShadow[0].material.opacity = 0.9;
+enemyEastWestTrailShadow[0].visible = false;
+scene.add(enemyEastWestTrailShadow[0]);
+
+// make many copies of these jet walls for later use
+for ( var i = 1; i < 500; i++ ) {			
+	enemyEastWestTrail[i] = enemyEastWestTrail[0].clone();
+	enemyEastWestTrail[i].visible = false;
+	scene.add(enemyEastWestTrail[i]);
+	
+	enemyEastWestTrailShadow[i] = new THREE.ShadowMesh(enemyEastWestTrail[i]);
+	enemyEastWestTrailShadow[i].material.opacity = 0.9;
+	enemyEastWestTrailShadow[i].visible = false;
+	scene.add(enemyEastWestTrailShadow[i]);
+}
 
 
 
