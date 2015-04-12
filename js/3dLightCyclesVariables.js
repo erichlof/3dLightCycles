@@ -98,7 +98,7 @@ if (mouseControl) {
 	}, false);
 
 	document.getElementById("container").addEventListener("mousedown", function(event) {
-		if (playerAlive && !gamePaused) {
+		if (playerAlive && enemyAlive && !gamePaused) {
 			if(event.button === 0)
 				turnCycleLeft = true;
 			else if(event.button === 2)
@@ -213,6 +213,11 @@ var enemyCycleHeadingVector = new THREE.Vector3();
 var canTurnLeft = false;
 var canTurnRight = false;
 var cycleSpeed = 20;
+var cycleCrashed = false;
+var enemyCycleCrashed = false;
+var needToResolveCollision = false;
+var resolveCollisionX = 0;
+var resolveCollisionZ = 0;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var trailLoweringAmount = 0;
