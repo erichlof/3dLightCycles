@@ -89,7 +89,7 @@ if (mouseControl) {
 	}, false);
 
 	document.getElementById("banner").addEventListener("mousedown", function(event) {
-		if (playerAlive && !gamePaused) {
+		if (playerAlive && enemyAlive && !gamePaused) {
 			if(event.button === 0)
 				turnCycleLeft = true;
 			else if(event.button === 2)
