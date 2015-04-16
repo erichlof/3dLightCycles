@@ -75,6 +75,7 @@
 	<script src="js/threex.GameTimer.js"></script>
 	<script src="js/howler.js"></script>
 	<script src="js/3dLightCyclesVariables.js"></script>
+	<script src="js/enemyAI.js"></script>
 	
 	<script>
 			
@@ -213,12 +214,14 @@
 			}
 			*/
 			
+			
+			
 			//if button1 is NOT pressed, reset it so we can turn again
-			if (!joystick.button1Pressed) {
+			if ( !joystick.button1Pressed ) {
 				canTurnRight = true;
 			}
 			//if button1 IS pressed, check to see if we can shoot
-			if (joystick.button1Pressed && playerAlive) {
+			if ( joystick.button1Pressed && playerAlive && enemyAlive ) {
 				if (canTurnRight) {
 					turnCycleRight = true;
 					//turn off ability to turn cycle so we don't rapid-fire turn
@@ -227,11 +230,11 @@
 			}
 			
 			//if button2 is NOT pressed, reset it so we can turn again
-			if (!joystick.button2Pressed) {
+			if ( !joystick.button2Pressed ) {
 				canTurnLeft = true;
 			}
 			//if button2 IS pressed, check to see if we can shoot
-			if (joystick.button2Pressed && playerAlive) {
+			if ( joystick.button2Pressed && playerAlive && enemyAlive ) {
 				if (canTurnLeft) {
 					turnCycleLeft = true;
 					//turn off ability to turn cycle so we don't rapid-fire turn
@@ -1171,33 +1174,16 @@
 				
 				// CHECK FOR COLLISIONS WITH TRAILS AND ARENA WALLS //////////////////////////////////////////////////////////////////
 				
-				/*
-				// doEnemyAI()
-				if (enemyCycle.position.x > arenaRadius) {
-					enemyCycle.position.x = arenaRadius - 1;
-					//enemyCycleCrash();
-					enemyTurnCycleRight = true;
-				}
-				if (enemyCycle.position.x < -arenaRadius) {
-					enemyCycle.position.x = -arenaRadius + 1;
-					//enemyCycleCrash();
-					enemyTurnCycleRight = true;
-				}
-				if (enemyCycle.position.z > arenaRadius) {
-					enemyCycle.position.z = arenaRadius - 1;
-					//enemyCycleCrash();
-					enemyTurnCycleRight = true;
-				}
-				if (enemyCycle.position.z < -arenaRadius) {
-					enemyCycle.position.z = -arenaRadius + 1;
-					//enemyCycleCrash();
-					enemyTurnCycleRight = true;
-				}
-				*/
+				
+				// first check for enemy cycle crashing
 				
 				// set up a reference to enemy cycle's position for faster loop lookup
 				enemyCyclePositionX = enemyCycle.position.x;
 				enemyCyclePositionZ = enemyCycle.position.z;
+				
+				// run enemy cycle's AI
+				doEnemyAI();
+				
 
 				if (enemyCycleDirection == NORTH) {
 					// check against player's trails
@@ -1419,240 +1405,255 @@
 
 				}
 				
+				// check for player cycle crashing
 				
 				// set up a reference to cycle's position for faster loop lookup
 				cyclePositionX = cycle.position.x;
 				cyclePositionZ = cycle.position.z;
+				
+				if ( !enemyCycleCrashed ) {
+					
+					if (cycleDirection == NORTH) {
+						// check against player's own trails
+						for ( var i = 0; i < testEWTrailCount; i++ ) {
 
-				if (cycleDirection == NORTH) {
-					// check against player's own trails
-					for ( var i = 0; i < testEWTrailCount; i++ ) {
+							if ( cyclePositionZ < test_EW_trailZ[i] && test_NS_currentTrailStartZ > test_EW_trailZ[i] ) {
 
-						if ( cyclePositionZ < test_EW_trailZ[i] && test_NS_currentTrailStartZ > test_EW_trailZ[i] ) {
-
-							if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
-								cycle.position.z = test_EW_trailZ[i] + 1;
-								cycleCrashed = true;
-							}
-							if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
-								cycle.position.z = test_EW_trailZ[i] + 1;
-								cycleCrashed = true;
-							}
-						}
-
-					}
-					// check against enemy's trails
-					for ( var i = 0; i <= enemyTestEWTrailCount; i++ ) {
-
-						if ( cyclePositionZ < enemyTest_EW_trailZ[i] && test_NS_currentTrailStartZ > enemyTest_EW_trailZ[i] ) {
-
-							if ( cyclePositionX > enemyTest_EW_trailStartX[i] && cyclePositionX < enemyTest_EW_trailEndX[i] ) {
-								if (i != enemyTestEWTrailCount) {
-									cycle.position.z = enemyTest_EW_trailZ[i] + 1;
+								if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
+									cycle.position.z = test_EW_trailZ[i] + 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestEWTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = cyclePositionX;
-									resolveCollisionZ = enemyTest_EW_trailZ[i];
-								}	
-							}
-							if ( cyclePositionX < enemyTest_EW_trailStartX[i] && cyclePositionX > enemyTest_EW_trailEndX[i] ) {
-								if (i != enemyTestEWTrailCount) {
-									cycle.position.z = enemyTest_EW_trailZ[i] + 1;
+								}
+								if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
+									cycle.position.z = test_EW_trailZ[i] + 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestEWTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = cyclePositionX;
-									resolveCollisionZ = enemyTest_EW_trailZ[i];
-								}	
-							}
-						}
-
-					}
-					// check against arena walls
-					if (cyclePositionZ < -arenaRadius) {
-						cycle.position.z = -arenaRadius + 1;
-						cycleCrashed = true;
-					}
-
-				}
-				else if (cycleDirection == SOUTH) {
-					// check against player's own trails
-					for ( var i = 0; i < testEWTrailCount; i++ ) {
-
-						if ( cyclePositionZ > test_EW_trailZ[i] && test_NS_currentTrailStartZ < test_EW_trailZ[i] ) {
-
-							if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
-								cycle.position.z = test_EW_trailZ[i] - 1;
-								cycleCrashed = true;
-							}
-							if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
-								cycle.position.z = test_EW_trailZ[i] - 1;
-								cycleCrashed = true;
-							}
-						}
-
-					}
-					// check against enemy's trails
-					for ( var i = 0; i <= enemyTestEWTrailCount; i++ ) {
-
-						if ( cyclePositionZ > enemyTest_EW_trailZ[i] && test_NS_currentTrailStartZ < enemyTest_EW_trailZ[i] ) {
-
-							if ( cyclePositionX > enemyTest_EW_trailStartX[i] && cyclePositionX < enemyTest_EW_trailEndX[i] ) {
-								if (i != enemyTestEWTrailCount) {
-									cycle.position.z = enemyTest_EW_trailZ[i] - 1;
-									cycleCrashed = true;
-								}	
-								else if (i == enemyTestEWTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = cyclePositionX;
-									resolveCollisionZ = enemyTest_EW_trailZ[i];
-								}	
-							}
-							if ( cyclePositionX < enemyTest_EW_trailStartX[i] && cyclePositionX > enemyTest_EW_trailEndX[i] ) {
-								if (i != enemyTestEWTrailCount) {
-									cycle.position.z = enemyTest_EW_trailZ[i] - 1;
-									cycleCrashed = true;
-								}	
-								else if (i == enemyTestEWTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = cyclePositionX;
-									resolveCollisionZ = enemyTest_EW_trailZ[i];
 								}
 							}
+
+						}
+						// check against enemy's trails
+						for ( var i = 0; i <= enemyTestEWTrailCount; i++ ) {
+
+							if ( cyclePositionZ < enemyTest_EW_trailZ[i] && test_NS_currentTrailStartZ > enemyTest_EW_trailZ[i] ) {
+
+								if ( cyclePositionX > enemyTest_EW_trailStartX[i] && cyclePositionX < enemyTest_EW_trailEndX[i] ) {
+									if (i != enemyTestEWTrailCount) {
+										cycle.position.z = enemyTest_EW_trailZ[i] + 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestEWTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = cyclePositionX;
+										resolveCollisionZ = enemyTest_EW_trailZ[i];
+									}	
+								}
+								if ( cyclePositionX < enemyTest_EW_trailStartX[i] && cyclePositionX > enemyTest_EW_trailEndX[i] ) {
+									if (i != enemyTestEWTrailCount) {
+										cycle.position.z = enemyTest_EW_trailZ[i] + 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestEWTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = cyclePositionX;
+										resolveCollisionZ = enemyTest_EW_trailZ[i];
+									}	
+								}
+							}
+
+						}
+						// check against arena walls
+						if (cyclePositionZ < -arenaRadius) {
+							cycle.position.z = -arenaRadius + 1;
+							cycleCrashed = true;
 						}
 
 					}
-					// check against arena walls
-					if (cyclePositionZ > arenaRadius) {
-						cycle.position.z = arenaRadius - 1;
-						cycleCrashed = true;
-					}
+					else if (cycleDirection == SOUTH) {
+						// check against player's own trails
+						for ( var i = 0; i < testEWTrailCount; i++ ) {
 
-				}
-				else if (cycleDirection == EAST) {
-					// check against player's own trails
-					for ( var i = 0; i < testNSTrailCount; i++ ) {
+							if ( cyclePositionZ > test_EW_trailZ[i] && test_NS_currentTrailStartZ < test_EW_trailZ[i] ) {
 
-						if ( cyclePositionX > test_NS_trailX[i] && test_EW_currentTrailStartX < test_NS_trailX[i] ) {
-
-							if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
-								cycle.position.x = test_NS_trailX[i] - 1;
-								cycleCrashed = true;
-							}
-							if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
-								cycle.position.x = test_NS_trailX[i] - 1;
-								cycleCrashed = true;
-							}
-						}
-
-					}
-					// check against enemy's trails
-					for ( var i = 0; i <= enemyTestNSTrailCount; i++ ) {
-
-						if ( cyclePositionX > enemyTest_NS_trailX[i] && test_EW_currentTrailStartX < enemyTest_NS_trailX[i] ) {
-
-							if ( cyclePositionZ > enemyTest_NS_trailStartZ[i] && cyclePositionZ < enemyTest_NS_trailEndZ[i] ) {
-								if (i != enemyTestNSTrailCount) {
-									cycle.position.x = enemyTest_NS_trailX[i] - 1;
+								if ( cyclePositionX > test_EW_trailStartX[i] && cyclePositionX < test_EW_trailEndX[i] ) {
+									cycle.position.z = test_EW_trailZ[i] - 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestNSTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = enemyTest_NS_trailX[i];
-									resolveCollisionZ = cyclePositionZ;
-								}	
-							}
-							if ( cyclePositionZ < enemyTest_NS_trailStartZ[i] && cyclePositionZ > enemyTest_NS_trailEndZ[i] ) {
-								if (i != enemyTestNSTrailCount) {
-									cycle.position.x = enemyTest_NS_trailX[i] - 1;
+								}
+								if ( cyclePositionX < test_EW_trailStartX[i] && cyclePositionX > test_EW_trailEndX[i] ) {
+									cycle.position.z = test_EW_trailZ[i] - 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestNSTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = enemyTest_NS_trailX[i];
-									resolveCollisionZ = cyclePositionZ;
-								}	
+								}
 							}
+
+						}
+						// check against enemy's trails
+						for ( var i = 0; i <= enemyTestEWTrailCount; i++ ) {
+
+							if ( cyclePositionZ > enemyTest_EW_trailZ[i] && test_NS_currentTrailStartZ < enemyTest_EW_trailZ[i] ) {
+
+								if ( cyclePositionX > enemyTest_EW_trailStartX[i] && cyclePositionX < enemyTest_EW_trailEndX[i] ) {
+									if (i != enemyTestEWTrailCount) {
+										cycle.position.z = enemyTest_EW_trailZ[i] - 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestEWTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = cyclePositionX;
+										resolveCollisionZ = enemyTest_EW_trailZ[i];
+									}	
+								}
+								if ( cyclePositionX < enemyTest_EW_trailStartX[i] && cyclePositionX > enemyTest_EW_trailEndX[i] ) {
+									if (i != enemyTestEWTrailCount) {
+										cycle.position.z = enemyTest_EW_trailZ[i] - 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestEWTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = cyclePositionX;
+										resolveCollisionZ = enemyTest_EW_trailZ[i];
+									}
+								}
+							}
+
+						}
+						// check against arena walls
+						if (cyclePositionZ > arenaRadius) {
+							cycle.position.z = arenaRadius - 1;
+							cycleCrashed = true;
 						}
 
 					}
-					// check against arena walls
-					if (cyclePositionX > arenaRadius) {
-						cycle.position.x = arenaRadius - 1;
-						cycleCrashed = true;
-					}
+					else if (cycleDirection == EAST) {
+						// check against player's own trails
+						for ( var i = 0; i < testNSTrailCount; i++ ) {
 
-				}
-				else if (cycleDirection == WEST) {
-					// check against player's own trails
-					for ( var i = 0; i < testNSTrailCount; i++ ) {
+							if ( cyclePositionX > test_NS_trailX[i] && test_EW_currentTrailStartX < test_NS_trailX[i] ) {
 
-						if ( cyclePositionX < test_NS_trailX[i] && test_EW_currentTrailStartX > test_NS_trailX[i] ) {
-
-							if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
-								cycle.position.x = test_NS_trailX[i] + 1;
-								cycleCrashed = true;
+								if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
+									cycle.position.x = test_NS_trailX[i] - 1;
+									cycleCrashed = true;
+								}
+								if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
+									cycle.position.x = test_NS_trailX[i] - 1;
+									cycleCrashed = true;
+								}
 							}
-							if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
-								cycle.position.x = test_NS_trailX[i] + 1;
-								cycleCrashed = true;
+
+						}
+						// check against enemy's trails
+						for ( var i = 0; i <= enemyTestNSTrailCount; i++ ) {
+
+							if ( cyclePositionX > enemyTest_NS_trailX[i] && test_EW_currentTrailStartX < enemyTest_NS_trailX[i] ) {
+
+								if ( cyclePositionZ > enemyTest_NS_trailStartZ[i] && cyclePositionZ < enemyTest_NS_trailEndZ[i] ) {
+									if (i != enemyTestNSTrailCount) {
+										cycle.position.x = enemyTest_NS_trailX[i] - 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestNSTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = enemyTest_NS_trailX[i];
+										resolveCollisionZ = cyclePositionZ;
+									}	
+								}
+								if ( cyclePositionZ < enemyTest_NS_trailStartZ[i] && cyclePositionZ > enemyTest_NS_trailEndZ[i] ) {
+									if (i != enemyTestNSTrailCount) {
+										cycle.position.x = enemyTest_NS_trailX[i] - 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestNSTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = enemyTest_NS_trailX[i];
+										resolveCollisionZ = cyclePositionZ;
+									}	
+								}
 							}
+
+						}
+						// check against arena walls
+						if (cyclePositionX > arenaRadius) {
+							cycle.position.x = arenaRadius - 1;
+							cycleCrashed = true;
 						}
 
 					}
-					// check against enemy's trails
-					for ( var i = 0; i <= enemyTestNSTrailCount; i++ ) {
+					else if (cycleDirection == WEST) {
+						// check against player's own trails
+						for ( var i = 0; i < testNSTrailCount; i++ ) {
 
-						if ( cyclePositionX < enemyTest_NS_trailX[i] && test_EW_currentTrailStartX > enemyTest_NS_trailX[i] ) {
+							if ( cyclePositionX < test_NS_trailX[i] && test_EW_currentTrailStartX > test_NS_trailX[i] ) {
 
-							if ( cyclePositionZ > enemyTest_NS_trailStartZ[i] && cyclePositionZ < enemyTest_NS_trailEndZ[i] ) {
-								if (i != enemyTestNSTrailCount) {
-									cycle.position.x = enemyTest_NS_trailX[i] + 1;
+								if ( cyclePositionZ > test_NS_trailStartZ[i] && cyclePositionZ < test_NS_trailEndZ[i] ) {
+									cycle.position.x = test_NS_trailX[i] + 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestNSTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = enemyTest_NS_trailX[i];
-									resolveCollisionZ = cyclePositionZ;
-								}	
-							}
-							if ( cyclePositionZ < enemyTest_NS_trailStartZ[i] && cyclePositionZ > enemyTest_NS_trailEndZ[i] ) {
-								if (i != enemyTestNSTrailCount) {
-									cycle.position.x = enemyTest_NS_trailX[i] + 1;
+								}
+								if ( cyclePositionZ < test_NS_trailStartZ[i] && cyclePositionZ > test_NS_trailEndZ[i] ) {
+									cycle.position.x = test_NS_trailX[i] + 1;
 									cycleCrashed = true;
-								}	
-								else if (i == enemyTestNSTrailCount) {
-									needToResolveCollision = true;
-									resolveCollisionX = enemyTest_NS_trailX[i];
-									resolveCollisionZ = cyclePositionZ;
-								}	
+								}
 							}
+
+						}
+						// check against enemy's trails
+						for ( var i = 0; i <= enemyTestNSTrailCount; i++ ) {
+
+							if ( cyclePositionX < enemyTest_NS_trailX[i] && test_EW_currentTrailStartX > enemyTest_NS_trailX[i] ) {
+
+								if ( cyclePositionZ > enemyTest_NS_trailStartZ[i] && cyclePositionZ < enemyTest_NS_trailEndZ[i] ) {
+									if (i != enemyTestNSTrailCount) {
+										cycle.position.x = enemyTest_NS_trailX[i] + 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestNSTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = enemyTest_NS_trailX[i];
+										resolveCollisionZ = cyclePositionZ;
+									}	
+								}
+								if ( cyclePositionZ < enemyTest_NS_trailStartZ[i] && cyclePositionZ > enemyTest_NS_trailEndZ[i] ) {
+									if (i != enemyTestNSTrailCount) {
+										cycle.position.x = enemyTest_NS_trailX[i] + 1;
+										cycleCrashed = true;
+									}	
+									else if (i == enemyTestNSTrailCount) {
+										needToResolveCollision = true;
+										resolveCollisionX = enemyTest_NS_trailX[i];
+										resolveCollisionZ = cyclePositionZ;
+									}	
+								}
+							}
+
+						}
+						// check against arena walls
+						if (cyclePositionX < -arenaRadius) {
+							cycle.position.x = -arenaRadius + 1;
+							cycleCrashed = true;
 						}
 
 					}
-					// check against arena walls
-					if (cyclePositionX < -arenaRadius) {
-						cycle.position.x = -arenaRadius + 1;
-						cycleCrashed = true;
-					}
-
-				}
+					
+				}// end if (!enemyCycleCrashed)
 				
 				// resolve collisions if the 2 current active trails intersect
 				// basically, the longer trail wins / shorter trail crashes
 				if (needToResolveCollision) {
-					if ( ( (cyclePositionX - resolveCollisionX) + (cyclePositionZ - resolveCollisionZ) ) >=
-					     ( (enemyCyclePositionX - resolveCollisionX) + (enemyCyclePositionZ - resolveCollisionZ) ) ) {
+					
+					testCycleDistanceSqX = (cyclePositionX - resolveCollisionX) * (cyclePositionX - resolveCollisionX);
+					testCycleDistanceSqZ = (cyclePositionZ - resolveCollisionZ) * (cyclePositionZ - resolveCollisionZ);
+					testCycleDistance = Math.sqrt(testCycleDistanceSqX + testCycleDistanceSqZ);
+					
+					testEnemyCycleDistanceSqX = (enemyCyclePositionX - resolveCollisionX) * (enemyCyclePositionX - resolveCollisionX);
+					testEnemyCycleDistanceSqZ = (enemyCyclePositionZ - resolveCollisionZ) * (enemyCyclePositionZ - resolveCollisionZ);
+					testEnemyCycleDistance = Math.sqrt(testEnemyCycleDistanceSqX + testEnemyCycleDistanceSqZ);
+					
+					if ( testCycleDistance >= testEnemyCycleDistance ) {
 						cycleCrashed = false;
 						enemyCycleCrashed = true;
 					} else {
 						cycleCrashed = true;
 						enemyCycleCrashed = false;
 					}
+					
 					needToResolveCollision = false;
+					
 				}
 				
 				if (cycleCrashed)
