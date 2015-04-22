@@ -24,7 +24,6 @@ var keyboard = new THREEx.KeyboardState();
 var b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
 var b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
 var joystick = new VirtualJoystick({
-	container: document.getElementById("container"),
 	add2Buttons: true,
 	hideJoystick: true,
 	hideButtons: false,
@@ -64,31 +63,35 @@ var renderer = new THREE.WebGLRenderer();
 //renderer.setPixelRatio(0.5);
 //renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-document.getElementById("container").appendChild(renderer.domElement);
+document.body.appendChild( renderer.domElement );
 window.addEventListener('resize', onWindowResize, false);
 var fontAspect = 0;
-
+var instructionsElement = document.getElementById( 'instructions' );
 var bannerElement = document.getElementById("banner");
 var scoreElement = document.getElementById("score");
 var gameOverElement = document.getElementById("gameover");
-var containerElement = document.getElementById("container");
+
 	
 // debug elements
 var debug1Element = document.getElementById("debug1");
 
+if ( !mouseControl ) {
+	document.getElementById("cameraButton").addEventListener("touchend", function() {
+			cameraButtonHandler();
+	}, false);
+}
+
 if (mouseControl) {
 	
-	document.getElementById("banner").addEventListener("click", function() {
+	instructionsElement.innerHTML = 'Game Paused <br> Click to play';
+	
+	document.body.addEventListener("click", function() {
 		this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock;
 		this.requestPointerLock();
 	}, false);
 
-	document.getElementById("container").addEventListener("click", function() {
-		this.requestPointerLock = this.requestPointerLock || this.mozRequestPointerLock;
-		this.requestPointerLock();
-	}, false);
-
-	document.getElementById("banner").addEventListener("mousedown", function(event) {
+	
+	window.addEventListener("mousedown", function(event) {
 		if (playerAlive && enemyAlive && !gamePaused) {
 			if(event.button === 0)
 				turnCycleLeft = true;
@@ -96,28 +99,26 @@ if (mouseControl) {
 				turnCycleRight = true;
 		}	
 	}, false);
-
-	document.getElementById("container").addEventListener("mousedown", function(event) {
-		if (playerAlive && enemyAlive && !gamePaused) {
-			if(event.button === 0)
-				turnCycleLeft = true;
-			else if(event.button === 2)
-				turnCycleRight = true;
-		}	
+	
+	window.addEventListener("click", function(event) {
+		event.preventDefault();	
+	}, false);
+	window.addEventListener("dblclick", function(event) {
+		event.preventDefault();	
 	}, false);
 	
 	
 	var pointerlockChange = function ( event ) {
 		
-		if ( document.pointerLockElement === bannerElement || document.mozPointerLockElement === bannerElement || document.webkitPointerLockElement === bannerElement ||
-		   	document.pointerLockElement === containerElement || document.mozPointerLockElement === containerElement || document.webkitPointerLockElement === containerElement ) {
+		if ( document.pointerLockElement === instructionsElement || document.mozPointerLockElement === instructionsElement || document.webkitPointerLockElement === instructionsElement ||
+		   	document.pointerLockElement === document.body || document.mozPointerLockElement === document.body || document.webkitPointerLockElement === document.body ) {
 			
-			bannerElement.style.display = 'none';
+			instructionsElement.style.display = 'none';
 			gamePaused = false;
 			
 		} else {
 			
-			bannerElement.style.display = '';
+			instructionsElement.style.display = '';
 			gamePaused = true;
 			
 		}
@@ -152,6 +153,7 @@ function onWindowResize() {
 	document.getElementById("sound").style.fontSize = (fontAspect) + "px";
 	
 	fontAspect *= 2;
+	instructionsElement.style.fontSize = fontAspect + "px";
 	bannerElement.style.fontSize = fontAspect + "px";
 	scoreElement.style.fontSize = fontAspect + "px";
 	
@@ -964,29 +966,46 @@ document.getElementById("help").style.webkitUserSelect = "none";
 document.getElementById("help").style.MozUserSelect = "none";
 //document.getElementById("help").style.msUserSelect = "none";
 document.getElementById("help").style.userSelect = "none";
+
 document.getElementById("help1").style.cursor = "default";
 document.getElementById("help1").style.webkitUserSelect = "none";
 document.getElementById("help1").style.MozUserSelect = "none";
 //document.getElementById("help1").style.msUserSelect = "none";
 document.getElementById("help1").style.userSelect = "none";
+
 document.getElementById("help2").style.cursor = "default";
 document.getElementById("help2").style.webkitUserSelect = "none";
 document.getElementById("help2").style.MozUserSelect = "none";
 //document.getElementById("help2").style.msUserSelect = "none";
 document.getElementById("help2").style.userSelect = "none";
+
 document.getElementById("score").style.cursor = "default";
 document.getElementById("score").style.webkitUserSelect = "none";
 document.getElementById("score").style.MozUserSelect = "none";
 //document.getElementById("score").style.msUserSelect = "none";
 document.getElementById("score").style.userSelect = "none";
+
 document.getElementById("gameover").style.cursor = "default";
 document.getElementById("gameover").style.webkitUserSelect = "none";
 document.getElementById("gameover").style.MozUserSelect = "none";
 //document.getElementById("gameover").style.msUserSelect = "none";
 document.getElementById("gameover").style.userSelect = "none";
-document.getElementById("banner").style.cursor = "pointer";
+
+document.getElementById("banner").style.cursor = "default";
+document.getElementById("banner").style.webkitUserSelect = "none";
+document.getElementById("banner").style.MozUserSelect = "none";
+//document.getElementById("banner").style.msUserSelect = "none";
+document.getElementById("banner").style.userSelect = "none";
+
+document.getElementById("instructions").style.cursor = "default";
+document.getElementById("instructions").style.webkitUserSelect = "none";
+document.getElementById("instructions").style.MozUserSelect = "none";
+//document.getElementById("instructions").style.msUserSelect = "none";
+document.getElementById("instructions").style.userSelect = "none";
+
 document.getElementById("sound").style.cursor = "pointer";
 document.getElementById("cameraButton").style.cursor = "pointer";
+
 
 //variablesReady += 1;
 
