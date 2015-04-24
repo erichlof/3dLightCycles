@@ -206,6 +206,15 @@ var SOUTH = 2;
 var WEST = 3;
 var cycleDirection = NORTH;
 var enemyCycleDirection = SOUTH;
+var enemyOldDirection = SOUTH; // used in AI
+var enemyTryingToTurnRight = false; // used in AI
+var enemyTryingToTurnLeft = false; // used in AI
+var exitEnemyAIRoutine = false; // used in AI
+var enemyInDangerOfColliding = false; // used in AI
+var enemyFeelerLength = 3; // used in AI
+var enemyFreeTurnTimer = new THREEx.GameTimer(3); // used in AI
+var enemyJustTurnedTimer = new THREEx.GameTimer(0.2); // used in AI
+
 var northVector = new THREE.Vector3(0, 0, -1);
 var southVector = new THREE.Vector3(0, 0, 1);
 var eastVector = new THREE.Vector3(1, 0, 0);
@@ -232,9 +241,6 @@ var trailLoweringAmount = 0;
 var crashAnimationTimer = new THREEx.GameTimer(1.5);
 var trailDisappearAnimationTimer = new THREEx.GameTimer(3);
 
-var enemyCanTurnLeft = false;
-var enemyCanTurnRight = false;
-var enemyTurnTimer = new THREEx.GameTimer(2);
 var enemyCycleSpeed = 20;
 var enemyPlayingCrashAnimation = false;
 var enemyPlayingTrailDisappearAnimation = false;
