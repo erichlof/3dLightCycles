@@ -35,10 +35,12 @@
 		}
 		
 		#cameraButton {
+			
 			position: fixed;
 			left: 1%;
 			top: 2%;
 			z-index: 10;
+			
 		}
 		
 	</style>
@@ -1198,9 +1200,6 @@
 				enemyCyclePositionX = enemyCycle.position.x;
 				enemyCyclePositionZ = enemyCycle.position.z;
 				
-				// run enemy cycle's AI
-				doEnemyAI();
-				
 
 				if (enemyCycleDirection == NORTH) {
 					// check against player's trails
@@ -1422,7 +1421,7 @@
 
 				}
 				
-				// check for player cycle crashing
+				// now check for player cycle crashing
 				
 				// set up a reference to cycle's position for faster loop lookup
 				cyclePositionX = cycle.position.x;
@@ -1677,7 +1676,14 @@
 					cycleCrash();
 				if (enemyCycleCrashed)
 					enemyCycleCrash();
-					
+				
+				
+				if (playerAlive && enemyAlive) {
+					// if enough time has passed since the last turn, run enemy cycle's AI
+					enemyJustTurnedTimer.run(frameTime);
+					if (enemyJustTurnedTimer.alarmSounding)
+						doEnemyAI();
+				}
 					
 					
 				// update cycles components
