@@ -24,6 +24,12 @@ slow Swipe to control camera rotation <br>
 PurpleButton: Turn Left <br>
 OrangeButton: Turn Right <br>
 
+May 15, 2015 Progress Note
+--------------------------------
+
+Added a new animation so when the cycles crash, they explode into their primitive pieces and fade from view.  Also I updated the cycle.json model in the 'models' folder.  I removed some materials that were not needed so now the web browser console won't give any more warnings when loading the model.  Sorry for the lack of updates, I have been off on a tangent studying GPU Ray Tracing with WebGL - a fascinating subject but time-consuming.  Next TODO for this Tron game is to add the ability to speed up your cycle.  And after that, maybe a simple scoring scheme and 'Winner' animation.
+
+
 March 4, 2015 Progress Note
 --------------------------------
 
