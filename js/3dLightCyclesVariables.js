@@ -192,6 +192,7 @@ var Far_3rdPersonCamera_MODE = 2;
 var SkyCamera_MODE = 3;
 var cameraMode = Close_3rdPersonCamera_MODE;
 var enemyCameraMode = Close_3rdPersonCamera_MODE;
+///var enemyCameraMode = SkyCamera_MODE;
 var frameTime = 0;
 var TWO_PI = Math.PI * 2;
 var PI_4 = Math.PI / 4;
@@ -238,8 +239,9 @@ var testEnemyCycleDistance = 0;
 var playingCrashAnimation = false;
 var playingTrailDisappearAnimation = false;
 var trailLoweringAmount = 0;
-var crashAnimationTimer = new THREEx.GameTimer(1.5);
+var crashAnimationTimer = new THREEx.GameTimer(3);//1.5
 var trailDisappearAnimationTimer = new THREEx.GameTimer(3);
+var crashPieceRotationAxis = new THREE.Vector3(1,1,0).normalize();
 
 var enemyCycleSpeed = 20;
 var enemyPlayingCrashAnimation = false;
@@ -1030,6 +1032,8 @@ window.onload = function() {
 		cycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
 		scene.add(cycle);//add the cycle mesh to the scene, so it becomes a game object
 
+		cycle.children[0].material.transparent = true;
+		cycle.children[0].material.opacity = 0.9;
 		cycle.children[1].material.color.set('rgb(130,100,55)');// main colored hull
 		cycle.children[1].material.specular.set('rgb(255,200,5)');// main hull specular highlight color
 		cycle.children[1].material.emissive.set('rgb(30,15,0)');// main colored hull emissive
@@ -1065,8 +1069,8 @@ window.onload = function() {
 	loader.load( 'models/classic-1982-tron-light-cycle.json', function ( mesh ) {
 
 		// ENEMY CYCLE
-		enemyCycle = mesh.clone();//copy mesh's contents into the global 'cycle' mesh
-		scene.add(enemyCycle);//add the cycle mesh to the scene, so it becomes a game object
+		enemyCycle = mesh.clone();//copy mesh's contents into the global 'enemyCycle' mesh
+		scene.add(enemyCycle);//add the enemyCycle mesh to the scene, so it becomes a game object
 
 		//enemyCycle.rotation.set(0, Math.PI, 0);
 		enemyCycle.children[1].material.color.set('rgb(0,84,183)');// main colored hull
