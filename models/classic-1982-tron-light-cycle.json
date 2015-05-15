@@ -39725,24 +39725,6 @@
 					378
 				]
 			}
-		},
-		{
-			"uuid": "5043f548-d3e4-4ca3-acbe-ca497e77c15b",
-			"type": "Geometry",
-			"data": {
-				"vertices": [],
-				"normals": [],
-				"faces": []
-			}
-		},
-		{
-			"uuid": "507ef01f-616f-48fd-998e-3b4c0951d7fc",
-			"type": "Geometry",
-			"data": {
-				"vertices": [],
-				"normals": [],
-				"faces": []
-			}
 		}
 	],
 	"materials": [
@@ -39756,13 +39738,8 @@
 			"specular": 5000268,
 			"shininess": 38,
 			"opacity": 1,
-			"transparent": false,
-			"wireframe": false,
-			"opacityMap": null,
-			"specularMap": null,
-			"emissiveMap": null,
-			"bumpMap": null,
-			"normalMap": null
+			"transparent": true,
+			"wireframe": false
 		},
 		{
 			"uuid": "cd2cfa9b-8382-415f-96cf-2d53498be88a",
@@ -39774,13 +39751,8 @@
 			"specular": 16762624,
 			"shininess": 2,
 			"opacity": 1,
-			"transparent": false,
-			"wireframe": false,
-			"opacityMap": null,
-			"specularMap": null,
-			"emissiveMap": null,
-			"bumpMap": null,
-			"normalMap": null
+			"transparent": true,
+			"wireframe": false
 		},
 		{
 			"uuid": "c499c637-d41c-4776-a4a9-4cd7bd3a1194",
@@ -39792,13 +39764,8 @@
 			"specular": 2302755,
 			"shininess": 43,
 			"opacity": 1,
-			"transparent": false,
-			"wireframe": false,
-			"opacityMap": null,
-			"specularMap": null,
-			"emissiveMap": null,
-			"bumpMap": null,
-			"normalMap": null
+			"transparent": true,
+			"wireframe": false
 		},
 		{
 			"uuid": "ffa537f5-17cb-4745-a21e-534b52ff6910",
@@ -39810,28 +39777,7 @@
 			"specular": 16777215,
 			"shininess": 3,
 			"opacity": 1,
-			"transparent": false,
-			"wireframe": false,
-			"opacityMap": null,
-			"specularMap": null,
-			"emissiveMap": null,
-			"bumpMap": null,
-			"normalMap": null
-		},
-		{
-			"uuid": "D073F6A1-A622-4272-9F32-5748A0C05A3B",
-			"type": "MeshBasicMaterial",
-			"color": 3683820,
-			"opacity": 1,
-			"transparent": false,
-			"wireframe": false
-		},
-		{
-			"uuid": "4F12942E-066D-488C-85DB-111BAAE263A2",
-			"type": "MeshBasicMaterial",
-			"color": 9407081,
-			"opacity": 1,
-			"transparent": false,
+			"transparent": true,
 			"wireframe": false
 		}
 	],
@@ -39863,20 +39809,20 @@
 				"type": "Mesh",
 				"geometry": "5154b9d5-f9e1-4812-bbd4-03e086282890",
 				"material": "153f611a-a515-48aa-95e5-c396e2027137",
-				"castShadow": true,
-				"receiveShadow": true,
+				"castShadow": false,
+				"receiveShadow": false,
 				"matrix": [
 					1,
 					0,
 					0,
 					0,
 					0,
-					2.220446049250313e-16,
+					0,
 					-1,
 					0,
 					0,
 					1,
-					2.220446049250313e-16,
+					0,
 					0,
 					0,
 					0,
@@ -39890,20 +39836,20 @@
 				"type": "Mesh",
 				"geometry": "f6ad07fe-8cde-4c23-b2b6-79525359eda0",
 				"material": "cd2cfa9b-8382-415f-96cf-2d53498be88a",
-				"castShadow": true,
-				"receiveShadow": true,
+				"castShadow": false,
+				"receiveShadow": false,
 				"matrix": [
 					1,
 					0,
 					0,
 					0,
 					0,
-					2.220446049250313e-16,
+					0,
 					-1,
 					0,
 					0,
 					1,
-					2.220446049250313e-16,
+					0,
 					0,
 					0,
 					0,
@@ -39917,20 +39863,20 @@
 				"type": "Mesh",
 				"geometry": "3a8bd2b7-fd54-4038-95b6-bf1b8dad9544",
 				"material": "c499c637-d41c-4776-a4a9-4cd7bd3a1194",
-				"castShadow": true,
-				"receiveShadow": true,
+				"castShadow": false,
+				"receiveShadow": false,
 				"matrix": [
 					1,
 					0,
 					0,
 					0,
 					0,
-					2.220446049250313e-16,
+					0,
 					-1,
 					0,
 					0,
 					1,
-					2.220446049250313e-16,
+					0,
 					0,
 					0,
 					0,
@@ -39944,147 +39890,25 @@
 				"type": "Mesh",
 				"geometry": "e984cfbc-6489-454e-aa56-c0da952b6f18",
 				"material": "ffa537f5-17cb-4745-a21e-534b52ff6910",
-				"castShadow": true,
-				"receiveShadow": true,
+				"castShadow": false,
+				"receiveShadow": false,
 				"matrix": [
 					1,
 					0,
 					0,
 					0,
 					0,
-					2.220446049250313e-16,
+					0,
 					-1,
 					0,
 					0,
 					1,
-					2.220446049250313e-16,
 					0,
-					0,
-					0,
-					0,
-					1
-				]
-			},
-			{
-				"uuid": "66ac8ec5-c21f-4105-b7b5-a00e7e5d942d",
-				"name": "LightPreset",
-				"visible": false,
-				"type": "Mesh",
-				"geometry": "5043f548-d3e4-4ca3-acbe-ca497e77c15b",
-				"material": "D073F6A1-A622-4272-9F32-5748A0C05A3B",
-				"castShadow": false,
-				"receiveShadow": false,
-				"matrix": [
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
-					0,
-					0,
-					0,
-					0.6300022602081299,
-					1
-				],
-				"children": [
-					{
-						"uuid": "c12e8ed3-4f1e-4210-8d77-726b7c5b80a5",
-						"name": "KeyLight",
-						"type": "DirectionalLight",
-						"color": 16776180,
-						"intensity": 1,
-						"castShadow": true,
-						"shadowBias": 0,
-						"shadowDarkness": 0.1,
-						"shadowCameraNear": 15.0009,
-						"shadowCameraFar": 60.0036,
-						"shadowMapWidth": 1024,
-						"shadowMapHeight": 1024,
-						"shadowCameraLeft": -2.5982,
-						"shadowCameraRight": 2.5982,
-						"shadowCameraTop": 2.5982,
-						"shadowCameraBottom": -2.5982,
-						"matrix": [
-							1,
-							0,
-							0,
-							0,
-							0,
-							0.44766420125961304,
-							-0.8942017555236816,
-							0,
-							0,
-							0.8942017555236816,
-							0.44766420125961304,
-							0,
-							0,
-							1000,
-							500,
-							1
-						]
-					}
-				]
-			},
-			{
-				"uuid": "7d132f71-93cd-4c0d-9cfe-475ec95aba49",
-				"name": "CameraPreset",
-				"type": "Mesh",
-				"geometry": "507ef01f-616f-48fd-998e-3b4c0951d7fc",
-				"material": "4F12942E-066D-488C-85DB-111BAAE263A2",
-				"castShadow": false,
-				"receiveShadow": false,
-				"matrix": [
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
 					0,
 					0,
 					0,
 					0,
 					1
-				],
-				"children": [
-					{
-						"uuid": "fc8f554f-d6b1-4b2c-885d-806358e1e95e",
-						"name": "TurnTableCamera",
-						"type": "PerspectiveCamera",
-						"fov": 45,
-						"aspect": 1.7778,
-						"near": 0.1,
-						"far": 50000,
-						"matrix": [
-							-0.725375235080719,
-							-4.0918688881674825e-8,
-							0.6883536577224731,
-							0,
-							0.15484429895877838,
-							0.9743705987930298,
-							0.16317231953144073,
-							0,
-							-0.6707115769386292,
-							0.22494879364967346,
-							-0.7067843079566956,
-							0,
-							-2.6952059268951416,
-							1.5339562892913818,
-							-2.840181350708008,
-							1
-						]
-					}
 				]
 			}
 		]
