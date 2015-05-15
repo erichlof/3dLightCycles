@@ -1710,9 +1710,76 @@
 			// freely without user interaction. When the cutscene ends, we will re-attach it as a child of controls
 
 			///cameraControlsPitchObject.remove(camera);
+			
 			if (playingCrashAnimation) {
 				
 				crashAnimationTimer.run(frameTime);
+				
+				if (!playerAlive) {
+					// black windows
+					cycle.children[0].position.x += 1.0 * frameTime;
+					cycle.children[0].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					cycle.children[0].position.z += 1.0 * frameTime;
+					cycle.children[0].rotateOnAxis(crashPieceRotationAxis, frameTime * 3);
+					cycle.children[0].material.opacity -= (0.4 * frameTime);
+					// main colored hull
+					cycle.children[1].position.x -= 1.5 * frameTime;
+					cycle.children[1].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					cycle.children[1].position.z += 1.5 * frameTime;
+					cycle.children[1].rotateOnAxis(crashPieceRotationAxis, frameTime * 2);
+					cycle.children[1].material.opacity -= (0.4 * frameTime);
+					// wheel rims
+					cycle.children[2].position.x -= 2.5 * frameTime;
+					cycle.children[2].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					cycle.children[2].position.z -= 2.5 * frameTime;
+					cycle.children[2].rotateOnAxis(crashPieceRotationAxis, frameTime * 3);
+					cycle.children[2].material.opacity -= (0.4 * frameTime);
+					// grey chassis
+					cycle.children[3].position.x += 2.0 * frameTime;
+					cycle.children[3].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					cycle.children[3].position.z -= 2.0 * frameTime;
+					cycle.children[3].rotateOnAxis(crashPieceRotationAxis, frameTime);
+					cycle.children[3].material.opacity -= (0.4 * frameTime);
+					
+					cycleShadow[0].material.opacity -= (0.4 * frameTime);
+					cycleShadow[1].material.opacity -= (0.4 * frameTime);
+					cycleShadow[2].material.opacity -= (0.4 * frameTime);
+					cycleShadow[3].material.opacity -= (0.4 * frameTime);
+					
+				}
+				
+				else if ( !enemyAlive ) {
+					// black windows
+					enemyCycle.children[0].position.x += 1.0 * frameTime;
+					enemyCycle.children[0].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					enemyCycle.children[0].position.z += 1.0 * frameTime;
+					enemyCycle.children[0].rotateOnAxis(crashPieceRotationAxis, frameTime * 3);
+					enemyCycle.children[0].material.opacity -= (0.4 * frameTime);
+					// main colored hull
+					enemyCycle.children[1].position.x -= 1.5 * frameTime;
+					enemyCycle.children[1].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					enemyCycle.children[1].position.z += 1.5 * frameTime;
+					enemyCycle.children[1].rotateOnAxis(crashPieceRotationAxis, frameTime * 2);
+					enemyCycle.children[1].material.opacity -= (0.4 * frameTime);
+					// wheel rims
+					enemyCycle.children[2].position.x -= 2.5 * frameTime;
+					enemyCycle.children[2].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					enemyCycle.children[2].position.z -= 2.5 * frameTime;
+					enemyCycle.children[2].rotateOnAxis(crashPieceRotationAxis, frameTime * 3);
+					enemyCycle.children[2].material.opacity -= (0.4 * frameTime);
+					// grey chassis
+					enemyCycle.children[3].position.x += 2.0 * frameTime;
+					enemyCycle.children[3].position.y = 1 + Math.abs( Math.sin(crashAnimationTimer.counter * 2) ) * (5 - crashAnimationTimer.counter);
+					enemyCycle.children[3].position.z -= 2.0 * frameTime;
+					enemyCycle.children[3].rotateOnAxis(crashPieceRotationAxis, frameTime);
+					enemyCycle.children[3].material.opacity -= (0.4 * frameTime);
+					
+					enemyCycleShadow[0].material.opacity -= (0.4 * frameTime);
+					enemyCycleShadow[1].material.opacity -= (0.4 * frameTime);
+					enemyCycleShadow[2].material.opacity -= (0.4 * frameTime);
+					enemyCycleShadow[3].material.opacity -= (0.4 * frameTime);
+					
+				}
 				
 				explosionTextureSize = (crashAnimationTimer.counter * 20) + 0.001;
 				
@@ -1882,6 +1949,30 @@
 					cycleShadow[1].visible = true;
 					cycleShadow[2].visible = true;
 					cycleShadow[3].visible = true;
+					
+					// reset cycle parts transparency after crash
+					cycle.children[0].material.opacity = 0.9;
+					if (cameraMode == CockpitCamera_MODE) cycle.children[0].material.opacity = 0.7;
+					cycle.children[1].material.opacity = 1;
+					cycle.children[2].material.opacity = 1;
+					cycle.children[3].material.opacity = 1;
+					
+					cycleShadow[0].material.opacity = 0.8;
+					cycleShadow[1].material.opacity = 0.8;
+					cycleShadow[2].material.opacity = 0.8;
+					cycleShadow[3].material.opacity = 0.8;
+					
+					// re-attach cycle parts
+					cycle.children[0].position.set(0, 0, 0);
+					cycle.children[1].position.set(0, 0, 0);
+					cycle.children[2].position.set(0, 0, 0);
+					cycle.children[3].position.set(0, 0, 0);
+					
+					// re-align cycle parts
+					cycle.children[0].rotation.set(Math.PI * -0.5, 0, 0);
+					cycle.children[1].rotation.set(Math.PI * -0.5, 0, 0);
+					cycle.children[2].rotation.set(Math.PI * -0.5, 0, 0);
+					cycle.children[3].rotation.set(Math.PI * -0.5, 0, 0);
 					
 					cycle.worldToLocal(cycle.position);
 					if (cycleDirection == WEST) {
@@ -2071,6 +2162,29 @@
 					enemyCycleShadow[2].visible = true;
 					enemyCycleShadow[3].visible = true;
 					
+					// reset enemyCycle parts transparency after crash
+					enemyCycle.children[0].material.opacity = 0.9;
+					if (enemyCameraMode == CockpitCamera_MODE) enemyCycle.children[0].material.opacity = 0.7;
+					enemyCycle.children[1].material.opacity = 1;
+					enemyCycle.children[2].material.opacity = 1;
+					enemyCycle.children[3].material.opacity = 1;
+					
+					enemyCycleShadow[0].material.opacity = 0.8;
+					enemyCycleShadow[1].material.opacity = 0.8;
+					enemyCycleShadow[2].material.opacity = 0.8;
+					enemyCycleShadow[3].material.opacity = 0.8;
+					
+					// re-attach cycle parts
+					enemyCycle.children[0].position.set(0, 0, 0);
+					enemyCycle.children[1].position.set(0, 0, 0);
+					enemyCycle.children[2].position.set(0, 0, 0);
+					enemyCycle.children[3].position.set(0, 0, 0);
+					
+					// re-align cycle parts
+					enemyCycle.children[0].rotation.set(Math.PI * -0.5, 0, 0);
+					enemyCycle.children[1].rotation.set(Math.PI * -0.5, 0, 0);
+					enemyCycle.children[2].rotation.set(Math.PI * -0.5, 0, 0);
+					enemyCycle.children[3].rotation.set(Math.PI * -0.5, 0, 0);
 					
 					enemyCycle.worldToLocal(enemyCycle.position);
 					if (enemyCycleDirection == WEST) {
@@ -2547,14 +2661,8 @@
 		function cycleCrash () {
 			
 			playerAlive = false;
-			cycle.visible = false;
 			trailBeginning.visible = false;
 			blendedBeginningTrailShadow.visible = false;
-			
-			cycleShadow[0].visible = false;
-			cycleShadow[1].visible = false;
-			cycleShadow[2].visible = false;
-			cycleShadow[3].visible = false;
 			
 			explosionRings.visible = true;
 			explosionRings.position.copy(cycle.position);
@@ -2581,14 +2689,8 @@
 		function enemyCycleCrash () {
 			
 			enemyAlive = false;
-			enemyCycle.visible = false;
 			enemyTrailBeginning.visible = false;
 			enemyBlendedBeginningTrailShadow.visible = false;
-			
-			enemyCycleShadow[0].visible = false;
-			enemyCycleShadow[1].visible = false;
-			enemyCycleShadow[2].visible = false;
-			enemyCycleShadow[3].visible = false;
 			
 			explosionRings.visible = true;
 			explosionRings.position.copy(enemyCycle.position);
@@ -2622,14 +2724,17 @@
 			switch (cameraMode) {
 					
 				case CockpitCamera_MODE:
-					
+					/*
 					cameraDistance = 0;
 					camera.position.set(0,0,0);
+					*/
+					camera.position.set(0,0,0);
+					
 					// initially look level ahead (no up and down)
 					cameraControlsPitchObject.rotation.x = 0.0;
 					joystick.previousRotationX = 0.0;
 					
-					//cycle.children[0].visible = false;
+					cycle.children[0].material.opacity = 0.7;
 					//cycle.children[1].visible = false;
 					//cycle.children[2].visible = false;
 					cycle.children[3].visible = false;
@@ -2645,6 +2750,7 @@
 					cameraDistance = 7;
 					camera.translateZ(cameraDistance);
 					
+					cycle.children[0].material.opacity = 0.9;
 					cycle.children[0].visible = true;
 					cycle.children[1].visible = true;
 					cycle.children[2].visible = true;
@@ -2661,6 +2767,7 @@
 					cameraDistance = 16;
 					camera.translateZ(cameraDistance);
 					
+					cycle.children[0].material.opacity = 0.9;
 					cycle.children[0].visible = true;
 					cycle.children[1].visible = true;
 					cycle.children[2].visible = true;
@@ -2677,6 +2784,7 @@
 					cameraDistance = 40;
 					camera.translateZ(cameraDistance);
 					
+					cycle.children[0].material.opacity = 0.9;
 					cycle.children[0].visible = true;
 					cycle.children[1].visible = true;
 					cycle.children[2].visible = true;
