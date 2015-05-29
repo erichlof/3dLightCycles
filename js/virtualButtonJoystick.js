@@ -88,7 +88,7 @@ var VirtualJoystick = function(opts) {
 		this._strokeStyleButton1 = opts.strokeStyleButton1 || 'orange';
 		this._button1El = opts.button1Element || this._buildButton1();
 		this._button1PercentLeft = opts.button1PercentLeft || 40;
-		this._button1PercentBottom = opts.button1PercentBottom || 1;
+		this._button1PercentBottom = opts.button1PercentBottom || 0;
 
 		if (!this._hideButtons) {
 			this._container.appendChild(this._button1El);	
@@ -100,7 +100,7 @@ var VirtualJoystick = function(opts) {
 		this._strokeStyleButton2 = opts.strokeStyleButton2 || 'magenta';
 		this._button2El = opts.button2Element || this._buildButton2();
 		this._button2PercentLeft = opts.button2PercentLeft || 50;
-		this._button2PercentBottom = opts.button2PercentBottom || 1;
+		this._button2PercentBottom = opts.button2PercentBottom || 0;
 		
 		if (!this._hideButtons) {
 			this._container.appendChild(this._button2El);
@@ -112,7 +112,7 @@ var VirtualJoystick = function(opts) {
 		this._strokeStyleButton3 = opts.strokeStyleButton3 || 'lightgreen';
 		this._button3El = opts.button3Element || this._buildButton3();
 		this._button3PercentLeft = opts.button3PercentLeft || 45;
-		this._button3PercentBottom = opts.button3PercentBottom || 10;
+		this._button3PercentBottom = opts.button3PercentBottom || 11;
 		
 		if (!this._hideButtons) {
 			this._container.appendChild(this._button3El);
