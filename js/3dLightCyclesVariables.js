@@ -22,7 +22,7 @@ var keyboard = new THREEx.KeyboardState();
 // are we in portrait mobile view? if so, move the buttons over to the left a little..
 // if not and we are in landscape mode, they can safely be moved farther right without running into each other
 var b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
-var b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
+var b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 77 : 81;
 var b3PercentLeft = Math.floor( (b1PercentLeft + b2PercentLeft) / 2 );
 var joystick = new VirtualJoystick({
 	add3Buttons: true,
@@ -174,14 +174,14 @@ function onWindowResize() {
 	// check if mobile device is in portrait or landscape mode and position buttons accordingly
 	b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
 	joystick._button2El.style.left = b2PercentLeft + "%";
-	b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
+	b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 77 : 81;
 	joystick._button1El.style.left = b1PercentLeft + "%";
 	joystick._button3El.style.left = Math.floor( (b1PercentLeft + b2PercentLeft) / 2 ) + "%";
 	if (SCREEN_WIDTH < SCREEN_HEIGHT ) {
-		joystick._button3El.style.bottom = 10 + "%";
+		joystick._button3El.style.bottom = 11 + "%";
 	}
 	else if (SCREEN_WIDTH > SCREEN_HEIGHT ) {
-		joystick._button3El.style.bottom = 20 + "%";
+		joystick._button3El.style.bottom = 21 + "%";
 	}
 	
 			
