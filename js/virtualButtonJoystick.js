@@ -1,4 +1,8 @@
-//var VJ_ctx;
+var VJ_Stick_ctx;
+var VJ_Base_ctx;
+var VJ_Button1_ctx;
+var VJ_Button2_ctx;
+var VJ_Button3_ctx;
 var VJ_touch = null;
 var VJ_touches = [];
 var VJ_testTouch = null;
@@ -184,9 +188,6 @@ var VirtualJoystick = function(opts) {
 		this._button3El.style.bottom = this._button3PercentBottom + "%";
 		this._button3El.style.zIndex = "10";
 	}
-	
-	this._transform = (opts.useCssTransform !== undefined ? opts.useCssTransform : true) ? this._getTransformProperty() : false; 
-	this._has3d = this._check3D();
 
 	var __bind = function(fn, me) {
 		return function() {
@@ -336,66 +337,66 @@ VirtualJoystick.prototype._onMove = function(x, y) {
 
 VirtualJoystick.prototype._onButton1Up = function() {
 	this.button1Pressed = false;
-	var VJ_ctx = this._button1El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'orange';
-	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button1_ctx.beginPath();
+	VJ_Button1_ctx.strokeStyle = 'orange';
+	VJ_Button1_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button1_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton1Down = function() {
 	this.button1Pressed = true;
-	var VJ_ctx = this._button1El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'white';
-	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button1_ctx.beginPath();
+	VJ_Button1_ctx.strokeStyle = 'white';
+	VJ_Button1_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button1_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton2Up = function() {
 	this.button2Pressed = false;
-	var VJ_ctx = this._button2El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'magenta';
-	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button2_ctx.beginPath();
+	VJ_Button2_ctx.strokeStyle = 'magenta';
+	VJ_Button2_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button2_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton2Down = function() {
 	this.button2Pressed = true;
-	var VJ_ctx = this._button2El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'white';
-	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button2_ctx.beginPath();
+	VJ_Button2_ctx.strokeStyle = 'white';
+	VJ_Button2_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button2_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton3Up = function() {
 	this.button3Pressed = false;
-	var VJ_ctx = this._button3El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'green';
-	VJ_ctx.lineWidth = 3;
-	VJ_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button3_ctx.beginPath();
+	VJ_Button3_ctx.strokeStyle = 'green';
+	VJ_Button3_ctx.lineWidth = 3;
+	VJ_Button3_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
+	VJ_Button3_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton3Down = function() {
 	this.button3Pressed = true;
-	var VJ_ctx = this._button3El.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'white';
-	VJ_ctx.lineWidth = 3;
-	VJ_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	
+	VJ_Button3_ctx.beginPath();
+	VJ_Button3_ctx.strokeStyle = 'white';
+	VJ_Button3_ctx.lineWidth = 3;
+	VJ_Button3_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
+	VJ_Button3_ctx.stroke();
 };
 
 
@@ -482,18 +483,18 @@ VirtualJoystick.prototype._buildJoystickBase = function() {
 	canvas.width = 126;
 	canvas.height = 126;
 	
-	var VJ_ctx = canvas.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyle;
-	VJ_ctx.lineWidth = 6;
-	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Base_ctx = canvas.getContext('2d');
+	VJ_Base_ctx.beginPath();
+	VJ_Base_ctx.strokeStyle = this._strokeStyle;
+	VJ_Base_ctx.lineWidth = 6;
+	VJ_Base_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
+	VJ_Base_ctx.stroke();
 
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyle;
-	VJ_ctx.lineWidth = 2;
-	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 60, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Base_ctx.beginPath();
+	VJ_Base_ctx.strokeStyle = this._strokeStyle;
+	VJ_Base_ctx.lineWidth = 2;
+	VJ_Base_ctx.arc(canvas.width / 2, canvas.width / 2, 60, 0, Math.PI * 2, true);
+	VJ_Base_ctx.stroke();
 
 	return canvas;
 };
@@ -505,12 +506,12 @@ VirtualJoystick.prototype._buildJoystickStick = function() {
 	var canvas = document.createElement('canvas');
 	canvas.width = 86;
 	canvas.height = 86;
-	var VJ_ctx = canvas.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyle;
-	VJ_ctx.lineWidth = 6;
-	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Stick_ctx = canvas.getContext('2d');
+	VJ_Stick_ctx.beginPath();
+	VJ_Stick_ctx.strokeStyle = this._strokeStyle;
+	VJ_Stick_ctx.lineWidth = 6;
+	VJ_Stick_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
+	VJ_Stick_ctx.stroke();
 	return canvas;
 };
 
@@ -523,22 +524,22 @@ VirtualJoystick.prototype._buildButton1 = function() {
 	canvas.height = this._buttonCanvasWidth;
 	if (this._add3Buttons) canvas.width = canvas.height = 80;
 
-	var VJ_ctx = canvas.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyleButton1;
-	VJ_ctx.lineWidth = 6;
-	if (this._add3Buttons) VJ_ctx.lineWidth = 4;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button1_ctx = canvas.getContext('2d');
+	VJ_Button1_ctx.beginPath();
+	VJ_Button1_ctx.strokeStyle = this._strokeStyleButton1;
+	VJ_Button1_ctx.lineWidth = 6;
+	if (this._add3Buttons) VJ_Button1_ctx.lineWidth = 4;
+	if (this._add3Buttons) VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button1_ctx.stroke();
 
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'red';
-	VJ_ctx.lineWidth = 2;
-	if (this._add3Buttons) VJ_ctx.lineWidth = 1;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button1_ctx.beginPath();
+	VJ_Button1_ctx.strokeStyle = 'red';
+	VJ_Button1_ctx.lineWidth = 2;
+	if (this._add3Buttons) VJ_Button1_ctx.lineWidth = 1;
+	if (this._add3Buttons) VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	else VJ_Button1_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
+	VJ_Button1_ctx.stroke();
 
 	return canvas;
 };
@@ -551,22 +552,22 @@ VirtualJoystick.prototype._buildButton2 = function() {
 	canvas.width = this._buttonCanvasWidth;
 	canvas.height = this._buttonCanvasWidth;
 
-	var VJ_ctx = canvas.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyleButton2;
-	VJ_ctx.lineWidth = 6;
-	if (this._add3Buttons) VJ_ctx.lineWidth = 4;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button2_ctx = canvas.getContext('2d');
+	VJ_Button2_ctx.beginPath();
+	VJ_Button2_ctx.strokeStyle = this._strokeStyleButton2;
+	VJ_Button2_ctx.lineWidth = 6;
+	if (this._add3Buttons) VJ_Button2_ctx.lineWidth = 4;
+	if (this._add3Buttons) VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_Button2_ctx.stroke();
 
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'purple';
-	VJ_ctx.lineWidth = 2;
-	if (this._add3Buttons) VJ_ctx.lineWidth = 1;
-	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
-	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button2_ctx.beginPath();
+	VJ_Button2_ctx.strokeStyle = 'purple';
+	VJ_Button2_ctx.lineWidth = 2;
+	if (this._add3Buttons) VJ_Button2_ctx.lineWidth = 1;
+	if (this._add3Buttons) VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	else VJ_Button2_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
+	VJ_Button2_ctx.stroke();
 
 	return canvas;
 };
@@ -579,82 +580,24 @@ VirtualJoystick.prototype._buildButton3 = function() {
 	canvas.width = 80;
 	canvas.height = 80;
 
-	var VJ_ctx = canvas.getContext('2d');
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = this._strokeStyleButton3;
-	VJ_ctx.lineWidth = 3;
-	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 20, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button3_ctx = canvas.getContext('2d');
+	VJ_Button3_ctx.beginPath();
+	VJ_Button3_ctx.strokeStyle = this._strokeStyleButton3;
+	VJ_Button3_ctx.lineWidth = 3;
+	VJ_Button3_ctx.arc(canvas.width / 2, canvas.width / 2, 20, 0, Math.PI * 2, true);
+	VJ_Button3_ctx.stroke();
 
-	VJ_ctx.beginPath();
-	VJ_ctx.strokeStyle = 'green';
-	VJ_ctx.lineWidth = 1;
-	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 30, 0, Math.PI * 2, true);
-	VJ_ctx.stroke();
+	VJ_Button3_ctx.beginPath();
+	VJ_Button3_ctx.strokeStyle = 'green';
+	VJ_Button3_ctx.lineWidth = 1;
+	VJ_Button3_ctx.arc(canvas.width / 2, canvas.width / 2, 30, 0, Math.PI * 2, true);
+	VJ_Button3_ctx.stroke();
 
 	return canvas;
 };
 
-//////////////////////////////////////////////////////////////////////////////////
-//		move using translate3d method with fallback to translate > 'top' and 'left'		
-//      modified from https://github.com/component/translate and dependents
-//////////////////////////////////////////////////////////////////////////////////
-
 VirtualJoystick.prototype._move = function(style, x, y)
 {
-	if (this._transform) {
-		if (this._has3d) {
-			style[this._transform] = 'translate3d(' + x + 'px,' + y + 'px, 0)';
-		} else {
-			style[this._transform] = 'translate(' + x + 'px,' + y + 'px)';
-		}
-	} else {
 		style.left = x + 'px';
 		style.top = y + 'px';
-	}
-};
-
-VirtualJoystick.prototype._getTransformProperty = function() 
-{
-	var styles = [
-		'webkitTransform',
-		'MozTransform',
-		'msTransform',
-		'OTransform',
-		'transform'
-	];
-
-	var el = document.createElement('p');
-	var style;
-
-	for (var i = 0; i < styles.length; i++) {
-		style = styles[i];
-		if (null != el.style[style]) {
-			return style;
-		}
-	}
-};
-
-VirtualJoystick.prototype._check3D = function() 
-{
-	var prop = this._getTransformProperty();
-	// IE8<= doesn't have `getComputedStyle`
-	if (!prop || !window.getComputedStyle) return module.exports = false;
-
-	var map = {
-		webkitTransform: '-webkit-transform',
-		OTransform: '-o-transform',
-		msTransform: '-ms-transform',
-		MozTransform: '-moz-transform',
-		transform: 'transform'
-	};
-
-	// from: https://gist.github.com/lorenzopolidori/3794226
-	var el = document.createElement('div');
-	el.style[prop] = 'translate3d(1px,1px,1px)';
-	document.body.insertBefore(el, null);
-	var val = getComputedStyle(el).getPropertyValue(map[prop]);
-	document.body.removeChild(el);
-	var exports = null != val && val.length && 'none' != val;
-	return exports;
 };
