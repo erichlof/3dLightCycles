@@ -23,12 +23,14 @@ var keyboard = new THREEx.KeyboardState();
 // if not and we are in landscape mode, they can safely be moved farther right without running into each other
 var b2PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 50 : 65;
 var b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
+var b3PercentLeft = Math.floor( (b1PercentLeft + b2PercentLeft) / 2 );
 var joystick = new VirtualJoystick({
-	add2Buttons: true,
+	add3Buttons: true,
 	hideJoystick: true,
 	hideButtons: false,
 	button1PercentLeft: b1PercentLeft,
 	button2PercentLeft: b2PercentLeft,
+	button3PercentLeft: b3PercentLeft
 });
 
 var PI_2 = Math.PI / 2;//used by controls below
@@ -174,6 +176,14 @@ function onWindowResize() {
 	joystick._button2El.style.left = b2PercentLeft + "%";
 	b1PercentLeft = SCREEN_WIDTH < SCREEN_HEIGHT ? 76 : 80;
 	joystick._button1El.style.left = b1PercentLeft + "%";
+	joystick._button3El.style.left = Math.floor( (b1PercentLeft + b2PercentLeft) / 2 ) + "%";
+	if (SCREEN_WIDTH < SCREEN_HEIGHT ) {
+		joystick._button3El.style.bottom = 10 + "%";
+	}
+	else if (SCREEN_WIDTH > SCREEN_HEIGHT ) {
+		joystick._button3El.style.bottom = 20 + "%";
+	}
+	
 			
 }
 
