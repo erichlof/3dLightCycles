@@ -239,7 +239,7 @@
 			if ( !joystick.button1Pressed ) {
 				canTurnRight = true;
 			}
-			//if button1 IS pressed, check to see if we can shoot
+			//if button1 IS pressed, check to see if we can turn
 			if ( joystick.button1Pressed && playerAlive && enemyAlive ) {
 				if (canTurnRight) {
 					turnCycleRight = true;
@@ -252,13 +252,32 @@
 			if ( !joystick.button2Pressed ) {
 				canTurnLeft = true;
 			}
-			//if button2 IS pressed, check to see if we can shoot
+			//if button2 IS pressed, check to see if we can turn
 			if ( joystick.button2Pressed && playerAlive && enemyAlive ) {
 				if (canTurnLeft) {
 					turnCycleLeft = true;
 					//turn off ability to turn cycle so we don't rapid-fire turn
 					canTurnLeft = false;
 				}
+			}
+			
+			//if thrust button is pressed, apply thrust force in cycle's direction
+			if ( playerAlive && (joystick.button3Pressed || keyboard.pressed('space')) ) {
+				
+				if (cycleSpeed < 50) {
+					cycleSpeed += 20 * frameTime;
+				}
+				//clamp cycleSpeed so we can't accelerate forever
+				if (cycleSpeed > 50) cycleSpeed = 50;
+
+			}
+			else { //no thrust is being applied, so slow the cycle down gradually
+
+				if (cycleSpeed > 21 && playerAlive) {
+					cycleSpeed -= 20 * frameTime;
+				}
+				else if (cycleSpeed <= 20 || !playerAlive) 
+					cycleSpeed = 20;//if cycleSpeed is below a threshold, clamp it to default speed
 			}
 			
 			
