@@ -1,3 +1,15 @@
+//var VJ_ctx;
+var VJ_touch = null;
+var VJ_touches = [];
+var VJ_testTouch = null;
+var VJ_x = 0;
+var VJ_y = 0;
+var VJ_deltaX = 0;
+var VJ_deltaY = 0;
+var VJ_stickDistance = 0;
+var VJ_stickNormalizedX = 0;
+var VJ_stickNormalizedY = 0;
+
 var VirtualJoystick = function(opts) {
 	opts = opts || {};
 	this._container = opts.container || document.body;
@@ -10,10 +22,17 @@ var VirtualJoystick = function(opts) {
 	this._stationaryBase = opts.stationaryBase || false;
 	this._add1Button = opts.add1Button || false;
 	this._add2Buttons = opts.add2Buttons || false;
+	this._add3Buttons = opts.add3Buttons || false;
 	if (this._add2Buttons) this._add1Button = false;
+	if (this._add3Buttons) {
+		this._add1Button = false;
+		this._add2Buttons = false;
+	} 
 	this._baseX = this._stickX = opts.baseX || 200;
 	this._baseY = this._stickY = opts.baseY || 300;
 	
+	this._buttonCanvasWidth = 106;
+	this._buttonCanvasHalfWidth = 53;
 	
 	if (this._add1Button) {
 		this._strokeStyleButton1 = opts.strokeStyleButton1 || 'orange';
@@ -29,6 +48,7 @@ var VirtualJoystick = function(opts) {
 		this.button1Pressed = false;
 		
 	}
+	
 	if (this._add2Buttons) {
 		this._strokeStyleButton1 = opts.strokeStyleButton1 || 'orange';
 		this._button1El = opts.button1Element || this._buildButton1();
@@ -56,6 +76,49 @@ var VirtualJoystick = function(opts) {
 		
 	}
 	
+	if (this._add3Buttons) {
+		
+		this._buttonCanvasWidth = 80;
+		this._buttonCanvasHalfWidth = 40;
+		
+		this._strokeStyleButton1 = opts.strokeStyleButton1 || 'orange';
+		this._button1El = opts.button1Element || this._buildButton1();
+		this._button1PercentLeft = opts.button1PercentLeft || 40;
+		this._button1PercentBottom = opts.button1PercentBottom || 1;
+
+		if (!this._hideButtons) {
+			this._container.appendChild(this._button1El);	
+		}
+		this._button1El.style.position = "absolute";
+		this._button1El.style.display = "none";
+		this.button1Pressed = false;
+		
+		this._strokeStyleButton2 = opts.strokeStyleButton2 || 'magenta';
+		this._button2El = opts.button2Element || this._buildButton2();
+		this._button2PercentLeft = opts.button2PercentLeft || 50;
+		this._button2PercentBottom = opts.button2PercentBottom || 1;
+		
+		if (!this._hideButtons) {
+			this._container.appendChild(this._button2El);
+		}
+		this._button2El.style.position = "absolute";
+		this._button2El.style.display = "none";
+		this.button2Pressed = false;
+		
+		this._strokeStyleButton3 = opts.strokeStyleButton3 || 'lightgreen';
+		this._button3El = opts.button3Element || this._buildButton3();
+		this._button3PercentLeft = opts.button3PercentLeft || 45;
+		this._button3PercentBottom = opts.button3PercentBottom || 10;
+		
+		if (!this._hideButtons) {
+			this._container.appendChild(this._button3El);
+		}
+		this._button3El.style.position = "absolute";
+		this._button3El.style.display = "none";
+		this.button3Pressed = false;
+		
+	}
+	
 	if(this._hideJoystick)
 		this._stationaryBase = false;
 
@@ -76,14 +139,7 @@ var VirtualJoystick = function(opts) {
 
 	this._pressed = false;
 	this._touchIdx = null;
-	var touch = null;
-	var x = 0;
-	var y = 0;
-	var deltaX = 0;
-	var deltaY = 0;
-	var stickDistance = 0;
-	var stickNormalizedX = 0;
-	var stickNormalizedY = 0;
+	
 	
 	//added for THREEx.FirstPersonControls use
 	this.previousRotationX = 0;
@@ -112,6 +168,23 @@ var VirtualJoystick = function(opts) {
 		this._button2El.style.bottom = this._button2PercentBottom + "%";
 		this._button2El.style.zIndex = "10";
 	}
+	if (this._add3Buttons) {
+		this._button1El.style.display = "";
+		this._button1El.style.left = this._button1PercentLeft + "%";
+		this._button1El.style.bottom = this._button1PercentBottom + "%";
+		this._button1El.style.zIndex = "10";
+		
+		this._button2El.style.display = "";
+		this._button2El.style.left = this._button2PercentLeft + "%";
+		this._button2El.style.bottom = this._button2PercentBottom + "%";
+		this._button2El.style.zIndex = "10";
+		
+		this._button3El.style.display = "";
+		this._button3El.style.left = this._button3PercentLeft + "%";
+		this._button3El.style.bottom = this._button3PercentBottom + "%";
+		this._button3El.style.zIndex = "10";
+	}
+	
 	this._transform = (opts.useCssTransform !== undefined ? opts.useCssTransform : true) ? this._getTransformProperty() : false; 
 	this._has3d = this._check3D();
 
@@ -161,34 +234,34 @@ VirtualJoystick.prototype.deltaY = function() {
 
 VirtualJoystick.prototype.up = function() {
 	if (!this._pressed) return false;
-	deltaX = this.deltaX();
-	deltaY = this.deltaY();
-	if (deltaY >= 0) return false;
-	if (Math.abs(deltaX) > 2 * Math.abs(deltaY)) return false;
+	VJ_deltaX = this.deltaX();
+	VJ_deltaY = this.deltaY();
+	if (VJ_deltaY >= 0) return false;
+	if (Math.abs(VJ_deltaX) > 2 * Math.abs(VJ_deltaY)) return false;
 	return true;
 };
 VirtualJoystick.prototype.down = function() {
 	if (!this._pressed) return false;
-	deltaX = this.deltaX();
-	deltaY = this.deltaY();
-	if (deltaY <= 0) return false;
-	if (Math.abs(deltaX) > 2 * Math.abs(deltaY)) return false;
+	VJ_deltaX = this.deltaX();
+	VJ_deltaY = this.deltaY();
+	if (VJ_deltaY <= 0) return false;
+	if (Math.abs(VJ_deltaX) > 2 * Math.abs(VJ_deltaY)) return false;
 	return true;
 };
 VirtualJoystick.prototype.right = function() {
 	if (!this._pressed) return false;
-	deltaX = this.deltaX();
-	deltaY = this.deltaY();
-	if (deltaX <= 0) return false;
-	if (Math.abs(deltaY) > 2 * Math.abs(deltaX)) return false;
+	VJ_deltaX = this.deltaX();
+	VJ_deltaY = this.deltaY();
+	if (VJ_deltaX <= 0) return false;
+	if (Math.abs(VJ_deltaY) > 2 * Math.abs(VJ_deltaX)) return false;
 	return true;
 };
 VirtualJoystick.prototype.left = function() {
 	if (!this._pressed) return false;
-	deltaX = this.deltaX();
-	deltaY = this.deltaY();
-	if (deltaX >= 0) return false;
-	if (Math.abs(deltaY) > 2 * Math.abs(deltaX)) return false;
+	VJ_deltaX = this.deltaX();
+	VJ_deltaY = this.deltaY();
+	if (VJ_deltaX >= 0) return false;
+	if (Math.abs(VJ_deltaY) > 2 * Math.abs(VJ_deltaX)) return false;
 	return true;
 };
 
@@ -224,14 +297,14 @@ VirtualJoystick.prototype._onDown = function(x, y) {
 	this._stickY = y;
 
 	if (this._limitStickTravel) {
-		deltaX = this.deltaX();
-		deltaY = this.deltaY();
-		stickDistance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-		if (stickDistance > this._stickRadius) {
-			stickNormalizedX = deltaX / stickDistance;
-			stickNormalizedY = deltaY / stickDistance;
-			this._stickX = stickNormalizedX * this._stickRadius + this._baseX;
-			this._stickY = stickNormalizedY * this._stickRadius + this._baseY;
+		VJ_deltaX = this.deltaX();
+		VJ_deltaY = this.deltaY();
+		VJ_stickDistance = Math.sqrt((VJ_deltaX * VJ_deltaX) + (VJ_deltaY * VJ_deltaY));
+		if (VJ_stickDistance > this._stickRadius) {
+			VJ_stickNormalizedX = VJ_deltaX / VJ_stickDistance;
+			VJ_stickNormalizedY = VJ_deltaY / VJ_stickDistance;
+			this._stickX = VJ_stickNormalizedX * this._stickRadius + this._baseX;
+			this._stickY = VJ_stickNormalizedY * this._stickRadius + this._baseY;
 		}
 	}
 	if(!this._hideJoystick){
@@ -245,15 +318,15 @@ VirtualJoystick.prototype._onMove = function(x, y) {
 	this._stickY = y;
 
 	if (this._limitStickTravel) {
-		deltaX = this.deltaX();
-		deltaY = this.deltaY();
-		stickDistance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-		if (stickDistance > this._stickRadius) {
-			stickNormalizedX = deltaX / stickDistance;
-			stickNormalizedY = deltaY / stickDistance;
+		VJ_deltaX = this.deltaX();
+		VJ_deltaY = this.deltaY();
+		VJ_stickDistance = Math.sqrt((VJ_deltaX * VJ_deltaX) + (VJ_deltaY * VJ_deltaY));
+		if (VJ_stickDistance > this._stickRadius) {
+			VJ_stickNormalizedX = VJ_deltaX / VJ_stickDistance;
+			VJ_stickNormalizedY = VJ_deltaY / VJ_stickDistance;
 
-			this._stickX = stickNormalizedX * this._stickRadius + this._baseX;
-			this._stickY = stickNormalizedY * this._stickRadius + this._baseY;
+			this._stickX = VJ_stickNormalizedX * this._stickRadius + this._baseX;
+			this._stickY = VJ_stickNormalizedY * this._stickRadius + this._baseY;
 		}
 	}
 	if(!this._hideJoystick){
@@ -263,88 +336,123 @@ VirtualJoystick.prototype._onMove = function(x, y) {
 
 VirtualJoystick.prototype._onButton1Up = function() {
 	this.button1Pressed = false;
-	var ctx = this._button1El.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = 'orange';
-	ctx.lineWidth = 6;
-	ctx.arc(53, 53, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = this._button1El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'orange';
+	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton1Down = function() {
 	this.button1Pressed = true;
-	var ctx = this._button1El.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = 'white';
-	ctx.lineWidth = 6;
-	ctx.arc(53, 53, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = this._button1El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'white';
+	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton2Up = function() {
 	this.button2Pressed = false;
-	var ctx = this._button2El.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = 'magenta';
-	ctx.lineWidth = 6;
-	ctx.arc(53, 53, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = this._button2El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'magenta';
+	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 };
 
 VirtualJoystick.prototype._onButton2Down = function() {
 	this.button2Pressed = true;
-	var ctx = this._button2El.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = 'white';
-	ctx.lineWidth = 6;
-	ctx.arc(53, 53, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = this._button2El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'white';
+	VJ_ctx.lineWidth = this._add3Buttons ? 4 : 6;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
+};
+
+VirtualJoystick.prototype._onButton3Up = function() {
+	this.button3Pressed = false;
+	var VJ_ctx = this._button3El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'green';
+	VJ_ctx.lineWidth = 3;
+	VJ_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
+};
+
+VirtualJoystick.prototype._onButton3Down = function() {
+	this.button3Pressed = true;
+	var VJ_ctx = this._button3El.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'white';
+	VJ_ctx.lineWidth = 3;
+	VJ_ctx.arc(40, 40, 20, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 };
 
 
 VirtualJoystick.prototype._onTouchStart = function(event) {
 
 	event.preventDefault();
-	var testTouch = event.changedTouches[0];
-	if (testTouch.target == this._button1El) {
+	VJ_testTouch = event.changedTouches[0];
+	if (VJ_testTouch.target == this._button1El) {
 		return this._onButton1Down();
 	}
-	else if (testTouch.target == this._button2El) {
+	else if (VJ_testTouch.target == this._button2El) {
 		return this._onButton2Down();
 	}
+	else if (VJ_testTouch.target == this._button3El) {
+		return this._onButton3Down();
+	}
 
-	var touches = event.touches;
-	if (touches.length == 2) {
-		if (touches[0].target != this._button1El && touches[0].target != this._button2El) {
-			x = touches[0].pageX;
-			y = touches[0].pageY;
-			return this._onDown(x, y);
+	VJ_touches = event.touches;
+	if (VJ_touches.length == 2) {
+		if (VJ_touches[0].target != this._button1El && VJ_touches[0].target != this._button2El && 
+		    VJ_touches[0].target != this._button3El) {
+			VJ_x = VJ_touches[0].pageX;
+			VJ_y = VJ_touches[0].pageY;
+			return this._onDown(VJ_x, VJ_y);
 		} 
 		else {
-			x = touches[1].pageX;
-			y = touches[1].pageY;
-			return this._onDown(x, y);
+			VJ_x = VJ_touches[1].pageX;
+			VJ_y = VJ_touches[1].pageY;
+			return this._onDown(VJ_x, VJ_y);
 		}
 	}
-	else if (touches.length >= 3) {
-		x = touches[2].pageX;
-		y = touches[2].pageY;
-		return this._onDown(x, y);
+	else if (VJ_touches.length == 3) {
+		VJ_x = VJ_touches[2].pageX;
+		VJ_y = VJ_touches[2].pageY;
+		return this._onDown(VJ_x, VJ_y);
+	}
+	else if (VJ_touches.length >= 4) {
+		VJ_x = VJ_touches[3].pageX;
+		VJ_y = VJ_touches[3].pageY;
+		return this._onDown(VJ_x, VJ_y);
 	}
 	else {
-		x = touches[0].pageX;
-		y = touches[0].pageY;
-		return this._onDown(x, y);
+		VJ_x = VJ_touches[0].pageX;
+		VJ_y = VJ_touches[0].pageY;
+		return this._onDown(VJ_x, VJ_y);
 	}
 };
 
 VirtualJoystick.prototype._onTouchEnd = function(event) {
   
-	touch = event.changedTouches[0];
-	if (touch.target == this._button1El) 
+	VJ_touch = event.changedTouches[0];
+	if (VJ_touch.target == this._button1El) 
 		return this._onButton1Up();
-	if (touch.target == this._button2El) 
+	if (VJ_touch.target == this._button2El) 
 		return this._onButton2Up();
+	if (VJ_touch.target == this._button3El) 
+		return this._onButton3Up();
 	
 	this.previousRotationY = cameraControlsYawObject.rotation.y;
 	this.previousRotationX = cameraControlsPitchObject.rotation.x;
@@ -354,12 +462,12 @@ VirtualJoystick.prototype._onTouchEnd = function(event) {
 
 VirtualJoystick.prototype._onTouchMove = function(event) {
 
-	touch = event.targetTouches[0];
-	if (touch.target == this._button1El) return;
-	if (touch.target == this._button2El) return;
-	x = touch.pageX;
-	y = touch.pageY;
-	return this._onMove(x, y);
+	VJ_touch = event.targetTouches[0];
+	if (VJ_touch.target == this._button1El || VJ_touch.target == this._button2El || VJ_touch.target == this._button3El)
+		return;
+	VJ_x = VJ_touch.pageX;
+	VJ_y = VJ_touch.pageY;
+	return this._onMove(VJ_x, VJ_y);
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -374,18 +482,18 @@ VirtualJoystick.prototype._buildJoystickBase = function() {
 	canvas.width = 126;
 	canvas.height = 126;
 	
-	var ctx = canvas.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = this._strokeStyle;
-	ctx.lineWidth = 6;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = canvas.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyle;
+	VJ_ctx.lineWidth = 6;
+	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
-	ctx.beginPath();
-	ctx.strokeStyle = this._strokeStyle;
-	ctx.lineWidth = 2;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 60, 0, Math.PI * 2, true);
-	ctx.stroke();
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyle;
+	VJ_ctx.lineWidth = 2;
+	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 60, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
 	return canvas;
 };
@@ -397,12 +505,12 @@ VirtualJoystick.prototype._buildJoystickStick = function() {
 	var canvas = document.createElement('canvas');
 	canvas.width = 86;
 	canvas.height = 86;
-	var ctx = canvas.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = this._strokeStyle;
-	ctx.lineWidth = 6;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = canvas.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyle;
+	VJ_ctx.lineWidth = 6;
+	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 40, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 	return canvas;
 };
 
@@ -411,21 +519,26 @@ VirtualJoystick.prototype._buildJoystickStick = function() {
  */
 VirtualJoystick.prototype._buildButton1 = function() {
 	var canvas = document.createElement('canvas');
-	canvas.width = 106;
-	canvas.height = 106;
+	canvas.width = this._buttonCanvasWidth;
+	canvas.height = this._buttonCanvasWidth;
+	if (this._add3Buttons) canvas.width = canvas.height = 80;
 
-	var ctx = canvas.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = this._strokeStyleButton1;
-	ctx.lineWidth = 6;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = canvas.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyleButton1;
+	VJ_ctx.lineWidth = 6;
+	if (this._add3Buttons) VJ_ctx.lineWidth = 4;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
-	ctx.beginPath();
-	ctx.strokeStyle = 'red';
-	ctx.lineWidth = 2;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 45, 0, Math.PI * 2, true);
-	ctx.stroke();
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'red';
+	VJ_ctx.lineWidth = 2;
+	if (this._add3Buttons) VJ_ctx.lineWidth = 1;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
 	return canvas;
 };
@@ -435,21 +548,49 @@ VirtualJoystick.prototype._buildButton1 = function() {
  */
 VirtualJoystick.prototype._buildButton2 = function() {
 	var canvas = document.createElement('canvas');
-	canvas.width = 106;
-	canvas.height = 106;
+	canvas.width = this._buttonCanvasWidth;
+	canvas.height = this._buttonCanvasWidth;
 
-	var ctx = canvas.getContext('2d');
-	ctx.beginPath();
-	ctx.strokeStyle = this._strokeStyleButton2;
-	ctx.lineWidth = 6;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 35, 0, Math.PI * 2, true);
-	ctx.stroke();
+	var VJ_ctx = canvas.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyleButton2;
+	VJ_ctx.lineWidth = 6;
+	if (this._add3Buttons) VJ_ctx.lineWidth = 4;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 25, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
-	ctx.beginPath();
-	ctx.strokeStyle = 'purple';
-	ctx.lineWidth = 2;
-	ctx.arc(canvas.width / 2, canvas.width / 2, 45, 0, Math.PI * 2, true);
-	ctx.stroke();
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'purple';
+	VJ_ctx.lineWidth = 2;
+	if (this._add3Buttons) VJ_ctx.lineWidth = 1;
+	if (this._add3Buttons) VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 35, 0, Math.PI * 2, true);
+	else VJ_ctx.arc(this._buttonCanvasHalfWidth, this._buttonCanvasHalfWidth, 45, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
+
+	return canvas;
+};
+
+/**
+ * build the canvas for Button3
+ */
+VirtualJoystick.prototype._buildButton3 = function() {
+	var canvas = document.createElement('canvas');
+	canvas.width = 80;
+	canvas.height = 80;
+
+	var VJ_ctx = canvas.getContext('2d');
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = this._strokeStyleButton3;
+	VJ_ctx.lineWidth = 3;
+	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 20, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
+
+	VJ_ctx.beginPath();
+	VJ_ctx.strokeStyle = 'green';
+	VJ_ctx.lineWidth = 1;
+	VJ_ctx.arc(canvas.width / 2, canvas.width / 2, 30, 0, Math.PI * 2, true);
+	VJ_ctx.stroke();
 
 	return canvas;
 };
