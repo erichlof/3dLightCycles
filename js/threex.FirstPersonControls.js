@@ -23,8 +23,8 @@ THREEx.FirstPersonControls = function ( camera, isPlayerControlled ) {
 		
 		var onMouseMove = function ( event ) {
 
-			movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-			movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+			movementX = event.movementX || event.mozMovementX || 0;
+			movementY = event.movementY || event.mozMovementY || 0;
 
 			that.yawObject.rotation.y -= movementX * 0.002;
 			that.pitchObject.rotation.x -= movementY * 0.002;
